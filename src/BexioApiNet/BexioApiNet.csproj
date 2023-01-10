@@ -1,0 +1,24 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net7.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+        <LangVersion>11</LangVersion>
+        <Title>BexioApiNet</Title>
+        <Authors>AMANDA Technology GmbH</Authors>
+        <Description>Bexio API Service</Description>
+        <Copyright>AMANDA Technology GmbH</Copyright>
+        <PackageProjectUrl>https://github.com/AMANDA-Technology/BexioApiNet</PackageProjectUrl>
+        <PackageLicenseExpression>MIT</PackageLicenseExpression>
+        <RepositoryUrl>https://github.com/AMANDA-Technology/BexioApiNet</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+        <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    </PropertyGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\BexioApiNet.Abstractions\BexioApiNet.Abstractions.csproj" />
+    </ItemGroup>
+
+</Project>
