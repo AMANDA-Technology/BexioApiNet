@@ -81,7 +81,7 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
         var initialOffset = (int)queryParameter.Parameters["offset"];
         maxObjects -= initialOffset;
 
-        while (fetchedObjects < maxObjects) //TODO: Possible bug when initial offset from user is != 0
+        while (fetchedObjects < maxObjects)
         {
             var res2 = await GetAsync<List<TResult>>(requestPath, queryParameter, cancellationToken);
             if (res2.Data == null || !res2.IsSuccess) throw new("Paging failed");
@@ -96,13 +96,13 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<TResult>> PostMultiPartFileAsync<TResult>(List<FileInfo> files, string requestPath, [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<TResult>> PostMultiPartFileAsync<TResult>(List<Tuple<MemoryStream, string>> files, string requestPath, [Optional] CancellationToken cancellationToken)
     {
         var form = new MultipartFormDataContent();
 
-        foreach (var file in files)
+        foreach (var entry in files)
         {
-            form.Add(new ByteArrayContent(await File.ReadAllBytesAsync(file.FullName, cancellationToken)), file.Name, file.Name);
+            form.Add(new ByteArrayContent(entry.Item1.ToArray()), entry.Item2, entry.Item2);
         }
 
         return await GetApiResult<TResult>(await _client.SendAsync(CreateHttpRequestMessageWithContent(HttpMethod.Post, requestPath, form), cancellationToken));

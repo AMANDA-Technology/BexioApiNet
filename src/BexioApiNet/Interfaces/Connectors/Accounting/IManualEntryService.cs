@@ -55,6 +55,16 @@ public interface IManualEntryService
     public Task<ApiResult<IReadOnlyList<ManualEntryEntryFile>>> AddAttachment(int manuelEntriesId, int manuelEntryId, List<FileInfo> files, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
+    /// Add one or more attachments to a manual entry. <see href="https://docs.bexio.com/#tag/Manual-Entries/operation/UploadManualEntryFile">Upload Manual Entry File</see>
+    /// </summary>
+    /// <param name="manuelEntriesId">The manual entry root id</param>
+    /// <param name="manuelEntryId">The manual root entry entry id</param>
+    /// <param name="files">List with files to attach</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
+    public Task<ApiResult<IReadOnlyList<ManualEntryEntryFile>>> AddAttachment(int manuelEntriesId, int manuelEntryId, List<Tuple<MemoryStream, string>> files, [Optional] CancellationToken cancellationToken);
+
+    /// <summary>
     /// Get a list of manual entries. <see href="https://docs.bexio.com/#tag/Manual-Entries/operation/ListManualEntries">List Manual Entries</see>
     /// </summary>
     /// <param name="queryParameterManualEntry">Query parameter specific for bank accounts</param>

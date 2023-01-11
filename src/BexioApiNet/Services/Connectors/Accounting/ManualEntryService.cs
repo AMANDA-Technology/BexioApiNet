@@ -62,6 +62,13 @@ public sealed class ManualEntryService : ConnectorService, IManualEntryService
     /// <inheritdoc />
     public async Task<ApiResult<IReadOnlyList<ManualEntryEntryFile>>> AddAttachment(int manuelEntriesId, int manuelEntryId, List<FileInfo> files, [Optional] CancellationToken cancellationToken)
     {
+        var filesInStream = files.Select(file => new Tuple<MemoryStream, string>(new(File.ReadAllBytes(file.FullName)), file.Name)).ToList();
+        return await ConnectionHandler.PostMultiPartFileAsync<IReadOnlyList<ManualEntryEntryFile>>(filesInStream, $"{ApiVersion}/{EndpointRoot}/{manuelEntriesId}/entries/{manuelEntryId}/files", cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<IReadOnlyList<ManualEntryEntryFile>>> AddAttachment(int manuelEntriesId, int manuelEntryId, List<Tuple<MemoryStream, string>> files, [Optional] CancellationToken cancellationToken)
+    {
         return await ConnectionHandler.PostMultiPartFileAsync<IReadOnlyList<ManualEntryEntryFile>>(files, $"{ApiVersion}/{EndpointRoot}/{manuelEntriesId}/entries/{manuelEntryId}/files", cancellationToken);
     }
 

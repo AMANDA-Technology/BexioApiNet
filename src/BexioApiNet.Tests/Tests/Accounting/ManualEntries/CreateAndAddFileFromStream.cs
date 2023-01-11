@@ -28,7 +28,7 @@ using BexioApiNet.Abstractions.Models.Accounting.ManualEntries.Views;
 
 namespace BexioApiNet.Tests.Tests.Accounting.ManualEntries;
 
-public class CreateAndAddFile : TestBase
+public class CreateAndAddFileFromStream : TestBase
 {
     /// <summary>
     ///
@@ -57,7 +57,11 @@ public class CreateAndAddFile : TestBase
         var res2 = await BexioApiClient!.AccountingManualEntries.AddAttachment(
             res.Data!.Id,
             res.Data.Entries[0].Id,
-            new List<FileInfo>(){new("Assets/letter.pdf"), new("Assets/letter2.pdf")});
+            new List<Tuple<MemoryStream, string>>
+            {
+                new( new(await File.ReadAllBytesAsync("Assets/letter.pdf")), "letter.pdf"),
+                new( new(await File.ReadAllBytesAsync("Assets/letter2.pdf")), "letter2.pdf")
+            });
 
         Assert.That(res2, Is.Not.Null);
         Assert.That(res2.Data!.First().MimeType, Is.EqualTo("application/pdf"));
