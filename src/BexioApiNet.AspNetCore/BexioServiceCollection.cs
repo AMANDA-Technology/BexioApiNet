@@ -26,7 +26,11 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Enums.Api;
 using Microsoft.Extensions.DependencyInjection;
 using BexioApiNet.Interfaces;
+using BexioApiNet.Interfaces.Connectors.Accounting;
+using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Services;
+using BexioApiNet.Services.Connectors.Accounting;
+using BexioApiNet.Services.Connectors.Banking;
 
 namespace BexioApiNet.AspNetCore;
 
@@ -64,6 +68,8 @@ public static class BexioServiceCollection
     {
         services.AddSingleton(bexioConfiguration);
         services.AddSingleton<IBexioConnectionHandler, BexioConnectionHandler>();
+        services.AddScoped<IBankAccountService, BankAccountService>();
+        services.AddScoped<IManualEntryService, ManualEntryService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;
