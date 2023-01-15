@@ -39,7 +39,22 @@ public interface IBexioApiClient
     public IBankAccountService BankingBankAccounts { get; set; }
 
     /// <summary>
+    /// Bexio account connector. <see href="https://docs.bexio.com/#tag/Accounts">Accounts</see>
+    /// </summary>
+    public IAccountService Accounts { get; set; }
+
+    /// <summary>
+    /// Bexio currency connector. <see href="https://docs.bexio.com/#tag/Currencies">Currencies</see>
+    /// </summary>
+    public ICurrencyService Currencies { get; set; }
+
+    /// <summary>
     /// Bexio account manual entry connector. <see href="https://docs.bexio.com/#tag/Manual-Entries">Manual Entries</see>
     /// </summary>
     public IManualEntryService AccountingManualEntries { get; set; }
+
+    /// <summary>
+    /// Bexio currency connector. <see href="https://docs.bexio.com/#tag/Taxes">Taxes</see>
+    /// </summary>
+    public ITaxService Taxes { get; set; }
 }

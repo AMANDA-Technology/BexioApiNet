@@ -23,20 +23,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace BexioApiNet.Services.Connectors.Accounting;
+namespace BexioApiNet.Abstractions.Models.Accounting.Accounts;
 
 /// <summary>
-/// Account endpoint configuration
+/// Account object. <see href="https://docs.bexio.com/#tag/Accounts/operation/v2ListAccounts"/>
 /// </summary>
-public struct AccountingConfiguration
-{
-    /// <summary>
-    /// Current api version of the endpoint
-    /// </summary>
-    public const string ApiVersion = "3.0";
-
-    /// <summary>
-    /// The request path
-    /// </summary>
-    public const string EndpointRoot = "accounting/manual_entries";
-}
+/// <param name="Id"></param>
+/// <param name="Uuid"></param>
+/// <param name="AccountNo"></param>
+/// <param name="Name"></param>
+/// <param name="AccountType"></param>
+/// <param name="TaxId"></param>
+/// <param name="FibuAccountGroupId"></param>
+/// <param name="IsActive"></param>
+/// <param name="IsLocked"></param>
+public sealed record Account(
+    [property: JsonPropertyName("id")] int Id,
+    [property: JsonPropertyName("uuid")] string Uuid,
+    [property: JsonPropertyName("account_no")] string AccountNo,
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("account_type")] int AccountType,
+    [property: JsonPropertyName("tax_id")] int? TaxId,
+    [property: JsonPropertyName("fibu_account_group_id")] int FibuAccountGroupId,
+    [property: JsonPropertyName("is_active")] bool IsActive,
+    [property: JsonPropertyName("is_locked")] bool IsLocked
+);

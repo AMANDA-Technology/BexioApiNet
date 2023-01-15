@@ -67,9 +67,9 @@ public interface IManualEntryService
     /// <summary>
     /// Get a list of manual entries. <see href="https://docs.bexio.com/#tag/Manual-Entries/operation/ListManualEntries">List Manual Entries</see>
     /// </summary>
-    /// <param name="queryParameterManualEntry">Query parameter specific for bank accounts</param>
+    /// <param name="queryParameterManualEntry">Query parameter specific for manual entry</param>
     /// <param name="autoPage">Fetch all possible results</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns></returns>
-    public Task<ApiResult<List<ManualEntry>>> Get([Optional] QueryParameterManualEntry queryParameterManualEntry, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken);
+    public Task<ApiResult<List<ManualEntry>>> Get([Optional] QueryParameterManualEntry? queryParameterManualEntry, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken);
 }

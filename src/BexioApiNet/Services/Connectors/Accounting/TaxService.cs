@@ -23,41 +23,52 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 using System.Runtime.InteropServices;
+using BexioApiNet.Abstractions.Enums.Api;
+using BexioApiNet.Abstractions.Models.Accounting.Currencies;
+using BexioApiNet.Abstractions.Models.Accounting.Taxes;
 using BexioApiNet.Abstractions.Models.Api;
-using BexioApiNet.Abstractions.Models.Banking.BankAccounts.Views;
 using BexioApiNet.Interfaces;
-using BexioApiNet.Interfaces.Connectors.Banking;
+using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Base;
 
-namespace BexioApiNet.Services.Connectors.Banking;
+namespace BexioApiNet.Services.Connectors.Accounting;
 
-/// <inheritdoc cref="IBankAccountService" />
-public sealed class BankAccountService : ConnectorService, IBankAccountService
+
+/// <inheritdoc cref="BexioApiNet.Interfaces.Connectors.Accounting.ICurrencyService" />
+
+public sealed class TaxService : ConnectorService, ITaxService
 {
     /// <summary>
     /// The api endpoint version
     /// </summary>
-    private const string ApiVersion = BankingConfiguration.ApiVersion;
+    private const string ApiVersion = TaxConfiguration.ApiVersion;
 
     /// <summary>
     /// The api request path
     /// </summary>
-    private const string EndpointRoot = BankingConfiguration.EndpointRoot;
+    private const string EndpointRoot = TaxConfiguration.EndpointRoot;
 
     /// <inheritdoc />
-    public BankAccountService(IBexioConnectionHandler bexioConnectionHandler) : base(bexioConnectionHandler)
+    public TaxService(IBexioConnectionHandler bexioConnectionHandler) : base(bexioConnectionHandler)
     {
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<List<BankAccountGet>>> Get(
-        [Optional] QueryParameterBankAccount queryParameterBankAccount,
-        [Optional] bool autoPage,
-        [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<List<Tax>>> Get([Optional] QueryParameterTax? queryParameterTax, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.GetAsync<List<BankAccountGet>>($"{ApiVersion}/{EndpointRoot}", queryParameterBankAccount.QueryParameter, cancellationToken);
+        var res = await ConnectionHandler.GetAsync<List<Tax>>($"{ApiVersion}/{EndpointRoot}", queryParameterTax?.QueryParameter, cancellationToken);
+
+        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?[ApiHeaderNames.TotalResults] is null) return res;
+
+        res.Data.AddRange(await ConnectionHandler.FetchAll<Tax>(
+            res.Data.Count,
+            (int)res.ResponseHeaders[ApiHeaderNames.TotalResults],
+            $"{ApiVersion}/{EndpointRoot}",
+            queryParameterTax?.QueryParameter,
+            cancellationToken));
+
+        return res;
     }
 }

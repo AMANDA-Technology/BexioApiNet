@@ -41,12 +41,12 @@ public sealed class ManualEntryService : ConnectorService, IManualEntryService
     /// <summary>
     /// The api endpoint version
     /// </summary>
-    private const string ApiVersion = AccountingConfiguration.ApiVersion;
+    private const string ApiVersion = ManualEntryConfiguration.ApiVersion;
 
     /// <summary>
     /// The api request path
     /// </summary>
-    private const string EndpointRoot = AccountingConfiguration.EndpointRoot;
+    private const string EndpointRoot = ManualEntryConfiguration.EndpointRoot;
 
     /// <inheritdoc />
     public ManualEntryService(IBexioConnectionHandler bexioConnectionHandler) : base(bexioConnectionHandler)

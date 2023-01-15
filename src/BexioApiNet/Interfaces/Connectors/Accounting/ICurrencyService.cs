@@ -23,41 +23,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 using System.Runtime.InteropServices;
+using BexioApiNet.Abstractions.Models.Accounting.Currencies;
 using BexioApiNet.Abstractions.Models.Api;
-using BexioApiNet.Abstractions.Models.Banking.BankAccounts.Views;
-using BexioApiNet.Interfaces;
-using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Models;
-using BexioApiNet.Services.Connectors.Base;
 
-namespace BexioApiNet.Services.Connectors.Banking;
+namespace BexioApiNet.Interfaces.Connectors.Accounting;
 
-/// <inheritdoc cref="IBankAccountService" />
-public sealed class BankAccountService : ConnectorService, IBankAccountService
+/// <summary>
+/// Service for getting currency entries in accounting namespace. <see href="https://docs.bexio.com/#tag/Currencies/operation/ListCurrencies">List Currencies</see>
+/// </summary>
+public interface ICurrencyService
 {
     /// <summary>
-    /// The api endpoint version
+    /// Get a list of currencies. <see href="https://docs.bexio.com/#tag/Currencies/operation/ListCurrencies">List Currencies</see>
     /// </summary>
-    private const string ApiVersion = BankingConfiguration.ApiVersion;
-
-    /// <summary>
-    /// The api request path
-    /// </summary>
-    private const string EndpointRoot = BankingConfiguration.EndpointRoot;
-
-    /// <inheritdoc />
-    public BankAccountService(IBexioConnectionHandler bexioConnectionHandler) : base(bexioConnectionHandler)
-    {
-    }
-
-    /// <inheritdoc />
-    public async Task<ApiResult<List<BankAccountGet>>> Get(
-        [Optional] QueryParameterBankAccount queryParameterBankAccount,
-        [Optional] bool autoPage,
-        [Optional] CancellationToken cancellationToken)
-    {
-        return await ConnectionHandler.GetAsync<List<BankAccountGet>>($"{ApiVersion}/{EndpointRoot}", queryParameterBankAccount.QueryParameter, cancellationToken);
-    }
+    /// <param name="queryParameterCurrency">Query parameter specific for accounts</param>
+    /// <param name="autoPage">Fetch all possible results</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
+    public Task<ApiResult<List<Currency>>> Get([Optional] QueryParameterCurrency? queryParameterCurrency, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken);
 }

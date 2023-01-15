@@ -69,7 +69,10 @@ public static class BexioServiceCollection
         services.AddSingleton(bexioConfiguration);
         services.AddSingleton<IBexioConnectionHandler, BexioConnectionHandler>();
         services.AddScoped<IBankAccountService, BankAccountService>();
+        services.AddScoped<IAccountService, AccountService>();
+        services.AddScoped<ICurrencyService, CurrencyService>();
         services.AddScoped<IManualEntryService, ManualEntryService>();
+        services.AddScoped<ITaxService, TaxService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;

@@ -23,28 +23,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace BexioApiNet.Abstractions.Models.Accounting.ManualEntries;
+namespace BexioApiNet.Models;
 
 /// <summary>
-/// Manual entry entry. <see href="https://docs.bexio.com/#tag/Manual-Entries/operation/ListManualEntries"/>
+/// Dictionary for optional query parameters
 /// </summary>
-/// <param name="Id"></param>
-/// <param name="Type"></param>
-/// <param name="Date"></param>
-/// <param name="ReferenceNr"></param>
-/// <param name="CreatedByUserId"></param>
-/// <param name="EditedByUserId"></param>
-/// <param name="Entries"></param>
-/// <param name="IsLocked"></param>
-/// <param name="LockedInfo"></param>
-public sealed record ManualEntryEntry(
-    [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("type")] string Type,
-    [property: JsonPropertyName("date")] DateOnly Date,
-    [property: JsonPropertyName("reference_nr")] string ReferenceNr,
-    [property: JsonPropertyName("created_by_user_id")] int? CreatedByUserId,
-    [property: JsonPropertyName("edited_by_user_id")] int? EditedByUserId,
-    [property: JsonPropertyName("entries")] IReadOnlyList<ManualEntry> Entries,
-    [property: JsonPropertyName("is_locked")] bool? IsLocked,
-    [property: JsonPropertyName("locked_info")] string LockedInfo
-);
+public sealed record QueryParameterAccount(
+    int Limit,
+    int Offset
+)
+{
+    /// <summary>
+    ///
+    /// </summary>
+    public QueryParameter? QueryParameter { get; } =
+        new(Parameters: new()
+        {
+            {"limit", Limit},
+            {"offset", Offset}
+        });
+};

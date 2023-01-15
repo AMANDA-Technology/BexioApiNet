@@ -41,7 +41,16 @@ public sealed class BexioApiClient : IBexioApiClient
     public IBankAccountService BankingBankAccounts { get; set; }
 
     /// <inheritdoc />
+    public IAccountService Accounts { get; set; }
+
+    /// <inheritdoc />
+    public ICurrencyService Currencies { get; set; }
+
+    /// <inheritdoc />
     public IManualEntryService AccountingManualEntries { get; set; }
+
+    /// <inheritdoc />
+    public ITaxService Taxes { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
@@ -49,10 +58,16 @@ public sealed class BexioApiClient : IBexioApiClient
     public BexioApiClient(
         IBexioConnectionHandler bexioConnectionHandler,
         IBankAccountService bankingBankAccounts,
-        IManualEntryService accountingManualEntries)
+        IAccountService accountingAccounts,
+        ICurrencyService currencies,
+        IManualEntryService accountingManualEntries,
+        ITaxService taxes)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
+        Accounts = accountingAccounts;
+        Currencies = currencies;
         AccountingManualEntries = accountingManualEntries;
+        Taxes = taxes;
     }
 }

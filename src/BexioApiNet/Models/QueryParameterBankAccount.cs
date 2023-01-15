@@ -36,7 +36,7 @@ public sealed record QueryParameterBankAccount(
     /// <summary>
     ///
     /// </summary>
-    public QueryParameter QueryParameter { get; } =
+    public QueryParameter? QueryParameter { get; } =
         new(Parameters: new()
         {
             {"limit", Limit},

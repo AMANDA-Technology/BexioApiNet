@@ -56,6 +56,9 @@ public class TestBase
         BexioApiClient = new BexioApiClient(
             connectionHandler,
             new BankAccountService(connectionHandler),
-            new ManualEntryService(connectionHandler));
+            new AccountService(connectionHandler),
+            new CurrencyService(connectionHandler),
+            new ManualEntryService(connectionHandler),
+            new TaxService(connectionHandler));
     }
 }

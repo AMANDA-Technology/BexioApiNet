@@ -23,41 +23,35 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+namespace BexioApiNet.Abstractions.Models.Accounting.Accounts.Enums;
 
-using System.Runtime.InteropServices;
-using BexioApiNet.Abstractions.Models.Api;
-using BexioApiNet.Abstractions.Models.Banking.BankAccounts.Views;
-using BexioApiNet.Interfaces;
-using BexioApiNet.Interfaces.Connectors.Banking;
-using BexioApiNet.Models;
-using BexioApiNet.Services.Connectors.Base;
-
-namespace BexioApiNet.Services.Connectors.Banking;
-
-/// <inheritdoc cref="IBankAccountService" />
-public sealed class BankAccountService : ConnectorService, IBankAccountService
+/// <summary>
+/// Account types. <see href="https://docs.bexio.com/#tag/Accounts/operation/v2ListAccounts"/>
+/// </summary>
+public enum AccountType
 {
     /// <summary>
-    /// The api endpoint version
+    /// <see href="https://docs.bexio.com/#tag/Accounts/operation/v2ListAccounts"/>
     /// </summary>
-    private const string ApiVersion = BankingConfiguration.ApiVersion;
+    Earnings = 1,
 
     /// <summary>
-    /// The api request path
+    /// <see href="https://docs.bexio.com/#tag/Accounts/operation/v2ListAccounts"/>
     /// </summary>
-    private const string EndpointRoot = BankingConfiguration.EndpointRoot;
+    Expenditures,
 
-    /// <inheritdoc />
-    public BankAccountService(IBexioConnectionHandler bexioConnectionHandler) : base(bexioConnectionHandler)
-    {
-    }
+    /// <summary>
+    /// <see href="https://docs.bexio.com/#tag/Accounts/operation/v2ListAccounts"/>
+    /// </summary>
+    ActiveAccounts,
 
-    /// <inheritdoc />
-    public async Task<ApiResult<List<BankAccountGet>>> Get(
-        [Optional] QueryParameterBankAccount queryParameterBankAccount,
-        [Optional] bool autoPage,
-        [Optional] CancellationToken cancellationToken)
-    {
-        return await ConnectionHandler.GetAsync<List<BankAccountGet>>($"{ApiVersion}/{EndpointRoot}", queryParameterBankAccount.QueryParameter, cancellationToken);
-    }
+    /// <summary>
+    /// <see href="https://docs.bexio.com/#tag/Accounts/operation/v2ListAccounts"/>
+    /// </summary>
+    PassiveAccounts,
+
+    /// <summary>
+    /// Also known as Abschluss. <see href="https://docs.bexio.com/#tag/Accounts/operation/v2ListAccounts"/>
+    /// </summary>
+    CompleteAccounts
 }

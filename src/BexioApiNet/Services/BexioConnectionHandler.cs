@@ -64,7 +64,7 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<TResult>> GetAsync<TResult>(string requestPath, [Optional] QueryParameter queryParameter, [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<TResult>> GetAsync<TResult>(string requestPath, [Optional] QueryParameter? queryParameter, [Optional] CancellationToken cancellationToken)
     {
         return await GetApiResult<TResult>(await _client.SendAsync(CreateHttpRequestMessage(HttpMethod.Get, requestPath, queryParameter), cancellationToken));
     }
@@ -75,10 +75,10 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     }
 
     /// <inheritdoc />
-    public async Task<List<TResult>> FetchAll<TResult>(int fetchedObjects, int maxObjects, string requestPath, QueryParameter queryParameter, [Optional] CancellationToken cancellationToken)
+    public async Task<List<TResult>> FetchAll<TResult>(int fetchedObjects, int maxObjects, string requestPath, QueryParameter? queryParameter, [Optional] CancellationToken cancellationToken)
     {
         var res = new List<TResult>();
-        var initialOffset = (int)queryParameter.Parameters["offset"];
+        var initialOffset = (int)(queryParameter?.Parameters["offset"] ?? 0);
         maxObjects -= initialOffset;
 
         while (fetchedObjects < maxObjects)

@@ -42,7 +42,7 @@ public interface IBexioConnectionHandler
     /// <param name="cancellationToken">Cancellation token</param>
     /// <typeparam name="TResult">The api result in the requested object type</typeparam>
     /// <returns></returns>
-    public Task<ApiResult<TResult>> GetAsync<TResult>(string requestPath, [Optional] QueryParameter queryParameter, [Optional] CancellationToken cancellationToken);
+    public Task<ApiResult<TResult>> GetAsync<TResult>(string requestPath, [Optional] QueryParameter? queryParameter, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
     /// Post any object type.
@@ -76,5 +76,5 @@ public interface IBexioConnectionHandler
     /// <param name="cancellationToken">Cancellation token</param>
     /// <typeparam name="TResult">The api result in the requested object type</typeparam>
     /// <returns></returns>
-    public Task<List<TResult>> FetchAll<TResult>(int fetchedObjects, int maxObjects, string requestPath, QueryParameter queryParameter, [Optional] CancellationToken cancellationToken);
+    public Task<List<TResult>> FetchAll<TResult>(int fetchedObjects, int maxObjects, string requestPath, QueryParameter? queryParameter, [Optional] CancellationToken cancellationToken);
 }

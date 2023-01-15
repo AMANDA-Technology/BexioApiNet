@@ -23,41 +23,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+namespace BexioApiNet.Abstractions.Models.Accounting.Taxes.Enums;
 
-using System.Runtime.InteropServices;
-using BexioApiNet.Abstractions.Models.Api;
-using BexioApiNet.Abstractions.Models.Banking.BankAccounts.Views;
-using BexioApiNet.Interfaces;
-using BexioApiNet.Interfaces.Connectors.Banking;
-using BexioApiNet.Models;
-using BexioApiNet.Services.Connectors.Base;
-
-namespace BexioApiNet.Services.Connectors.Banking;
-
-/// <inheritdoc cref="IBankAccountService" />
-public sealed class BankAccountService : ConnectorService, IBankAccountService
+/// <summary>
+/// Tax scopes. <see href="https://docs.bexio.com/#tag/Taxes">Taxes</see>
+/// </summary>
+public enum TaxScope
 {
     /// <summary>
-    /// The api endpoint version
+    ///
     /// </summary>
-    private const string ApiVersion = BankingConfiguration.ApiVersion;
+    // ReSharper disable once InconsistentNaming
+    active,
 
     /// <summary>
-    /// The api request path
+    ///
     /// </summary>
-    private const string EndpointRoot = BankingConfiguration.EndpointRoot;
-
-    /// <inheritdoc />
-    public BankAccountService(IBexioConnectionHandler bexioConnectionHandler) : base(bexioConnectionHandler)
-    {
-    }
-
-    /// <inheritdoc />
-    public async Task<ApiResult<List<BankAccountGet>>> Get(
-        [Optional] QueryParameterBankAccount queryParameterBankAccount,
-        [Optional] bool autoPage,
-        [Optional] CancellationToken cancellationToken)
-    {
-        return await ConnectionHandler.GetAsync<List<BankAccountGet>>($"{ApiVersion}/{EndpointRoot}", queryParameterBankAccount.QueryParameter, cancellationToken);
-    }
+    // ReSharper disable once InconsistentNaming
+    inactive
 }

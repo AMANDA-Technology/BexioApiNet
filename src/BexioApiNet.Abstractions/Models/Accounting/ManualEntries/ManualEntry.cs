@@ -26,25 +26,35 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Accounting.ManualEntries;
 
 /// <summary>
-/// Manual entry entry. <see href="https://docs.bexio.com/#tag/Manual-Entries/operation/ListManualEntries"/>
+/// Manual entry. <see href="https://docs.bexio.com/#tag/Manual-Entries/operation/ListManualEntries"/>
 /// </summary>
 /// <param name="Id"></param>
-/// <param name="Type"></param>
 /// <param name="Date"></param>
-/// <param name="ReferenceNr"></param>
+/// <param name="DebitAccountId"></param>
+/// <param name="CreditAccountId"></param>
+/// <param name="TaxId"></param>
+/// <param name="TaxAccountId"></param>
+/// <param name="Description"></param>
+/// <param name="Amount"></param>
+/// <param name="CurrencyId"></param>
+/// <param name="BaseCurrencyId"></param>
+/// <param name="CurrencyFactor"></param>
+/// <param name="BaseCurrencyAmount"></param>
 /// <param name="CreatedByUserId"></param>
 /// <param name="EditedByUserId"></param>
-/// <param name="Entries"></param>
-/// <param name="IsLocked"></param>
-/// <param name="LockedInfo"></param>
-public sealed record ManualEntryEntry(
+public sealed record ManualEntry(
     [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("type")] string Type,
     [property: JsonPropertyName("date")] DateOnly Date,
-    [property: JsonPropertyName("reference_nr")] string ReferenceNr,
+    [property: JsonPropertyName("debit_account_id")] int? DebitAccountId,
+    [property: JsonPropertyName("credit_account_id")] int? CreditAccountId,
+    [property: JsonPropertyName("tax_id")] int? TaxId,
+    [property: JsonPropertyName("tax_account_id")] int? TaxAccountId,
+    [property: JsonPropertyName("description")] string Description,
+    [property: JsonPropertyName("amount")] decimal? Amount,
+    [property: JsonPropertyName("currency_id")] int? CurrencyId,
+    [property: JsonPropertyName("base_currency_id")] int? BaseCurrencyId,
+    [property: JsonPropertyName("currency_factor")] int? CurrencyFactor,
+    [property: JsonPropertyName("base_currency_amount")] double? BaseCurrencyAmount,
     [property: JsonPropertyName("created_by_user_id")] int? CreatedByUserId,
-    [property: JsonPropertyName("edited_by_user_id")] int? EditedByUserId,
-    [property: JsonPropertyName("entries")] IReadOnlyList<ManualEntry> Entries,
-    [property: JsonPropertyName("is_locked")] bool? IsLocked,
-    [property: JsonPropertyName("locked_info")] string LockedInfo
+    [property: JsonPropertyName("edited_by_user_id")] int? EditedByUserId
 );

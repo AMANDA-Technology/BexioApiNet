@@ -23,41 +23,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 using System.Runtime.InteropServices;
+using BexioApiNet.Abstractions.Models.Accounting.Accounts;
 using BexioApiNet.Abstractions.Models.Api;
-using BexioApiNet.Abstractions.Models.Banking.BankAccounts.Views;
-using BexioApiNet.Interfaces;
-using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Models;
-using BexioApiNet.Services.Connectors.Base;
 
-namespace BexioApiNet.Services.Connectors.Banking;
+namespace BexioApiNet.Interfaces.Connectors.Accounting;
 
-/// <inheritdoc cref="IBankAccountService" />
-public sealed class BankAccountService : ConnectorService, IBankAccountService
+/// <summary>
+/// Service for getting account entries in accounting namespace. <see href="https://docs.bexio.com/#tag/Accounts">Accounts</see>
+/// </summary>
+public interface IAccountService
 {
     /// <summary>
-    /// The api endpoint version
+    /// Get a list of accounts. <see href="https://docs.bexio.com/#tag/Accounts/operation/v2ListAccounts">v2 List Accounts</see>
     /// </summary>
-    private const string ApiVersion = BankingConfiguration.ApiVersion;
-
-    /// <summary>
-    /// The api request path
-    /// </summary>
-    private const string EndpointRoot = BankingConfiguration.EndpointRoot;
-
-    /// <inheritdoc />
-    public BankAccountService(IBexioConnectionHandler bexioConnectionHandler) : base(bexioConnectionHandler)
-    {
-    }
-
-    /// <inheritdoc />
-    public async Task<ApiResult<List<BankAccountGet>>> Get(
-        [Optional] QueryParameterBankAccount queryParameterBankAccount,
-        [Optional] bool autoPage,
-        [Optional] CancellationToken cancellationToken)
-    {
-        return await ConnectionHandler.GetAsync<List<BankAccountGet>>($"{ApiVersion}/{EndpointRoot}", queryParameterBankAccount.QueryParameter, cancellationToken);
-    }
+    /// <param name="queryParameterAccount">Query parameter specific for accounts</param>
+    /// <param name="autoPage">Fetch all possible results</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
+    public Task<ApiResult<List<Account>>> Get([Optional] QueryParameterAccount? queryParameterAccount, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken);
 }

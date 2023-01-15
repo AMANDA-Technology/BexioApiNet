@@ -23,41 +23,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+namespace BexioApiNet.Services.Connectors.Accounting;
 
-using System.Runtime.InteropServices;
-using BexioApiNet.Abstractions.Models.Api;
-using BexioApiNet.Abstractions.Models.Banking.BankAccounts.Views;
-using BexioApiNet.Interfaces;
-using BexioApiNet.Interfaces.Connectors.Banking;
-using BexioApiNet.Models;
-using BexioApiNet.Services.Connectors.Base;
-
-namespace BexioApiNet.Services.Connectors.Banking;
-
-/// <inheritdoc cref="IBankAccountService" />
-public sealed class BankAccountService : ConnectorService, IBankAccountService
+/// <summary>
+/// Account endpoint configuration
+/// </summary>
+public struct AccountConfiguration
 {
     /// <summary>
-    /// The api endpoint version
+    /// Current api version of the endpoint
     /// </summary>
-    private const string ApiVersion = BankingConfiguration.ApiVersion;
+    public const string ApiVersion = "2.0";
 
     /// <summary>
-    /// The api request path
+    /// The request path
     /// </summary>
-    private const string EndpointRoot = BankingConfiguration.EndpointRoot;
-
-    /// <inheritdoc />
-    public BankAccountService(IBexioConnectionHandler bexioConnectionHandler) : base(bexioConnectionHandler)
-    {
-    }
-
-    /// <inheritdoc />
-    public async Task<ApiResult<List<BankAccountGet>>> Get(
-        [Optional] QueryParameterBankAccount queryParameterBankAccount,
-        [Optional] bool autoPage,
-        [Optional] CancellationToken cancellationToken)
-    {
-        return await ConnectionHandler.GetAsync<List<BankAccountGet>>($"{ApiVersion}/{EndpointRoot}", queryParameterBankAccount.QueryParameter, cancellationToken);
-    }
+    public const string EndpointRoot = "accounts";
 }
