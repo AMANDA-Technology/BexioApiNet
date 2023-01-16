@@ -53,7 +53,7 @@ public sealed record Tax(
     [property: JsonPropertyName("type")] string Type,
     [property: JsonPropertyName("account_id")] int? AccountId,
     [property: JsonPropertyName("tax_settlement_type")] string TaxSettlementType,
-    [property: JsonPropertyName("value")] double Value,
+    [property: JsonPropertyName("value")] decimal Value,
     [property: JsonPropertyName("net_tax_value")] int? NetTaxValue,
     [property: JsonPropertyName("start_year")] int? StartYear,
     [property: JsonPropertyName("end_year")] int? EndYear,

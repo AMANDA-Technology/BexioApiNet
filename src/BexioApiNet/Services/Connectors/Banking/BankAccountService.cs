@@ -54,10 +54,10 @@ public sealed class BankAccountService : ConnectorService, IBankAccountService
 
     /// <inheritdoc />
     public async Task<ApiResult<List<BankAccountGet>>> Get(
-        [Optional] QueryParameterBankAccount queryParameterBankAccount,
+        [Optional] QueryParameterBankAccount? queryParameterBankAccount,
         [Optional] bool autoPage,
         [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.GetAsync<List<BankAccountGet>>($"{ApiVersion}/{EndpointRoot}", queryParameterBankAccount.QueryParameter, cancellationToken);
+        return await ConnectionHandler.GetAsync<List<BankAccountGet>>($"{ApiVersion}/{EndpointRoot}", queryParameterBankAccount?.QueryParameter, cancellationToken);
     }
 }
