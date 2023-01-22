@@ -96,6 +96,12 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     }
 
     /// <inheritdoc />
+    public async Task<ApiResult<object>> Delete(string requestPath, [Optional] CancellationToken cancellationToken)
+    {
+        return await GetApiResult<object>(await _client.DeleteAsync(requestPath, cancellationToken));
+    }
+
+    /// <inheritdoc />
     public async Task<ApiResult<TResult>> PostMultiPartFileAsync<TResult>(List<Tuple<MemoryStream, string>> files, string requestPath, [Optional] CancellationToken cancellationToken)
     {
         var form = new MultipartFormDataContent();

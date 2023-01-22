@@ -42,7 +42,7 @@ public interface IManualEntryService
     /// <param name="manualEntryEntry">Create view</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns></returns>
-    public Task<ApiResult<ManualEntryEntry>> Create(ManualEntryEntryCreate manualEntryEntry, [Optional] CancellationToken cancellationToken);
+    public Task<ApiResult<ManualEntry>> Create(ManualEntryEntryCreate manualEntryEntry, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
     /// Add one or more attachments to a manual entry. <see href="https://docs.bexio.com/#tag/Manual-Entries/operation/UploadManualEntryFile">Upload Manual Entry File</see>
@@ -71,5 +71,13 @@ public interface IManualEntryService
     /// <param name="autoPage">Fetch all possible results</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns></returns>
-    public Task<ApiResult<List<ManualEntry>>> Get([Optional] QueryParameterManualEntry? queryParameterManualEntry, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken);
+    public Task<ApiResult<List<ManualEntry>?>> Get([Optional] QueryParameterManualEntry? queryParameterManualEntry, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Delete a manual entry
+    /// </summary>
+    /// <param name="id"></param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
+    public Task<ApiResult<object>> Delete(int id, [Optional] CancellationToken cancellationToken);
 }

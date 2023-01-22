@@ -77,4 +77,12 @@ public interface IBexioConnectionHandler
     /// <typeparam name="TResult">The api result in the requested object type</typeparam>
     /// <returns></returns>
     public Task<List<TResult>> FetchAll<TResult>(int fetchedObjects, int maxObjects, string requestPath, QueryParameter? queryParameter, [Optional] CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Delete an object
+    /// </summary>
+    /// <param name="requestPath">The api request path</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
+    public Task<ApiResult<object>> Delete(string requestPath, [Optional] CancellationToken cancellationToken);
 }

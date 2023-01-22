@@ -54,9 +54,9 @@ public sealed class ManualEntryService : ConnectorService, IManualEntryService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<ManualEntryEntry>> Create(ManualEntryEntryCreate manualEntryEntry, [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<ManualEntry>> Create(ManualEntryEntryCreate manualEntryEntry, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PostAsync<ManualEntryEntry, ManualEntryEntryCreate>(manualEntryEntry, $"{ApiVersion}/{EndpointRoot}", cancellationToken);
+        return await ConnectionHandler.PostAsync<ManualEntry, ManualEntryEntryCreate>(manualEntryEntry, $"{ApiVersion}/{EndpointRoot}", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -73,9 +73,9 @@ public sealed class ManualEntryService : ConnectorService, IManualEntryService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<List<ManualEntry>>> Get([Optional] QueryParameterManualEntry queryParameterManualEntry, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<List<ManualEntry>?>> Get([Optional] QueryParameterManualEntry? queryParameterManualEntry, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
     {
-        var res = await ConnectionHandler.GetAsync<List<ManualEntry>>($"{ApiVersion}/{EndpointRoot}", queryParameterManualEntry.QueryParameter, cancellationToken);
+        ApiResult<List<ManualEntry>?> res = await ConnectionHandler.GetAsync<List<ManualEntry>>($"{ApiVersion}/{EndpointRoot}", queryParameterManualEntry?.QueryParameter, cancellationToken);
 
         if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?[ApiHeaderNames.TotalResults] is null) return res;
 
@@ -83,11 +83,16 @@ public sealed class ManualEntryService : ConnectorService, IManualEntryService
             res.Data.Count,
             (int)res.ResponseHeaders[ApiHeaderNames.TotalResults],
             $"{ApiVersion}/{EndpointRoot}",
-            queryParameterManualEntry.QueryParameter,
+            queryParameterManualEntry?.QueryParameter,
             cancellationToken));
 
         return res;
     }
 
-
+    /// <inheritdoc />
+    public async Task<ApiResult<object>> Delete(int id, [Optional] CancellationToken cancellationToken)
+    {
+        var res = await ConnectionHandler.Delete($"{ApiVersion}/{EndpointRoot}/{id}", cancellationToken);
+        return res;
+    }
 }

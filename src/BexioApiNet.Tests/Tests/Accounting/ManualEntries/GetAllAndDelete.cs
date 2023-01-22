@@ -23,28 +23,43 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace BexioApiNet.Abstractions.Models.Accounting.ManualEntries;
+using BexioApiNet.Abstractions.Models.Accounting.ManualEntries;
+using BexioApiNet.Abstractions.Models.Api;
+using BexioApiNet.Models;
+
+namespace BexioApiNet.Tests.Tests.Accounting.ManualEntries;
 
 /// <summary>
-/// Manual entry entry. <see href="https://docs.bexio.com/#tag/Manual-Entries/operation/ListManualEntries"/>
+///
 /// </summary>
-/// <param name="Id"></param>
-/// <param name="Type"></param>
-/// <param name="Date"></param>
-/// <param name="ReferenceNr"></param>
-/// <param name="CreatedByUserId"></param>
-/// <param name="EditedByUserId"></param>
-/// <param name="Entries"></param>
-/// <param name="IsLocked"></param>
-/// <param name="LockedInfo"></param>
-public sealed record ManualEntry(
-    [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("type")] string Type,
-    [property: JsonPropertyName("date")] DateOnly Date,
-    [property: JsonPropertyName("reference_nr")] string ReferenceNr,
-    [property: JsonPropertyName("created_by_user_id")] int? CreatedByUserId,
-    [property: JsonPropertyName("edited_by_user_id")] int? EditedByUserId,
-    [property: JsonPropertyName("entries")] IReadOnlyList<ManualEntryEntry> Entries,
-    [property: JsonPropertyName("is_locked")] bool? IsLocked,
-    [property: JsonPropertyName("locked_info")] string LockedInfo
-);
+public class TestGetAllAndDelete : TestBase
+{
+    /// <summary>
+    ///
+    /// </summary>
+    [Test]
+    public async Task GetAll()
+    {
+        var res = await BexioApiClient!.AccountingManualEntries.Get(autoPage: true);
+
+        Assert.That(res, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(res.Data!.Count, Is.GreaterThan(5));
+            Assert.That(res.IsSuccess, Is.True);
+            Assert.That(res.ApiError, Is.Null);
+            Assert.That(res.Data?.First().Id, Is.Not.Null);
+        });
+
+        foreach (var entry in res.Data?.Where(x => x.Entries.Any(y => y.Description.Contains("Test entry"))) ?? new List<ManualEntry>())
+        {
+            var res2 = await BexioApiClient!.AccountingManualEntries.Delete(entry.Id);
+
+            Assert.Multiple(() =>
+            {
+                Assert.That(res2, Is.Not.Null);
+                Assert.That(res.IsSuccess, Is.True);
+            });
+        }
+    }
+}
