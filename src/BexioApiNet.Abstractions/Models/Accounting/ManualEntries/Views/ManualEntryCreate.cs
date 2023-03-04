@@ -46,7 +46,7 @@ public sealed record ManualEntryCreate(
     [property: JsonPropertyName("description")] string Description,
     [property: JsonPropertyName("amount")] decimal? Amount,
     [property: JsonPropertyName("currency_id")] int? CurrencyId,
-    [property: JsonPropertyName("currency_factor")] int? CurrencyFactor
+    [property: JsonPropertyName("currency_factor")] decimal? CurrencyFactor
 );
 
 /// <summary>

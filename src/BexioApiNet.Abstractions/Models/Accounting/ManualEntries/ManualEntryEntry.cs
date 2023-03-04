@@ -53,7 +53,7 @@ public sealed record ManualEntryEntry(
     [property: JsonPropertyName("amount")] decimal? Amount,
     [property: JsonPropertyName("currency_id")] int? CurrencyId,
     [property: JsonPropertyName("base_currency_id")] int? BaseCurrencyId,
-    [property: JsonPropertyName("currency_factor")] int? CurrencyFactor,
+    [property: JsonPropertyName("currency_factor")] decimal? CurrencyFactor,
     [property: JsonPropertyName("base_currency_amount")] double? BaseCurrencyAmount,
     [property: JsonPropertyName("created_by_user_id")] int? CreatedByUserId,
     [property: JsonPropertyName("edited_by_user_id")] int? EditedByUserId
