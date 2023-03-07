@@ -59,11 +59,12 @@ public sealed class CurrencyService : ConnectorService, ICurrencyService
     {
         var res = await ConnectionHandler.GetAsync<List<Currency>>($"{ApiVersion}/{EndpointRoot}", queryParameterCurrency?.QueryParameter, cancellationToken);
 
-        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?[ApiHeaderNames.TotalResults] is null) return res;
+        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
+            return res;
 
         res.Data.AddRange(await ConnectionHandler.FetchAll<Currency>(
             res.Data.Count,
-            (int)res.ResponseHeaders[ApiHeaderNames.TotalResults],
+            totalResults,
             $"{ApiVersion}/{EndpointRoot}",
             queryParameterCurrency?.QueryParameter,
             cancellationToken));

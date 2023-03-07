@@ -89,6 +89,7 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
            res.AddRange(res2.Data);
            fetchedObjects += res2.Data.Count;
 
+           queryParameter ??= new(new());
            queryParameter.Parameters["offset"] = fetchedObjects + initialOffset;
         }
 

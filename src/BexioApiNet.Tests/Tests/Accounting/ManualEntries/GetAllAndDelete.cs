@@ -24,8 +24,6 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Models.Accounting.ManualEntries;
-using BexioApiNet.Abstractions.Models.Api;
-using BexioApiNet.Models;
 
 namespace BexioApiNet.Tests.Tests.Accounting.ManualEntries;
 

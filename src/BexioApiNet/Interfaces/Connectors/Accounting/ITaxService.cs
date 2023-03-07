@@ -24,7 +24,6 @@ SOFTWARE.
 */
 
 using System.Runtime.InteropServices;
-using BexioApiNet.Abstractions.Models.Accounting.Currencies;
 using BexioApiNet.Abstractions.Models.Accounting.Taxes;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Models;

@@ -55,15 +55,16 @@ public sealed class AccountService : ConnectorService, IAccountService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<List<Account>>> Get([Optional] QueryParameterAccount queryParameterAccount, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<List<Account>>> Get([Optional] QueryParameterAccount? queryParameterAccount, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
     {
         var res = await ConnectionHandler.GetAsync<List<Account>>($"{ApiVersion}/{EndpointRoot}", queryParameterAccount?.QueryParameter, cancellationToken);
 
-        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?[ApiHeaderNames.TotalResults] is null) return res;
+        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
+            return res;
 
         res.Data.AddRange(await ConnectionHandler.FetchAll<Account>(
             res.Data.Count,
-            (int)res.ResponseHeaders[ApiHeaderNames.TotalResults],
+            totalResults,
             $"{ApiVersion}/{EndpointRoot}",
             queryParameterAccount?.QueryParameter,
             cancellationToken));

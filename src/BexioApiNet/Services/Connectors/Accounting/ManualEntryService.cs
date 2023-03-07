@@ -75,13 +75,14 @@ public sealed class ManualEntryService : ConnectorService, IManualEntryService
     /// <inheritdoc />
     public async Task<ApiResult<List<ManualEntry>?>> Get([Optional] QueryParameterManualEntry? queryParameterManualEntry, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
     {
-        ApiResult<List<ManualEntry>?> res = await ConnectionHandler.GetAsync<List<ManualEntry>>($"{ApiVersion}/{EndpointRoot}", queryParameterManualEntry?.QueryParameter, cancellationToken);
+        var res = await ConnectionHandler.GetAsync<List<ManualEntry>?>($"{ApiVersion}/{EndpointRoot}", queryParameterManualEntry?.QueryParameter, cancellationToken);
 
-        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?[ApiHeaderNames.TotalResults] is null) return res;
+        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
+            return res;
 
         res.Data.AddRange(await ConnectionHandler.FetchAll<ManualEntry>(
             res.Data.Count,
-            (int)res.ResponseHeaders[ApiHeaderNames.TotalResults],
+            totalResults,
             $"{ApiVersion}/{EndpointRoot}",
             queryParameterManualEntry?.QueryParameter,
             cancellationToken));

@@ -59,7 +59,6 @@ public interface IBexioConnectionHandler
     /// Post any file content as multi part form request.
     /// </summary>
     /// <param name="files">A list of files</param>
-    /// <param name="fileName">The file name for reference with extension</param>
     /// <param name="requestPath">The api request path</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <typeparam name="TResult">The api result in the requested object type</typeparam>

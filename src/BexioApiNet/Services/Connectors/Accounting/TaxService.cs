@@ -25,7 +25,6 @@ SOFTWARE.
 
 using System.Runtime.InteropServices;
 using BexioApiNet.Abstractions.Enums.Api;
-using BexioApiNet.Abstractions.Models.Accounting.Currencies;
 using BexioApiNet.Abstractions.Models.Accounting.Taxes;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Interfaces;
@@ -60,11 +59,12 @@ public sealed class TaxService : ConnectorService, ITaxService
     {
         var res = await ConnectionHandler.GetAsync<List<Tax>>($"{ApiVersion}/{EndpointRoot}", queryParameterTax?.QueryParameter, cancellationToken);
 
-        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?[ApiHeaderNames.TotalResults] is null) return res;
+        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
+            return res;
 
         res.Data.AddRange(await ConnectionHandler.FetchAll<Tax>(
             res.Data.Count,
-            (int)res.ResponseHeaders[ApiHeaderNames.TotalResults],
+            totalResults,
             $"{ApiVersion}/{EndpointRoot}",
             queryParameterTax?.QueryParameter,
             cancellationToken));

@@ -54,7 +54,6 @@ public class TestBase
             });
 
         BexioApiClient = new BexioApiClient(
-            connectionHandler,
             new BankAccountService(connectionHandler),
             new AccountService(connectionHandler),
             new CurrencyService(connectionHandler),
