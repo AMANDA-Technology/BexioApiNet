@@ -56,7 +56,7 @@ public class CreateAndAddFile : TestBase
 
         var res2 = await BexioApiClient!.AccountingManualEntries.AddAttachment(
             res.Data!.Id,
-            res.Data.Entries[0].Id,
+            res.Data.Entries[0].Id!.Value,
             new List<FileInfo>(){new("Assets/letter.pdf"), new("Assets/letter2.pdf")});
 
         Assert.That(res2, Is.Not.Null);

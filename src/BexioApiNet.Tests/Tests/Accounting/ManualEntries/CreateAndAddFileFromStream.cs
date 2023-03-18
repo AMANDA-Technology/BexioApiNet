@@ -56,7 +56,7 @@ public class CreateAndAddFileFromStream : TestBase
 
         var res2 = await BexioApiClient!.AccountingManualEntries.AddAttachment(
             res.Data!.Id,
-            res.Data.Entries[0].Id,
+            res.Data.Entries[0].Id!.Value,
             new List<Tuple<MemoryStream, string>>
             {
                 new( new(await File.ReadAllBytesAsync("Assets/letter.pdf")), "letter.pdf"),

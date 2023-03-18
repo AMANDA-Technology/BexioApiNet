@@ -38,7 +38,7 @@ public class TestGetAll : TestBase
     [Test]
     public async Task GetAll()
     {
-        var queryParameter = new QueryParameterManualEntry(5, 23);
+        var queryParameter = new QueryParameterManualEntry(5, 0);
 
         Assert.That(BexioApiClient, Is.Not.Null);
 

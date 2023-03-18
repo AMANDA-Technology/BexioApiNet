@@ -40,6 +40,7 @@ namespace BexioApiNet.Abstractions.Models.Accounting.ManualEntries;
 public sealed record ManualEntry(
     [property: JsonPropertyName("id")] int Id,
     [property: JsonPropertyName("type")] string Type,
+    [property: JsonPropertyName("booking_type")] string BookingType,
     [property: JsonPropertyName("date")] DateOnly Date,
     [property: JsonPropertyName("reference_nr")] string ReferenceNr,
     [property: JsonPropertyName("created_by_user_id")] int? CreatedByUserId,

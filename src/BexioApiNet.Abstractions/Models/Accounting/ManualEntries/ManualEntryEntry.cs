@@ -43,8 +43,8 @@ namespace BexioApiNet.Abstractions.Models.Accounting.ManualEntries;
 /// <param name="CreatedByUserId"></param>
 /// <param name="EditedByUserId"></param>
 public sealed record ManualEntryEntry(
-    [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("date")] DateOnly Date,
+    [property: JsonPropertyName("id")] int? Id,
+    [property: JsonPropertyName("date")] DateOnly? Date,
     [property: JsonPropertyName("debit_account_id")] int? DebitAccountId,
     [property: JsonPropertyName("credit_account_id")] int? CreditAccountId,
     [property: JsonPropertyName("tax_id")] int? TaxId,

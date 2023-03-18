@@ -185,14 +185,21 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
         var headers = GetResponseHeaders(httpResponseMessage);
         var content = await httpResponseMessage.Content.ReadAsStringAsync();
 
-        return new()
+        try
         {
-            IsSuccess = isSuccess,
-            ApiError = isSuccess ? null : JsonSerializer.Deserialize<ApiError>(content),
-            Data = httpResponseMessage.IsSuccessStatusCode ? JsonSerializer.Deserialize<T>(content) : default,
-            ResponseHeaders = headers,
-            StatusCode = httpResponseMessage.StatusCode
-        };
+            return new()
+            {
+                IsSuccess = isSuccess,
+                ApiError = isSuccess ? null : JsonSerializer.Deserialize<ApiError>(content),
+                Data = httpResponseMessage.IsSuccessStatusCode ? JsonSerializer.Deserialize<T>(content) : default,
+                ResponseHeaders = headers,
+                StatusCode = httpResponseMessage.StatusCode
+            };
+        }
+        catch (Exception e)
+        {
+            throw;
+        }
     }
 
     /// <summary>
