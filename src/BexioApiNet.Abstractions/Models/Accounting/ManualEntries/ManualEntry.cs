@@ -30,6 +30,7 @@ namespace BexioApiNet.Abstractions.Models.Accounting.ManualEntries;
 /// </summary>
 /// <param name="Id"></param>
 /// <param name="Type"></param>
+/// <param name="BookingType"></param>
 /// <param name="Date"></param>
 /// <param name="ReferenceNr"></param>
 /// <param name="CreatedByUserId"></param>
