@@ -30,7 +30,6 @@ namespace BexioApiNet.Abstractions.Exceptions;
 /// <summary>
 /// Represents errors that occur from Bexio API responses
 /// </summary>
-[Serializable]
 public class BexioApiErrorException : ApplicationException
 {
     /// <summary>
