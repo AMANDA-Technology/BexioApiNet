@@ -15,17 +15,6 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Repository", "Repository", 
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "GitHub", "GitHub", "{AC815182-71FE-4377-92ED-ADD0BEA40B79}"
-	ProjectSection(SolutionItems) = preProject
-		.github\dependabot.yml = .github\dependabot.yml
-	EndProjectSection
-EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Workflows", "Workflows", "{33DA7152-E2BF-4FD1-952C-BB631FCF584E}"
-	ProjectSection(SolutionItems) = preProject
-		.github\workflows\codeql-analysis.yml = .github\workflows\codeql-analysis.yml
-		.github\workflows\main.yml = .github\workflows\main.yml
-	EndProjectSection
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +39,5 @@ Global
 		{245C4FE9-E0F6-42D9-AD43-D9B3770D49CA}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(NestedProjects) = preSolution
-		{33DA7152-E2BF-4FD1-952C-BB631FCF584E} = {AC815182-71FE-4377-92ED-ADD0BEA40B79}
 	EndGlobalSection
 EndGlobal
