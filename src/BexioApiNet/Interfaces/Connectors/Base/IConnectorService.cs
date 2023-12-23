@@ -28,6 +28,4 @@ namespace BexioApiNet.Interfaces.Connectors.Base;
 /// <summary>
 /// Base interface for all connector services of the API
 /// </summary>
-public interface IConnectorService
-{
-}
+public interface IConnectorService;

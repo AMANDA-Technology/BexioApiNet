@@ -84,7 +84,7 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
         while (fetchedObjects < maxObjects)
         {
             var res2 = await GetAsync<List<TResult>>(requestPath, queryParameter, cancellationToken);
-            if (res2.Data == null || !res2.IsSuccess) throw new("Paging failed");
+            if (res2.Data == null || !res2.IsSuccess) throw new InvalidOperationException("Paging failed");
 
            res.AddRange(res2.Data);
            fetchedObjects += res2.Data.Count;

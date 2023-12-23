@@ -43,8 +43,8 @@ public class TestBase
     [SetUp]
     public void Setup()
     {
-        var baseUri = Environment.GetEnvironmentVariable("BexioApiNet__BaseUri") ?? throw new("Missing BexioApiNet__BaseUri");
-        var jwtToken = Environment.GetEnvironmentVariable("BexioApiNet__JwtToken") ?? throw new("Missing BexioApiNet__JwtToken");
+        var baseUri = Environment.GetEnvironmentVariable("BexioApiNet__BaseUri") ?? throw new InvalidOperationException("Missing BexioApiNet__BaseUri");
+        var jwtToken = Environment.GetEnvironmentVariable("BexioApiNet__JwtToken") ?? throw new InvalidOperationException("Missing BexioApiNet__JwtToken");
         var connectionHandler = new BexioConnectionHandler(
             new BexioConfiguration
             {

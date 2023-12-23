@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Runtime.Serialization;
 using BexioApiNet.Abstractions.Models.Api;
 
 namespace BexioApiNet.Abstractions.Exceptions;
@@ -32,7 +31,7 @@ namespace BexioApiNet.Abstractions.Exceptions;
 /// Represents errors that occur from Bexio API responses
 /// </summary>
 [Serializable]
-public class BexioApiErrorException : Exception
+public class BexioApiErrorException : ApplicationException
 {
     /// <summary>
     /// API Result
@@ -67,22 +66,5 @@ public class BexioApiErrorException : Exception
     public BexioApiErrorException(ApiResult apiResult, string message, Exception inner) : base(message, inner)
     {
         ApiResult = apiResult;
-    }
-
-    /// <summary>
-    /// Initializes a new instance of the <see cref="BexioApiErrorException"/> class
-    /// </summary>
-    /// <param name="info"></param>
-    /// <param name="context"></param>
-    protected BexioApiErrorException(SerializationInfo info, StreamingContext context) : base(info, context)
-    {
-        ApiResult = info.GetValue(nameof(ApiResult), typeof(ApiResult)) as ApiResult;
-    }
-
-    /// <inheritdoc />
-    public override void GetObjectData(SerializationInfo info, StreamingContext context)
-    {
-        base.GetObjectData(info, context);
-        info.AddValue(nameof(ApiResult), ApiResult);
     }
 }
