@@ -43,7 +43,7 @@ public class TestGetAllAndDelete : TestBase
         Assert.That(res, Is.Not.Null);
         Assert.Multiple(() =>
         {
-            Assert.That(res.Data!.Count, Is.GreaterThan(5));
+            Assert.That(res.Data!, Has.Count.GreaterThan(5));
             Assert.That(res.IsSuccess, Is.True);
             Assert.That(res.ApiError, Is.Null);
             Assert.That(res.Data?.First().Id, Is.Not.Null);

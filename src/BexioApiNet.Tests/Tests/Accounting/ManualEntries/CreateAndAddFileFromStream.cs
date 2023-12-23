@@ -64,6 +64,6 @@ public class CreateAndAddFileFromStream : TestBase
             });
 
         Assert.That(res2, Is.Not.Null);
-        Assert.That(res2.Data!.First().MimeType, Is.EqualTo("application/pdf"));
+        Assert.That(res2.Data![0].MimeType, Is.EqualTo("application/pdf"));
     }
 }
