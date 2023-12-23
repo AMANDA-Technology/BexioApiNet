@@ -13,3 +13,5 @@ See [Bexio website](https://www.bexio.com/).
 [![BuildNuGetAndPublish](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/main.yml/badge.svg)](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/main.yml)
 
 [![CodeQL](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/codeql-analysis.yml)
+
+[![SonarCloud](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/sonar-analysis.yml/badge.svg)](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/sonar-analysis.yml)
