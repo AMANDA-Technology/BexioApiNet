@@ -49,8 +49,8 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     /// <param name="configuration"></param>
     public BexioConnectionHandler(IBexioConfiguration configuration)
     {
-        if (!configuration.BaseUri.EndsWith("/"))
-            configuration.BaseUri += "/";
+        if (!configuration.BaseUri.EndsWith('/'))
+            configuration.BaseUri += '/';
 
         _client = new(new HttpClientHandler { AllowAutoRedirect = false })
         {
