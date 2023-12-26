@@ -32,7 +32,7 @@ namespace BexioApiNet.Interfaces;
 /// <summary>
 /// Connection handler to call bexio REST API
 /// </summary>
-public interface IBexioConnectionHandler
+public interface IBexioConnectionHandler : IDisposable
 {
     /// <summary>
     /// Simply get of any object type.

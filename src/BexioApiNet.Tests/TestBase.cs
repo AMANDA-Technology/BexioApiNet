@@ -30,14 +30,17 @@ using BexioApiNet.Services.Connectors.Banking;
 namespace BexioApiNet.Tests;
 
 /// <summary>
-///
+/// Base class for all bexio API tests
 /// </summary>
 public class TestBase
 {
+    /// <summary>
+    /// Default instance of bexio API client
+    /// </summary>
     protected IBexioApiClient? BexioApiClient;
 
     /// <summary>
-    ///
+    /// Setup
     /// </summary>
     /// <exception cref="Exception"></exception>
     [SetUp]
@@ -45,7 +48,7 @@ public class TestBase
     {
         var baseUri = Environment.GetEnvironmentVariable("BexioApiNet__BaseUri") ?? throw new InvalidOperationException("Missing BexioApiNet__BaseUri");
         var jwtToken = Environment.GetEnvironmentVariable("BexioApiNet__JwtToken") ?? throw new InvalidOperationException("Missing BexioApiNet__JwtToken");
-        var connectionHandler = new BexioConnectionHandler(
+        using var connectionHandler = new BexioConnectionHandler(
             new BexioConfiguration
             {
                 BaseUri = baseUri,
@@ -54,10 +57,20 @@ public class TestBase
             });
 
         BexioApiClient = new BexioApiClient(
+            connectionHandler,
             new BankAccountService(connectionHandler),
             new AccountService(connectionHandler),
             new CurrencyService(connectionHandler),
             new ManualEntryService(connectionHandler),
             new TaxService(connectionHandler));
+    }
+
+    /// <summary>
+    /// Teardown
+    /// </summary>
+    [TearDown]
+    public void Teardown()
+    {
+        BexioApiClient?.Dispose();
     }
 }

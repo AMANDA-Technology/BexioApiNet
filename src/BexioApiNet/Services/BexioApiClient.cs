@@ -32,6 +32,11 @@ namespace BexioApiNet.Services;
 /// <inheritdoc />
 public sealed class BexioApiClient : IBexioApiClient
 {
+    /// <summary>
+    /// Instance of connection handler used for all services
+    /// </summary>
+    private readonly IBexioConnectionHandler _bexioConnectionHandler;
+
     /// <inheritdoc />
     public IBankAccountService BankingBankAccounts { get; set; }
 
@@ -51,16 +56,24 @@ public sealed class BexioApiClient : IBexioApiClient
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
     public BexioApiClient(
+        IBexioConnectionHandler bexioConnectionHandler,
         IBankAccountService bankingBankAccounts,
         IAccountService accountingAccounts,
         ICurrencyService currencies,
         IManualEntryService accountingManualEntries,
         ITaxService taxes)
     {
+        _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
         Accounts = accountingAccounts;
         Currencies = currencies;
         AccountingManualEntries = accountingManualEntries;
         Taxes = taxes;
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _bexioConnectionHandler.Dispose();
     }
 }

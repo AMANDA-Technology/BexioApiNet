@@ -31,7 +31,7 @@ namespace BexioApiNet.Interfaces;
 /// <summary>
 /// Connector service to call bexio REST API. <see href="https://docs.bexio.com/">bexio API (3.0.0)</see>
 /// </summary>
-public interface IBexioApiClient
+public interface IBexioApiClient : IDisposable
 {
     /// <summary>
     /// Bexio bank account connector. <see href="https://docs.bexio.com/#tag/Bank-Accounts">Bank-Accounts</see>

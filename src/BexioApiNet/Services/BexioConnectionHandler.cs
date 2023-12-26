@@ -49,6 +49,9 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     /// <param name="configuration"></param>
     public BexioConnectionHandler(IBexioConfiguration configuration)
     {
+        ArgumentException.ThrowIfNullOrWhiteSpace(configuration.BaseUri);
+        ArgumentException.ThrowIfNullOrWhiteSpace(configuration.JwtToken);
+
         if (!configuration.BaseUri.EndsWith('/'))
             configuration.BaseUri += '/';
 
@@ -213,5 +216,11 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
             [ApiHeaderNames.TotalResults] = httpResponseMessage.Headers.TryGetValues(ApiHeaderNames.TotalResults, out values) && int.TryParse(values.First(), out var totalResults)
                 ? totalResults : 0,
         };
+    }
+
+    /// <inheritdoc />
+    public void Dispose()
+    {
+        _client.Dispose();
     }
 }
