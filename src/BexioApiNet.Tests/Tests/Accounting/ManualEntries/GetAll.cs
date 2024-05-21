@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Models;
 
 namespace BexioApiNet.Tests.Tests.Accounting.ManualEntries;
@@ -58,6 +59,35 @@ public class TestGetAll : TestBase
         Assert.Multiple(() =>
         {
             Assert.That(res2.Data!, Has.Count.GreaterThan(5));
+            Assert.That(res2.IsSuccess, Is.True);
+            Assert.That(res2.ApiError, Is.Null);
+            Assert.That(res2.Data?.First().Id, Is.Not.Null);
+        });
+    }
+
+    [Test]
+    public async Task GetLast50()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var res = await BexioApiClient!.AccountingManualEntries.Get(new(1, 0));
+        Assert.That(res, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(res.Data!, Has.Count.EqualTo(1));
+            Assert.That(res.IsSuccess, Is.True);
+            Assert.That(res.ApiError, Is.Null);
+            Assert.That(res.Data?.First().Id, Is.Not.Null);
+        });
+
+        var totalResults = res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) ?? 0;
+        Assert.That(totalResults, Is.Positive);
+
+        var res2 = await BexioApiClient.AccountingManualEntries.Get(new(51, totalResults - 50));
+        Assert.That(res2, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(res2.Data!, Has.Count.EqualTo(50));
             Assert.That(res2.IsSuccess, Is.True);
             Assert.That(res2.ApiError, Is.Null);
             Assert.That(res2.Data?.First().Id, Is.Not.Null);
