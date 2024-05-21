@@ -2,6 +2,8 @@
 
 Unofficial API client implementation for the Bexio v3 API. See [API Doc](https://docs.bexio.com/). (used version 3.0.0)
 
+NOTE: Since Bexio does not provide free test accounts, this project will be temporarily discontinued. If you have landed here and are looking for a more comprehensive Bexio API Client Library for .Net, please contact us and we will look for a solution together! Or if you are someone from Bexio and you would like to offer a .Net library to your customers, you are welcome to contact us for a cooperation. 🙌
+
 See [Bexio website](https://www.bexio.com/).
 
 ### Packages
