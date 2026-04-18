@@ -9,8 +9,8 @@ BexioApiNet is a .NET client library for the Bexio REST API (v3.0.0). It provide
 > **Contributors writing tests:** follow [`doc/development/testing-guide.md`](./doc/development/testing-guide.md).
 
 ## Tech Stack
-- **Language**: C# 13
-- **Framework**: .NET 9.0
+- **Language**: C# 14
+- **Framework**: .NET 10.0
 - **Testing**: NUnit 4, Coverlet
 - **Core Dependencies**: `Microsoft.Extensions.DependencyInjection`, `Microsoft.Extensions.Http` (for the AspNetCore package), `System.Text.Json`
 

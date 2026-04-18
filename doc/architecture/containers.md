@@ -16,9 +16,9 @@ C4Container
   Person(developer, "Developer / .NET App", "Consumes the library")
 
   System_Boundary(bexioApiNet, "BexioApiNet SDK") {
-    Container(abstractions, "BexioApiNet.Abstractions", "NuGet Package (.NET 9)", "Provides interfaces, domain models (DTOs), and enums. No external dependencies.")
-    Container(core, "BexioApiNet", "NuGet Package (.NET 9)", "Provides core API client implementation, connectors, and HTTP handling.")
-    Container(aspnetcore, "BexioApiNet.AspNetCore", "NuGet Package (.NET 9)", "Provides IServiceCollection extensions for Microsoft.Extensions.DependencyInjection.")
+    Container(abstractions, "BexioApiNet.Abstractions", "NuGet Package (.NET 10)", "Provides interfaces, domain models (DTOs), and enums. No external dependencies.")
+    Container(core, "BexioApiNet", "NuGet Package (.NET 10)", "Provides core API client implementation, connectors, and HTTP handling.")
+    Container(aspnetcore, "BexioApiNet.AspNetCore", "NuGet Package (.NET 10)", "Provides IServiceCollection extensions for Microsoft.Extensions.DependencyInjection.")
   }
 
   System_Ext(bexioApi, "Bexio REST API", "Upstream API")
