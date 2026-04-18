@@ -44,9 +44,18 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     private readonly HttpClient _client;
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="BexioConnectionHandler"/> class.
+    /// When true, this instance owns the <see cref="HttpClient"/> and is responsible for disposing it.
+    /// False when the client is supplied by an external source such as <c>IHttpClientFactory</c> via typed client injection.
     /// </summary>
-    /// <param name="configuration"></param>
+    private readonly bool _ownsHttpClient;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BexioConnectionHandler"/> class using a configuration only.
+    /// The instance creates and owns its own <see cref="HttpClient"/>. Prefer the DI-friendly overload that accepts
+    /// an <see cref="HttpClient"/> (registered via <c>IHttpClientFactory</c>) in ASP.NET Core applications
+    /// to avoid socket exhaustion.
+    /// </summary>
+    /// <param name="configuration">Bexio configuration.</param>
     public BexioConnectionHandler(IBexioConfiguration configuration)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(configuration.BaseUri);
@@ -64,6 +73,24 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
                 Authorization = new("Bearer", configuration.JwtToken)
             }
         };
+        _ownsHttpClient = true;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BexioConnectionHandler"/> class with an externally managed
+    /// <see cref="HttpClient"/>. Intended for DI scenarios where the client is produced and managed by
+    /// <c>IHttpClientFactory</c>. The handler will not dispose of the injected client.
+    /// </summary>
+    /// <param name="httpClient">Externally managed HTTP client. Must already be configured with <c>BaseAddress</c>, the <c>Accept</c> header and the <c>Authorization</c> header.</param>
+    /// <param name="configuration">Bexio configuration used to validate required values.</param>
+    public BexioConnectionHandler(HttpClient httpClient, IBexioConfiguration configuration)
+    {
+        ArgumentNullException.ThrowIfNull(httpClient);
+        ArgumentException.ThrowIfNullOrWhiteSpace(configuration.BaseUri);
+        ArgumentException.ThrowIfNullOrWhiteSpace(configuration.JwtToken);
+
+        _client = httpClient;
+        _ownsHttpClient = false;
     }
 
     /// <inheritdoc />
@@ -221,6 +248,7 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     /// <inheritdoc />
     public void Dispose()
     {
-        _client.Dispose();
+        if (_ownsHttpClient)
+            _client.Dispose();
     }
 }

@@ -30,24 +30,36 @@ using BexioApiNet.Services.Connectors.Banking;
 namespace BexioApiNet.Tests;
 
 /// <summary>
-/// Base class for all bexio API tests
+/// Base class for live end-to-end bexio API tests. Tests inheriting from this class
+/// call the real Bexio API and are automatically skipped when credentials are absent.
+/// Categorize with <c>[Category("E2E")]</c> by inheriting, so CI runs can filter with
+/// <c>dotnet test --filter TestCategory!=E2E</c>.
 /// </summary>
+[Category("E2E")]
 public class TestBase
 {
     /// <summary>
-    /// Default instance of bexio API client
+    /// Default instance of bexio API client. Null when credentials are missing and the test is skipped.
     /// </summary>
     protected IBexioApiClient? BexioApiClient;
 
     /// <summary>
-    /// Setup
+    /// Setup. Reads <c>BexioApiNet__BaseUri</c> and <c>BexioApiNet__JwtToken</c> from environment
+    /// variables. Calls <see cref="Assert.Ignore(string)"/> if either is missing so the test suite
+    /// does not fail CI or AI agent runs that lack live credentials.
     /// </summary>
-    /// <exception cref="Exception"></exception>
     [SetUp]
     public void Setup()
     {
-        var baseUri = Environment.GetEnvironmentVariable("BexioApiNet__BaseUri") ?? throw new InvalidOperationException("Missing BexioApiNet__BaseUri");
-        var jwtToken = Environment.GetEnvironmentVariable("BexioApiNet__JwtToken") ?? throw new InvalidOperationException("Missing BexioApiNet__JwtToken");
+        var baseUri = Environment.GetEnvironmentVariable("BexioApiNet__BaseUri");
+        var jwtToken = Environment.GetEnvironmentVariable("BexioApiNet__JwtToken");
+
+        if (string.IsNullOrWhiteSpace(baseUri) || string.IsNullOrWhiteSpace(jwtToken))
+        {
+            Assert.Ignore("Missing Bexio API credentials (BexioApiNet__BaseUri or BexioApiNet__JwtToken). Skipping live E2E test.");
+            return;
+        }
+
         var connectionHandler = new BexioConnectionHandler(
             new BexioConfiguration
             {
@@ -66,7 +78,7 @@ public class TestBase
     }
 
     /// <summary>
-    /// Teardown
+    /// Teardown. Disposes of the client if it was created.
     /// </summary>
     [TearDown]
     public void Teardown()

@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System.Net.Http.Headers;
 using BexioApiNet.Abstractions.Enums.Api;
 using Microsoft.Extensions.DependencyInjection;
 using BexioApiNet.Interfaces;
@@ -35,18 +36,18 @@ using BexioApiNet.Services.Connectors.Banking;
 namespace BexioApiNet.AspNetCore;
 
 /// <summary>
-/// Bexio service collection extension for dependency injection
+/// Bexio service collection extension for dependency injection.
 /// </summary>
 public static class BexioServiceCollection
 {
     /// <summary>
-    /// Adds the configuration, handler and rest service to the services
+    /// Adds the configuration, handler and rest service to the services.
     /// </summary>
-    /// <param name="services"></param>
-    /// <param name="baseUri"></param>
-    /// <param name="jwtToken"></param>
-    /// <param name="acceptHeaderFormat"></param>
-    /// <returns></returns>
+    /// <param name="services">Service collection to register Bexio services into.</param>
+    /// <param name="baseUri">Bexio API base URI (see <see href="https://docs.bexio.com/#section/API-basics/API-routes"/>).</param>
+    /// <param name="jwtToken">JWT token used for authentication (see <see href="https://docs.bexio.com/#section/Authentication/JWT-(JSON-Web-Tokens)"/>).</param>
+    /// <param name="acceptHeaderFormat">Accept header format. Defaults to <see cref="ApiAcceptHeaders.JsonFormatted"/>.</param>
+    /// <returns>The same service collection, to allow chaining.</returns>
     public static IServiceCollection AddBexioServices(this IServiceCollection services, string baseUri, string jwtToken, string acceptHeaderFormat = ApiAcceptHeaders.JsonFormatted)
     {
         return services.AddBexioServices(new BexioConfiguration
@@ -58,16 +59,31 @@ public static class BexioServiceCollection
     }
 
     /// <summary>
-    /// Adds the configuration, handler and rest service to the services
+    /// Adds the configuration, handler and rest service to the services. The <see cref="IBexioConnectionHandler"/>
+    /// is registered as a typed <see cref="HttpClient"/> backed by <see cref="IHttpClientFactory"/> to avoid
+    /// socket exhaustion under load.
     /// </summary>
-    /// <param name="services"></param>
-    /// <param name="bexioConfiguration"></param>
-    /// <returns></returns>
+    /// <param name="services">Service collection to register Bexio services into.</param>
+    /// <param name="bexioConfiguration">Bexio configuration (base URI, JWT token, accept header format).</param>
+    /// <returns>The same service collection, to allow chaining.</returns>
     // ReSharper disable once MemberCanBePrivate.Global
     public static IServiceCollection AddBexioServices(this IServiceCollection services, IBexioConfiguration bexioConfiguration)
     {
         services.AddSingleton(bexioConfiguration);
-        services.AddScoped<IBexioConnectionHandler, BexioConnectionHandler>();
+
+        services.AddHttpClient<IBexioConnectionHandler, BexioConnectionHandler>((provider, client) =>
+            {
+                var configuration = provider.GetRequiredService<IBexioConfiguration>();
+
+                if (!configuration.BaseUri.EndsWith('/'))
+                    configuration.BaseUri += '/';
+
+                client.BaseAddress = new Uri(configuration.BaseUri);
+                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(configuration.AcceptHeaderFormat));
+                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", configuration.JwtToken);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+
         services.AddScoped<IBankAccountService, BankAccountService>();
         services.AddScoped<IAccountService, AccountService>();
         services.AddScoped<ICurrencyService, CurrencyService>();
