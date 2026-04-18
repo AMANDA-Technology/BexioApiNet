@@ -23,6 +23,29 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-global using NUnit.Framework;
-global using BexioApiNet.Interfaces;
-global using BexioApiNet.Services;
+namespace BexioApiNet.E2eTests.Tests.Accounting.Currencies;
+
+/// <summary>
+///
+/// </summary>
+public class TestGetAll : BexioE2eTestBase
+{
+    /// <summary>
+    ///
+    /// </summary>
+    [Test]
+    public async Task GetAll()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var res = await BexioApiClient!.Currencies.Get(autoPage: true);
+
+        Assert.That(res, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(res.IsSuccess, Is.True);
+            Assert.That(res.ApiError, Is.Null);
+            Assert.That(res.Data?.First().Id, Is.Not.Null);
+        });
+    }
+}

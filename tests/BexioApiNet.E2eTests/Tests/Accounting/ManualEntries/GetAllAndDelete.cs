@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -25,12 +25,12 @@ SOFTWARE.
 
 using BexioApiNet.Abstractions.Models.Accounting.ManualEntries;
 
-namespace BexioApiNet.Tests.Tests.Accounting.ManualEntries;
+namespace BexioApiNet.E2eTests.Tests.Accounting.ManualEntries;
 
 /// <summary>
 ///
 /// </summary>
-public class TestGetAllAndDelete : TestBase
+public class TestGetAllAndDelete : BexioE2eTestBase
 {
     /// <summary>
     ///

@@ -25,4 +25,10 @@
         <ProjectReference Include="..\..\src\BexioApiNet\BexioApiNet.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+        <None Update="Assets\*">
+            <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+        </None>
+    </ItemGroup>
+
 </Project>
