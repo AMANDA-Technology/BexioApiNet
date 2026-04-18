@@ -14,6 +14,12 @@ See [Bexio website](https://www.bexio.com/).
 
 [![BuildNuGetAndPublish](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/main.yml/badge.svg)](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/main.yml)
 
+[![PR CI](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/pr.yml/badge.svg)](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/pr.yml)
+
 [![CodeQL](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/codeql-analysis.yml/badge.svg)](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/codeql-analysis.yml)
 
 [![SonarCloud](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/sonar-analysis.yml/badge.svg)](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/sonar-analysis.yml)
+
+### Branch protection
+
+The `PR CI` check (build + offline unit tests) is intended to be **required** on `main`. Configure under *Settings → Branches → Branch protection rules → main*: require status check `Build and test (offline)`. E2E tests are never invoked in CI — they need Bexio credentials and run only locally.
