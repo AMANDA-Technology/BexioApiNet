@@ -5,62 +5,84 @@ tags: [readiness, ai, assessment]
 
 # AI Readiness Assessment
 
+_Last updated: 2026-04-18 (Issue #3 "get steroids" hardening pass)_
+
 ## Section 1: Documentation Quality
-The documentation landscape for this project is well-structured but lacks formal AI-specific instructions.
+The documentation landscape for this project is formal and AI-aware.
 
 - **What exists and is useful**:
-  - A `CLAUDE.md` file exists in the repository root, providing high-level tech stack details, key conventions, and important file locations.
-  - Comprehensive C4 architecture models and ADRs are located in `doc/architecture/` (`README.md`, `context.md`, `containers.md`, `components/library.md`, `glossary.md`).
-  - The `README.md` clearly states the purpose of the project and its discontinuation status.
+  - `CLAUDE.md` at the repository root — high-level human overview: tech stack, solution structure, key conventions, important file locations.
+  - [`ai_instructions.md`](../ai_instructions.md) at the repository root — strict procedural rules for AI coding agents (tech stack, architecture patterns, testing hard limits, forbidden patterns).
+  - [`doc/development/feature-addition-guide.md`](./development/feature-addition-guide.md) — reproducible 5-step guide for implementing any Bexio endpoint (models → interfaces → implementation → DI → tests).
+  - [`doc/development/testing-guide.md`](./development/testing-guide.md) — heavy-testing strategy: offline unit tests (NSubstitute / WireMock.Net / stub `HttpMessageHandler`) plus categorized live E2E tests.
+  - Comprehensive C4 architecture models and ADRs under `doc/architecture/` (`README.md`, `context.md`, `containers.md`, `components/library.md`, `glossary.md`).
+  - `README.md` clearly states the purpose and status of the project.
 - **What is missing or insufficient**:
-  - There is no standard `ai_instructions.md` file in the root.
-  - The API docs link in `README.md` points to Bexio's v3 API, but it would be beneficial for AI agents to have local OpenAPI specifications to generate models from.
-- **What needs improvement**:
-  - The project needs an `ai_instructions.md` to formally instruct AI agents (replacing or complementing the existing `CLAUDE.md`).
+  - A locally vendored copy of the Bexio OpenAPI spec would further reduce the risk of drift against <https://docs.bexio.com/>. Backlog candidate, not a blocker.
 - **Rate**: Ready
 
 ## Section 2: Test Coverage
-The testing approach is integration-heavy and relies entirely on live API connectivity.
+Two-layer strategy now in place: offline unit tests (mandatory for new code) and live integration tests (optional, gracefully skipped when credentials are missing).
 
-- **Test frameworks in use**: 
-  - NUnit 4 and Coverlet, configured in `src/BexioApiNet.Tests/BexioApiNet.Tests.csproj`.
-  - **Run command**: `dotnet test src/BexioApiNet.Tests/BexioApiNet.Tests.csproj`
-- **What IS covered**: 
+- **Test frameworks in use**:
+  - NUnit 4 + NUnit Analyzers + Coverlet, configured in `src/BexioApiNet.Tests/BexioApiNet.Tests.csproj`.
+  - Permitted mocking libraries for unit tests: **NSubstitute** (preferred for `IBexioConnectionHandler`) and **WireMock.Net** (for end-to-end stubs against the real `BexioConnectionHandler`).
+  - **Run commands**:
+    - Offline-only: `dotnet test --filter TestCategory=Unit`
+    - Live E2E only: `dotnet test --filter TestCategory=E2E` (requires `BexioApiNet__BaseUri` + `BexioApiNet__JwtToken`)
+    - CI-safe default: `dotnet test --filter TestCategory!=E2E`
+- **What IS covered today (live integration only)**:
   - `Accounting/Accounts/GetAll`
   - `Accounting/Currencies/GetAll`
   - `Accounting/ManualEntries` (Create, CreateAndAddFile, CreateAndAddFileFromStream, GetAll, GetAllAndDelete)
   - `Accounting/Taxes/GetAll`
   - `Banking/BankAccount/GetAll`
-  - *(See `src/BexioApiNet.Tests/Tests/` directory for full list)*
-- **What is NOT covered**: 
-  - There are no unit tests using a mocked `HttpMessageHandler`.
-  - Significant portions of the Bexio API (e.g., Contacts, Invoices, Items) are missing both library implementation and tests.
-- **Test quality assessment**: 
-  - Tests are high-fidelity integration tests but are **brittle** and impossible to run without live credentials. As seen in `src/BexioApiNet.Tests/TestBase.cs` lines 42-43, tests will throw `InvalidOperationException` if `BexioApiNet__BaseUri` and `BexioApiNet__JwtToken` environment variables are missing.
-- **Rate**: Partial Coverage
+- **What is NOT covered**:
+  - No offline unit tests yet — the scaffolding and guide are in place; adding unit coverage is a follow-up backlog item (see Section 4).
+  - Significant portions of the Bexio API (Contacts, Invoices, Items, Projects, etc.) are not yet implemented.
+- **Test quality assessment**:
+  - Existing tests are high-fidelity integration tests. Previously they threw `InvalidOperationException` when env vars were missing; now `TestBase` calls `Assert.Ignore(...)` so the suite skips gracefully, unblocking agents and CI that lack credentials. The base class is categorized `[Category("E2E")]`.
+- **Rate**: Partial Coverage (ready to expand; infrastructure is in place)
 
 ## Section 3: Technical Debt & Danger Zones
 
-### 1. Live Integration Testing (Danger Zone)
-- **Location**: `src/BexioApiNet.Tests/TestBase.cs` lines 42-43
-- **Why it's dangerous**: Running `dotnet test` requires real Bexio API credentials. If an AI agent attempts to run tests during code changes without these credentials, the test suite will instantly fail. AI agents cannot verify their changes properly.
-- **Precautions**: Agents must avoid running `dotnet test` unless specifically provided with environment credentials. Instead, agents should rely on building (`dotnet build`) to check for compilation errors, and mock components where possible.
+### 1. Live Integration Testing (Resolved)
+- **Status**: **Resolved**
+- **Location**: `src/BexioApiNet.Tests/TestBase.cs`
+- **What changed**: `TestBase.Setup()` now reads `BexioApiNet__BaseUri` and `BexioApiNet__JwtToken` from env vars and calls `Assert.Ignore(...)` when either is missing. The class is marked `[Category("E2E")]`. This lets `dotnet test` run safely in CI and agent sandboxes without Bexio credentials.
+- **Remaining precaution**: Agents must still avoid running live E2E tests (`--filter TestCategory=E2E`) without explicit credentials.
 
-### 2. HttpClient Lifecycle Management (Technical Debt)
-- **Location**: `src/BexioApiNet/Services/BexioConnectionHandler.cs` line 36
-- **Why it's dangerous**: `BexioConnectionHandler` instantiates and manages its own `HttpClient` (`_client = new(new HttpClientHandler...)`). In ASP.NET Core applications, this can lead to socket exhaustion under heavy load. It does not use `IHttpClientFactory`.
-- **Precautions**: Any AI agent modifying the HTTP pipeline must be careful not to introduce more manual `HttpClient` instantiations. A refactoring to `IHttpClientFactory` should be planned.
+### 2. HttpClient Lifecycle Management (Resolved)
+- **Status**: **Resolved**
+- **Location**: `src/BexioApiNet/Services/BexioConnectionHandler.cs`, `src/BexioApiNet.AspNetCore/BexioServiceCollection.cs`
+- **What changed**: `BexioConnectionHandler` now exposes a dual constructor:
+  1. `(IBexioConfiguration)` — legacy path for non-DI consumers. The handler owns and disposes its own `HttpClient`.
+  2. `(HttpClient, IBexioConfiguration)` — DI path. `Dispose` is a no-op for the client because `IHttpClientFactory` owns it.
+  
+  `BexioServiceCollection.AddBexioServices` registers the handler as a typed client via `services.AddHttpClient<IBexioConnectionHandler, BexioConnectionHandler>(...)`, eliminating the socket-exhaustion risk under load.
 
 ### 3. Incomplete API Coverage (Known Debt)
+- **Status**: Ongoing
 - **Location**: `README.md` and `src/BexioApiNet/Interfaces/Connectors/`
-- **Why it's dangerous**: The `README.md` notes the project is temporarily discontinued due to a lack of free test accounts. Many Bexio domains (Contacts, Projects, Invoices) are not implemented. 
-- **Precautions**: When an AI is asked to implement a new Bexio endpoint, it will have to create new Connector Services, Models, and Interfaces from scratch following the existing pattern.
+- **Why it's noted**: Many Bexio domains (Contacts, Projects, Invoices, Items, ...) are not implemented.
+- **Precautions**: When implementing a new domain, follow [`doc/development/feature-addition-guide.md`](./development/feature-addition-guide.md) verbatim. Ship unit tests with every new method.
 
 ## Section 4: Backlog Ideas
 
 | Title | Description | Complexity | Priority |
 |-------|-------------|------------|----------|
-| Refactor to `IHttpClientFactory` | Modify `BexioConnectionHandler` and `BexioApiNet.AspNetCore` to utilize `IHttpClientFactory` instead of manual `HttpClient` instantiation to prevent socket exhaustion. | M | High |
-| Add Offline Unit Tests | Create a suite of unit tests utilizing a mocked `HttpMessageHandler` to allow testing API parsing and logic without live Bexio credentials. | M | High |
-| Create `ai_instructions.md` | Standardize AI instructions by migrating rules from `CLAUDE.md` to `ai_instructions.md` and adding explicit notes about testing constraints. | S | Low |
-| Expand API Connectors | Implement missing Bexio API endpoints such as Contacts, Invoices, and Projects based on the existing `ConnectorService` pattern. | L | Medium |
+| Add Offline Unit Test Suite | Populate `src/BexioApiNet.Tests/UnitTests/` with NSubstitute- and WireMock.Net-based tests covering every existing connector method. Today the folder is scaffolded but empty. | M | High |
+| Expand API Connectors | Implement missing Bexio domains (Contacts, Projects, Invoices, Items, ...) per the feature-addition guide. | L | Medium |
+| Vendor Bexio OpenAPI Spec | Check a local copy of the Bexio OpenAPI spec into `doc/` so AI agents can generate models deterministically without relying on docs.bexio.com uptime. | M | Medium |
+| Wire Unit Tests into CI | Add a GitHub Actions job that runs `dotnet test --filter TestCategory=Unit` on every PR (independently of E2E credentials availability). | S | Medium |
+
+## Section 5: Completed (Issue #3)
+
+| Title | Resolved In |
+|-------|-------------|
+| Create `ai_instructions.md` | Issue #3 — present at repo root. |
+| Create feature-addition guide | Issue #3 — `doc/development/feature-addition-guide.md`. |
+| Create testing guide | Issue #3 — `doc/development/testing-guide.md`. |
+| Refactor to `IHttpClientFactory` | Issue #3 — dual constructor on `BexioConnectionHandler` + `AddHttpClient<>` in DI registration. |
+| Tests skip gracefully without credentials | Issue #3 — `TestBase.Setup` uses `Assert.Ignore`; base class `[Category("E2E")]`. |
+| Harmonize `CLAUDE.md` with agent docs | Issue #3 — cross-links added, redundant rules moved to `ai_instructions.md`. |

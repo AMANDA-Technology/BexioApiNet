@@ -50,3 +50,7 @@ source/node_modules
 # Reverts
 !build/
 !build/GetBuildVersion.psm1
+
+# Local AI agent scratch / context
+.ai-context/
+
