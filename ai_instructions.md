@@ -17,6 +17,8 @@ If anything here conflicts with `CLAUDE.md`, **this file wins for agent behavior
 ## 1. Mission & Source of Truth
 
 1. This library is a 1:1 typed .NET client for the **Bexio REST API v3.0.0**. Source of truth: <https://docs.bexio.com/>.
+   - **Vendored spec (primary reference for AI agents):** [`doc/openapi/bexio-v3.json`](./doc/openapi/bexio-v3.json) — OpenAPI 3.0.2, API v3.0.0, 355 paths, retrieved 2026-04-18. Use this for offline, deterministic model generation. See [`doc/openapi/README.md`](./doc/openapi/README.md) for the refresh procedure.
+   - **Human-readable mirror:** <https://docs.bexio.com/> — use for browsing documentation and for verifying context not captured in the JSON spec.
 2. **Every** endpoint, DTO field, status code and query parameter must match the Bexio docs exactly. If the docs and the code disagree, **the docs are right** — open a change.
 3. Never invent endpoints, fields or behavior that the Bexio docs do not describe. If the docs are ambiguous, stop and ask rather than guessing.
 
