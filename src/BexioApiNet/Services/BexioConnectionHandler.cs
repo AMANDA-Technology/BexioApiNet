@@ -218,11 +218,36 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
         return new()
         {
             IsSuccess = isSuccess,
-            ApiError = isSuccess ? null : JsonSerializer.Deserialize<ApiError>(content),
-            Data = httpResponseMessage.IsSuccessStatusCode ? JsonSerializer.Deserialize<T>(content) : default,
+            ApiError = isSuccess ? null : TryDeserialize<ApiError>(content),
+            Data = httpResponseMessage.IsSuccessStatusCode ? TryDeserialize<T>(content) : default,
             ResponseHeaders = headers,
             StatusCode = httpResponseMessage.StatusCode
         };
+    }
+
+    /// <summary>
+    /// Attempt to deserialize a response body, returning <c>default</c> for empty or non-JSON
+    /// payloads instead of propagating a <see cref="JsonException"/>.
+    /// Bexio occasionally returns empty or non-JSON responses (e.g. <c>302</c> redirects or
+    /// gateway HTML) and consumers receive an <see cref="ApiResult{T}"/> with a null <c>Data</c>
+    /// rather than an unhandled exception.
+    /// </summary>
+    /// <param name="content">The response body.</param>
+    /// <typeparam name="T">Target deserialization type.</typeparam>
+    /// <returns>The deserialized value, or <c>default</c> if the body is empty or not valid JSON.</returns>
+    private static T? TryDeserialize<T>(string content)
+    {
+        if (string.IsNullOrWhiteSpace(content))
+            return default;
+
+        try
+        {
+            return JsonSerializer.Deserialize<T>(content);
+        }
+        catch (JsonException)
+        {
+            return default;
+        }
     }
 
     /// <summary>
