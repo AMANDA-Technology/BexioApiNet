@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -26,9 +26,9 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Models.Accounting.ManualEntries.Enums;
 using BexioApiNet.Abstractions.Models.Accounting.ManualEntries.Views;
 
-namespace BexioApiNet.Tests.Tests.Accounting.ManualEntries;
+namespace BexioApiNet.E2eTests.Tests.Accounting.ManualEntries;
 
-public class CreateAndAddFile : TestBase
+public class CreateAndAddFileFromStream : BexioE2eTestBase
 {
     /// <summary>
     ///
@@ -57,10 +57,10 @@ public class CreateAndAddFile : TestBase
         var res2 = await BexioApiClient!.AccountingManualEntries.AddAttachment(
             res.Data!.Id,
             res.Data.Entries[0].Id!.Value,
-            new List<FileInfo>
+            new List<Tuple<MemoryStream, string>>
             {
-                new("Assets/letter.pdf"),
-                new("Assets/letter2.pdf")
+                new( new(await File.ReadAllBytesAsync("Assets/letter.pdf")), "letter.pdf"),
+                new( new(await File.ReadAllBytesAsync("Assets/letter2.pdf")), "letter2.pdf")
             });
 
         Assert.That(res2, Is.Not.Null);

@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -23,12 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace BexioApiNet.Tests.Tests.Accounting.Accounts;
+namespace BexioApiNet.E2eTests.Tests.Accounting.Accounts;
 
 /// <summary>
 ///
 /// </summary>
-public class TestGetAll : TestBase
+public class TestGetAll : BexioE2eTestBase
 {
     /// <summary>
     ///

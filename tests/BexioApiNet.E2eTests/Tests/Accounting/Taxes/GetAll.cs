@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -23,12 +23,12 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace BexioApiNet.Tests.Tests.Accounting.Currencies;
+namespace BexioApiNet.E2eTests.Tests.Accounting.Taxes;
 
 /// <summary>
 ///
 /// </summary>
-public class TestGetAll : TestBase
+public class TestGetAll : BexioE2eTestBase
 {
     /// <summary>
     ///
@@ -38,7 +38,7 @@ public class TestGetAll : TestBase
     {
         Assert.That(BexioApiClient, Is.Not.Null);
 
-        var res = await BexioApiClient!.Currencies.Get(autoPage: true);
+        var res = await BexioApiClient!.Taxes.Get(autoPage: true);
 
         Assert.That(res, Is.Not.Null);
         Assert.Multiple(() =>

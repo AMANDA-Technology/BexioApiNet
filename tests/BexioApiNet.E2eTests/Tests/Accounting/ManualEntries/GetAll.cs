@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -26,12 +26,12 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Models;
 
-namespace BexioApiNet.Tests.Tests.Accounting.ManualEntries;
+namespace BexioApiNet.E2eTests.Tests.Accounting.ManualEntries;
 
 /// <summary>
 ///
 /// </summary>
-public class TestGetAll : TestBase
+public class TestGetAll : BexioE2eTestBase
 {
     /// <summary>
     ///
