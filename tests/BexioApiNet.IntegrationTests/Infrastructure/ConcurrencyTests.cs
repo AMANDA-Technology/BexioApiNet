@@ -89,8 +89,8 @@ public sealed class ConcurrencyTests : IntegrationTestBase
 
         await Task.WhenAll(getTask, postTask, deleteTask);
 
-        Assert.That(getTask.Result.IsSuccess, Is.True);
-        Assert.That(postTask.Result.IsSuccess, Is.True);
-        Assert.That(deleteTask.Result.IsSuccess, Is.True);
+        Assert.That((await getTask).IsSuccess, Is.True);
+        Assert.That((await postTask).IsSuccess, Is.True);
+        Assert.That((await deleteTask).IsSuccess, Is.True);
     }
 }

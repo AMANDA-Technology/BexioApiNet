@@ -30,7 +30,7 @@ namespace BexioApiNet.IntegrationTests.Infrastructure;
 /// <see cref="CancellationToken"/> and surfaces cancellation as
 /// <see cref="OperationCanceledException"/> (or a subclass such as <see cref="TaskCanceledException"/>).
 /// Cancellation is exercised both mid-flight (slow WireMock response cancelled after 100&nbsp;ms)
-/// and before the request is even sent (token cancelled up-front).
+/// and before the request is even sent (token cancelled up front).
 /// </summary>
 public sealed class CancellationTests : IntegrationTestBase
 {
