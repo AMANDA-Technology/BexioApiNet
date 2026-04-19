@@ -26,6 +26,7 @@ SOFTWARE.
 using System.Runtime.InteropServices;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Invoices;
+using BexioApiNet.Abstractions.Models.Sales.Orders;
 using BexioApiNet.Abstractions.Models.Sales.Quotes;
 using BexioApiNet.Abstractions.Models.Sales.Quotes.Views;
 using BexioApiNet.Models;
@@ -172,16 +173,14 @@ public interface IQuoteService
     public Task<ApiResult<Quote>> Copy(int id, QuoteCopyRequest request, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
-    /// Create an order from an existing quote. The response is the newly created order, but the
-    /// <c>Order</c> domain model is added in a later sub-issue — for now the payload is returned
-    /// as a generic <see cref="object"/> carrying the raw Bexio JSON.
+    /// Create an order from an existing quote.
     /// <see href="https://docs.bexio.com/#tag/Quotes/operation/v2CreateOrderFromQuote">Create Order From Quote</see>
     /// </summary>
     /// <param name="id">The source quote id.</param>
     /// <param name="request">Optional subset of positions to carry over. When omitted, all positions are copied.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>The newly created order payload (typed as <see cref="object"/> until <c>Order</c> lands).</returns>
-    public Task<ApiResult<object>> CreateOrderFromQuote(int id, QuoteConvertRequest request, [Optional] CancellationToken cancellationToken);
+    /// <returns>The newly created order.</returns>
+    public Task<ApiResult<Order>> CreateOrderFromQuote(int id, QuoteConvertRequest request, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
     /// Create an invoice from an existing quote.

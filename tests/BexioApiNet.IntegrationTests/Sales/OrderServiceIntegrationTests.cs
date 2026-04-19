@@ -392,8 +392,8 @@ public sealed class OrderServiceIntegrationTests : IntegrationTestBase
 
     /// <summary>
     /// <c>OrderService.CreateDeliveryFromOrder</c> must send a <c>POST</c> against
-    /// <c>/2.0/kb_order/{id}/delivery</c>. The response is returned as a generic
-    /// <see cref="object"/> until a dedicated <c>Delivery</c> model is added in a later sub-issue.
+    /// <c>/2.0/kb_order/{id}/delivery</c> and surface the resulting
+    /// <see cref="Abstractions.Models.Sales.Deliveries.Delivery"/>.
     /// </summary>
     [Test]
     public async Task OrderService_CreateDeliveryFromOrder_SendsPostRequest_ToDeliveryPath()
@@ -414,6 +414,8 @@ public sealed class OrderServiceIntegrationTests : IntegrationTestBase
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!.Id, Is.EqualTo(99));
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
         });

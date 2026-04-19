@@ -26,6 +26,7 @@ SOFTWARE.
 using System.Runtime.InteropServices;
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
+using BexioApiNet.Abstractions.Models.Sales.Deliveries;
 using BexioApiNet.Abstractions.Models.Sales.Invoices;
 using BexioApiNet.Abstractions.Models.Sales.Orders;
 using BexioApiNet.Abstractions.Models.Sales.Orders.Views;
@@ -40,12 +41,12 @@ namespace BexioApiNet.Services.Connectors.Sales;
 public sealed class OrderService : ConnectorService, IOrderService
 {
     /// <summary>
-    ///     The api endpoint version
+    /// The api endpoint version
     /// </summary>
     private const string ApiVersion = OrderConfiguration.ApiVersion;
 
     /// <summary>
-    ///     The api request path
+    /// The api request path
     /// </summary>
     private const string EndpointRoot = OrderConfiguration.EndpointRoot;
 
@@ -55,14 +56,11 @@ public sealed class OrderService : ConnectorService, IOrderService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<List<Order>?>> Get([Optional] QueryParameterOrder? queryParameterOrder,
-        [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<List<Order>?>> Get([Optional] QueryParameterOrder? queryParameterOrder, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
     {
-        var res = await ConnectionHandler.GetAsync<List<Order>?>($"{ApiVersion}/{EndpointRoot}",
-            queryParameterOrder?.QueryParameter, cancellationToken);
+        var res = await ConnectionHandler.GetAsync<List<Order>?>($"{ApiVersion}/{EndpointRoot}", queryParameterOrder?.QueryParameter, cancellationToken);
 
-        if (!autoPage || !res.IsSuccess || res.Data is null ||
-            res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
+        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
             return res;
 
         res.Data.AddRange(await ConnectionHandler.FetchAll<Order>(
@@ -90,23 +88,19 @@ public sealed class OrderService : ConnectorService, IOrderService
     /// <inheritdoc />
     public async Task<ApiResult<OrderRepetition>> GetRepetition(int id, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.GetAsync<OrderRepetition>($"{ApiVersion}/{EndpointRoot}/{id}/repetition", null,
-            cancellationToken);
+        return await ConnectionHandler.GetAsync<OrderRepetition>($"{ApiVersion}/{EndpointRoot}/{id}/repetition", null, cancellationToken);
     }
 
     /// <inheritdoc />
     public async Task<ApiResult<Order>> Create(OrderCreate order, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PostAsync<Order, OrderCreate>(order, $"{ApiVersion}/{EndpointRoot}",
-            cancellationToken);
+        return await ConnectionHandler.PostAsync<Order, OrderCreate>(order, $"{ApiVersion}/{EndpointRoot}", cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<Order>> Update(int id, OrderUpdate order,
-        [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<Order>> Update(int id, OrderUpdate order, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PostAsync<Order, OrderUpdate>(order, $"{ApiVersion}/{EndpointRoot}/{id}",
-            cancellationToken);
+        return await ConnectionHandler.PostAsync<Order, OrderUpdate>(order, $"{ApiVersion}/{EndpointRoot}/{id}", cancellationToken);
     }
 
     /// <inheritdoc />
@@ -116,35 +110,27 @@ public sealed class OrderService : ConnectorService, IOrderService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<List<Order>>> Search(List<SearchCriteria> searchCriteria,
-        [Optional] QueryParameterOrder? queryParameterOrder, [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<List<Order>>> Search(List<SearchCriteria> searchCriteria, [Optional] QueryParameterOrder? queryParameterOrder, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PostSearchAsync<Order>(searchCriteria, $"{ApiVersion}/{EndpointRoot}/search",
-            queryParameterOrder?.QueryParameter, cancellationToken);
+        return await ConnectionHandler.PostSearchAsync<Order>(searchCriteria, $"{ApiVersion}/{EndpointRoot}/search", queryParameterOrder?.QueryParameter, cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<object>> CreateDeliveryFromOrder(int id, OrderConvertRequest request,
-        [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<Delivery>> CreateDeliveryFromOrder(int id, OrderConvertRequest request, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PostAsync<object, OrderConvertRequest>(request,
-            $"{ApiVersion}/{EndpointRoot}/{id}/delivery", cancellationToken);
+        return await ConnectionHandler.PostAsync<Delivery, OrderConvertRequest>(request, $"{ApiVersion}/{EndpointRoot}/{id}/delivery", cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<Invoice>> CreateInvoiceFromOrder(int id, OrderConvertRequest request,
-        [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<Invoice>> CreateInvoiceFromOrder(int id, OrderConvertRequest request, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PostAsync<Invoice, OrderConvertRequest>(request,
-            $"{ApiVersion}/{EndpointRoot}/{id}/invoice", cancellationToken);
+        return await ConnectionHandler.PostAsync<Invoice, OrderConvertRequest>(request, $"{ApiVersion}/{EndpointRoot}/{id}/invoice", cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<OrderRepetition>> CreateRepetition(int id, OrderRepetitionCreate repetition,
-        [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<OrderRepetition>> CreateRepetition(int id, OrderRepetitionCreate repetition, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PostAsync<OrderRepetition, OrderRepetitionCreate>(repetition,
-            $"{ApiVersion}/{EndpointRoot}/{id}/repetition", cancellationToken);
+        return await ConnectionHandler.PostAsync<OrderRepetition, OrderRepetitionCreate>(repetition, $"{ApiVersion}/{EndpointRoot}/{id}/repetition", cancellationToken);
     }
 
     /// <inheritdoc />

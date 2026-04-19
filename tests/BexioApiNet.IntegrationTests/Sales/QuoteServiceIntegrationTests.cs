@@ -594,8 +594,7 @@ public sealed class QuoteServiceIntegrationTests : IntegrationTestBase
 
     /// <summary>
     /// <c>QuoteService.CreateOrderFromQuote</c> must send a <c>POST</c> against
-    /// <c>/2.0/kb_offer/{id}/order</c>. The response is returned as a generic <see cref="object"/>
-    /// until a dedicated <c>Order</c> model is added in a later sub-issue.
+    /// <c>/2.0/kb_offer/{id}/order</c> and surface the resulting <see cref="Abstractions.Models.Sales.Orders.Order"/>.
     /// </summary>
     [Test]
     public async Task QuoteService_CreateOrderFromQuote_SendsPostRequest_ToOrderPath()
@@ -616,6 +615,8 @@ public sealed class QuoteServiceIntegrationTests : IntegrationTestBase
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!.Id, Is.EqualTo(55));
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
         });

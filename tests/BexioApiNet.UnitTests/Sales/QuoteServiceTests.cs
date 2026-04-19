@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Invoices;
+using BexioApiNet.Abstractions.Models.Sales.Orders;
 using BexioApiNet.Abstractions.Models.Sales.Quotes;
 using BexioApiNet.Abstractions.Models.Sales.Quotes.Views;
 using BexioApiNet.Models;
@@ -483,18 +484,17 @@ public sealed class QuoteServiceTests : ServiceTestBase
 
     /// <summary>
     ///     CreateOrderFromQuote posts the optional <see cref="QuoteConvertRequest"/> body to the
-    ///     <c>/{id}/order</c> endpoint. The response type is <see cref="object"/> until a dedicated
-    ///     <c>Order</c> model is added in a later sub-issue.
+    ///     <c>/{id}/order</c> endpoint and returns the newly created <see cref="Order"/>.
     /// </summary>
     [Test]
     public async Task CreateOrderFromQuote_CallsPostAsync_WithOrderPath()
     {
         const int id = 42;
         var payload = new QuoteConvertRequest();
-        var response = new ApiResult<object> { IsSuccess = true };
+        var response = new ApiResult<Order> { IsSuccess = true };
         string? capturedPath = null;
         ConnectionHandler
-            .PostAsync<object, QuoteConvertRequest>(
+            .PostAsync<Order, QuoteConvertRequest>(
                 Arg.Any<QuoteConvertRequest>(),
                 Arg.Do<string>(path => capturedPath = path),
                 Arg.Any<CancellationToken>())

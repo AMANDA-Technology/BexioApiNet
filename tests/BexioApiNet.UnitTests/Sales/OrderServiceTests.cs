@@ -26,6 +26,7 @@ SOFTWARE.
 using System.Text.Json;
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
+using BexioApiNet.Abstractions.Models.Sales.Deliveries;
 using BexioApiNet.Abstractions.Models.Sales.Invoices;
 using BexioApiNet.Abstractions.Models.Sales.Orders;
 using BexioApiNet.Abstractions.Models.Sales.Orders.Views;
@@ -332,18 +333,17 @@ public sealed class OrderServiceTests : ServiceTestBase
 
     /// <summary>
     ///     CreateDeliveryFromOrder posts the optional <see cref="OrderConvertRequest" /> body to the
-    ///     <c>/{id}/delivery</c> endpoint. The response type is <see cref="object" /> until a dedicated
-    ///     <c>Delivery</c> model is added in a later sub-issue.
+    ///     <c>/{id}/delivery</c> endpoint and returns the newly created <see cref="Delivery" />.
     /// </summary>
     [Test]
     public async Task CreateDeliveryFromOrder_CallsPostAsync_WithDeliveryPath()
     {
         const int id = 42;
         var payload = new OrderConvertRequest();
-        var response = new ApiResult<object> { IsSuccess = true };
+        var response = new ApiResult<Delivery> { IsSuccess = true };
         string? capturedPath = null;
         ConnectionHandler
-            .PostAsync<object, OrderConvertRequest>(
+            .PostAsync<Delivery, OrderConvertRequest>(
                 Arg.Any<OrderConvertRequest>(),
                 Arg.Do<string>(path => capturedPath = path),
                 Arg.Any<CancellationToken>())

@@ -38,12 +38,12 @@ namespace BexioApiNet.Services.Connectors.Sales;
 public sealed class DeliveryService : ConnectorService, IDeliveryService
 {
     /// <summary>
-    ///     The api endpoint version
+    /// The api endpoint version
     /// </summary>
     private const string ApiVersion = DeliveryConfiguration.ApiVersion;
 
     /// <summary>
-    ///     The api request path
+    /// The api request path
     /// </summary>
     private const string EndpointRoot = DeliveryConfiguration.EndpointRoot;
 
@@ -53,14 +53,11 @@ public sealed class DeliveryService : ConnectorService, IDeliveryService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<List<Delivery>?>> Get([Optional] QueryParameterDelivery? queryParameterDelivery,
-        [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<List<Delivery>?>> Get([Optional] QueryParameterDelivery? queryParameterDelivery, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
     {
-        var res = await ConnectionHandler.GetAsync<List<Delivery>?>($"{ApiVersion}/{EndpointRoot}",
-            queryParameterDelivery?.QueryParameter, cancellationToken);
+        var res = await ConnectionHandler.GetAsync<List<Delivery>?>($"{ApiVersion}/{EndpointRoot}", queryParameterDelivery?.QueryParameter, cancellationToken);
 
-        if (!autoPage || !res.IsSuccess || res.Data is null ||
-            res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
+        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
             return res;
 
         res.Data.AddRange(await ConnectionHandler.FetchAll<Delivery>(

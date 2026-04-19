@@ -27,6 +27,7 @@ using System.Runtime.InteropServices;
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Invoices;
+using BexioApiNet.Abstractions.Models.Sales.Orders;
 using BexioApiNet.Abstractions.Models.Sales.Quotes;
 using BexioApiNet.Abstractions.Models.Sales.Quotes.Views;
 using BexioApiNet.Interfaces;
@@ -157,9 +158,9 @@ public sealed class QuoteService : ConnectorService, IQuoteService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<object>> CreateOrderFromQuote(int id, QuoteConvertRequest request, [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<Order>> CreateOrderFromQuote(int id, QuoteConvertRequest request, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PostAsync<object, QuoteConvertRequest>(request, $"{ApiVersion}/{EndpointRoot}/{id}/order", cancellationToken);
+        return await ConnectionHandler.PostAsync<Order, QuoteConvertRequest>(request, $"{ApiVersion}/{EndpointRoot}/{id}/order", cancellationToken);
     }
 
     /// <inheritdoc />
