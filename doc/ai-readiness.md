@@ -5,7 +5,7 @@ tags: [readiness, ai, assessment]
 
 # AI Readiness Assessment
 
-_Last updated: 2026-04-18 (Issue #3 "get steroids" hardening pass)_
+_Last updated: 2026-04-18 (Issue #8 — vendor Bexio OpenAPI spec)_
 
 ## Section 1: Documentation Quality
 The documentation landscape for this project is formal and AI-aware.
@@ -18,7 +18,7 @@ The documentation landscape for this project is formal and AI-aware.
   - Comprehensive C4 architecture models and ADRs under `doc/architecture/` (`README.md`, `context.md`, `containers.md`, `components/library.md`, `glossary.md`).
   - `README.md` clearly states the purpose and status of the project.
 - **What is missing or insufficient**:
-  - A locally vendored copy of the Bexio OpenAPI spec would further reduce the risk of drift against <https://docs.bexio.com/>. Backlog candidate, not a blocker.
+  - Nothing critical. A locally vendored OpenAPI spec is now committed at `doc/openapi/bexio-v3.json` (Issue #8).
 - **Rate**: Ready
 
 ## Section 2: Test Coverage
@@ -75,10 +75,9 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
 | Title | Description | Complexity | Priority |
 |-------|-------------|------------|----------|
 | Expand API Connectors | Implement missing Bexio domains (Contacts, Projects, Invoices, Items, ...) per the feature-addition guide. | L | Medium |
-| Vendor Bexio OpenAPI Spec | Check a local copy of the Bexio OpenAPI spec into `doc/` so AI agents can generate models deterministically without relying on docs.bexio.com uptime. | M | Medium |
 | Wire Unit Tests into CI | Add a GitHub Actions job that runs `dotnet test --filter TestCategory!=E2E` on every PR (independently of E2E credentials availability). | S | Medium |
 
-## Section 5: Completed (Issue #3 and Issue #7)
+## Section 5: Completed (Issue #3, Issue #7, and Issue #8)
 
 | Title | Resolved In |
 |-------|-------------|
@@ -90,3 +89,4 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
 | Harmonize `CLAUDE.md` with agent docs | Issue #3 — cross-links added, redundant rules moved to `ai_instructions.md`. |
 | Scaffold three-tier test architecture | Issue #7 — UnitTests, IntegrationTests, and E2eTests projects. |
 | Add comprehensive offline Unit and Integration coverage | Issue #7 — comprehensive Unit tests and WireMock.Net integration tests added. |
+| Vendor Bexio OpenAPI Spec | Issue #8 — `doc/openapi/bexio-v3.json` committed (OpenAPI 3.0.2, API v3.0.0, 355 paths, retrieved 2026-04-18). Refresh procedure in `doc/openapi/README.md`. |

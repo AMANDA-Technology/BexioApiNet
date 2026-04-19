@@ -7,7 +7,7 @@ tags: [development, guide, how-to, contributing]
 
 This guide defines the **strict, reproducible, 5-step process** for adding a new Bexio API endpoint to BexioApiNet. Every new endpoint must follow this process so the library remains 1:1 with the Bexio REST API documentation.
 
-**Source of truth for every endpoint, field and parameter:** <https://docs.bexio.com/>.
+**Source of truth for every endpoint, field and parameter:** [`doc/openapi/bexio-v3.json`](../openapi/bexio-v3.json) (vendored OpenAPI spec — primary reference for AI agents). Human-readable mirror: <https://docs.bexio.com/>.
 
 Before starting, make sure you have read:
 - [`ai_instructions.md`](../../ai_instructions.md) — agent rules.
