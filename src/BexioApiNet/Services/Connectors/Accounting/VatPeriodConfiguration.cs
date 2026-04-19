@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Accounting;
 /// <summary>
 /// Vat period endpoint configuration
 /// </summary>
-public struct VatPeriodConfiguration
+public static class VatPeriodConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

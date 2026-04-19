@@ -31,7 +31,7 @@ namespace BexioApiNet.Services.Connectors.Contacts;
 /// supplied per-call by the service so only the version and trailing segment
 /// live here.
 /// </summary>
-public struct AdditionalAddressConfiguration
+public static class AdditionalAddressConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

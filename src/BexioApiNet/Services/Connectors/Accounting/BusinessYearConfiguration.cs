@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Accounting;
 /// <summary>
 ///     Business year endpoint configuration
 /// </summary>
-public struct BusinessYearConfiguration
+public static class BusinessYearConfiguration
 {
     /// <summary>
     ///     Current api version of the endpoint

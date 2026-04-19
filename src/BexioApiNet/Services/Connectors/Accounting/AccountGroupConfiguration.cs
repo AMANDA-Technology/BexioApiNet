@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Accounting;
 /// <summary>
 /// Account group endpoint configuration
 /// </summary>
-public struct AccountGroupConfiguration
+public static class AccountGroupConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

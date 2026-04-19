@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Accounting;
 /// <summary>
 /// Account endpoint configuration
 /// </summary>
-public struct CurrencyConfiguration
+public static class CurrencyConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

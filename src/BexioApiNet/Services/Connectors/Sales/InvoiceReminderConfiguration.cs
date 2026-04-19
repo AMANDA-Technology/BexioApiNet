@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Sales;
 /// <summary>
 /// Invoice reminder endpoint configuration
 /// </summary>
-public struct InvoiceReminderConfiguration
+public static class InvoiceReminderConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

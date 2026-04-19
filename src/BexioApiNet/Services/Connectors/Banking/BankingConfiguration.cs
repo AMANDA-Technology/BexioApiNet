@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Banking;
 /// <summary>
 /// Account endpoint configuration
 /// </summary>
-public struct BankingConfiguration
+public static class BankingConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint
