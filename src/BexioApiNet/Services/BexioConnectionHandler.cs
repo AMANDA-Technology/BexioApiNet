@@ -145,6 +145,85 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
         return await GetApiResult<TResult>(await _client.SendAsync(CreateHttpRequestMessageWithContent(HttpMethod.Post, requestPath, form), cancellationToken));
     }
 
+    /// <inheritdoc />
+    public async Task<ApiResult<TResult>> PutAsync<TResult, TUpdate>(TUpdate payload, string requestPath, [Optional] CancellationToken cancellationToken)
+    {
+        return await GetApiResult<TResult>(await _client.SendAsync(CreateHttpRequestMessageWithBody(HttpMethod.Put, requestPath, payload), cancellationToken));
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<TResult>> PatchAsync<TResult, TPatch>(TPatch payload, string requestPath, [Optional] CancellationToken cancellationToken)
+    {
+        return await GetApiResult<TResult>(await _client.SendAsync(CreateHttpRequestMessageWithBody(HttpMethod.Patch, requestPath, payload), cancellationToken));
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<TResult>> PostActionAsync<TResult>(string requestPath, [Optional] CancellationToken cancellationToken)
+    {
+        return await GetApiResult<TResult>(await _client.SendAsync(CreateHttpRequestMessage(HttpMethod.Post, requestPath), cancellationToken));
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<object>> PostActionAsync(string requestPath, [Optional] CancellationToken cancellationToken)
+    {
+        return await GetApiResult<object>(await _client.SendAsync(CreateHttpRequestMessage(HttpMethod.Post, requestPath), cancellationToken));
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<byte[]>> GetBinaryAsync(string requestPath, [Optional] CancellationToken cancellationToken)
+    {
+        var response = await _client.SendAsync(CreateHttpRequestMessage(HttpMethod.Get, requestPath), cancellationToken);
+        var headers = GetResponseHeaders(response);
+
+        byte[]? data = null;
+        ApiError? apiError = null;
+
+        if (response.IsSuccessStatusCode)
+        {
+            data = await response.Content.ReadAsByteArrayAsync(cancellationToken);
+        }
+        else
+        {
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+            apiError = TryDeserialize<ApiError>(content);
+        }
+
+        return new()
+        {
+            IsSuccess = response.IsSuccessStatusCode,
+            ApiError = apiError,
+            Data = data,
+            ResponseHeaders = headers,
+            StatusCode = response.StatusCode
+        };
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<List<TResult>>> PostSearchAsync<TResult>(List<SearchCriteria> searchCriteria, string requestPath, [Optional] QueryParameter? queryParameter, [Optional] CancellationToken cancellationToken)
+    {
+        var httpRequestMessage = CreateHttpRequestMessageWithBody(HttpMethod.Post, requestPath, searchCriteria);
+
+        if (queryParameter is not null)
+        {
+            var uriBuilder = new UriBuilder(httpRequestMessage.RequestUri!);
+            var query = HttpUtility.ParseQueryString(uriBuilder.Query);
+
+            foreach (var (key, value) in queryParameter.Parameters)
+                query[key] = value.ToString();
+
+            uriBuilder.Query = query.ToString();
+            httpRequestMessage.RequestUri = uriBuilder.Uri;
+        }
+
+        return await GetApiResult<List<TResult>>(await _client.SendAsync(httpRequestMessage, cancellationToken));
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<List<TResult>>> PostBulkAsync<TResult, TCreate>(List<TCreate> payloads, string requestPath, [Optional] CancellationToken cancellationToken)
+    {
+        return await GetApiResult<List<TResult>>(await _client.SendAsync(CreateHttpRequestMessageWithBody(HttpMethod.Post, requestPath, payloads), cancellationToken));
+    }
+
     /// <summary>
     /// Create http request message to send to the API (without body)
     /// </summary>

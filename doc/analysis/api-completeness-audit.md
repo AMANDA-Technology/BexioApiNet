@@ -686,20 +686,20 @@ All position types share the same polymorphic pattern: CRUD on `/{kb_document_ty
 
 ## Infrastructure Patterns Required
 
-Before Wave 1 implementation, the following HTTP patterns must be supported by `BexioConnectionHandler`:
+Before Wave 1 implementation, the following HTTP patterns must be supported by `BexioConnectionHandler`. Phase 0 (issue #23) delivered the remaining verbs and the shared `PositionService` base; all patterns are now in place.
 
 | Pattern | Current Support | Example Endpoint | Action Needed |
 |---------|----------------|------------------|---------------|
 | GET (list + single) | YES | `/2.0/accounts` | None |
 | POST (create) | YES | `/3.0/accounting/manual_entries` | None |
-| POST (search) | PARTIAL | `/2.0/accounts/search` | Verify body handling |
-| POST (action) | NO | `/2.0/kb_invoice/{id}/issue` | Add `PostActionAsync` |
-| PUT (update) | NO | `/3.0/accounting/manual_entries/{id}` | Add `PutAsync<T>` |
-| PATCH (partial update) | NO | `/3.0/currencies/{id}` | Add `PatchAsync<T>` |
+| POST (search) | YES | `/2.0/accounts/search` | None |
+| POST (action) | YES | `/2.0/kb_invoice/{id}/issue` | None |
+| PUT (update) | YES | `/3.0/accounting/manual_entries/{id}` | None |
+| PATCH (partial update) | YES | `/3.0/currencies/{id}` | None |
 | DELETE | YES | `/3.0/accounting/manual_entries/{id}` | None |
-| GET (binary/PDF) | NO | `/2.0/kb_invoice/{id}/pdf` | Add `GetBinaryAsync` |
+| GET (binary/PDF) | YES | `/2.0/kb_invoice/{id}/pdf` | None |
 | POST (multipart file) | YES | `.../files` | None |
-| POST (bulk) | NO | `/2.0/contact/_bulk_create` | Add `PostBulkAsync<T>` |
+| POST (bulk) | YES | `/2.0/contact/_bulk_create` | None |
 
 ---
 

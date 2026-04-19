@@ -43,8 +43,9 @@ If a change would require bumping any of these, stop and escalate.
 - **Never throw** on non-2xx Bexio responses. Populate `ApiResult.IsSuccess`, `ApiResult.StatusCode`, `ApiResult.ApiError`, `ApiResult.Data` and `ApiResult.ResponseHeaders`.
 - Only throw for genuinely exceptional conditions (e.g., the paging invariant in `BexioConnectionHandler.FetchAll`).
 
-### 3.2 `ConnectorService` base class
-- Every endpoint group (`AccountService`, `ManualEntryService`, ...) inherits from `ConnectorService` in `src/BexioApiNet/Services/Connectors/Base/ConnectorService.cs`.
+### 3.2 `ConnectorService` and `PositionService` base classes
+- Standard endpoint groups (`AccountService`, `ManualEntryService`, ...) inherit from `ConnectorService` in `src/BexioApiNet/Services/Connectors/Base/ConnectorService.cs`.
+- Position endpoint groups (the 7 `kb_position_*` variants) inherit from the abstract `PositionService` base class which provides shared CRUD routing.
 - Services never instantiate their own `HttpClient`. They always go through `ConnectionHandler` (the injected `IBexioConnectionHandler`).
 - Endpoint constants live in a sibling `<Entity>Configuration` static class (e.g., `ManualEntryConfiguration.ApiVersion` and `ManualEntryConfiguration.EndpointRoot`). Do not inline string paths.
 
@@ -63,6 +64,13 @@ If a change would require bumping any of these, stop and escalate.
 
 ### 3.5 Query parameters
 - Optional query parameters go in a domain-specific `QueryParameter<Entity>` record (see `src/BexioApiNet/Models/QueryParameter*.cs`). The wrapped `QueryParameter.Parameters` dictionary is what the handler serializes onto the URL.
+
+### 3.6 Search, Action, and Bulk Operations
+- For the Bexio `/search` endpoints, use `ConnectionHandler.PostSearchAsync` with the `SearchCriteria` model (from `BexioApiNet.Abstractions.Models.Api`).
+- For bulk creation endpoints, use `ConnectionHandler.PostBulkAsync`.
+- For endpoints emitting an action (issue, send, cancel), use `ConnectionHandler.PostActionAsync` (with or without a return type).
+- For endpoints returning files/PDFs, use `ConnectionHandler.GetBinaryAsync`.
+- Standard endpoints map to `GetAsync`, `PostAsync`, `PutAsync`, `PatchAsync`, and `Delete`.
 
 ## 4. Model & DTO Rules
 
