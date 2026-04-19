@@ -180,9 +180,11 @@ public sealed class ContactService : ConnectorService, IContactService
 
 **Rules:**
 - No direct `HttpClient` use. Everything goes through `ConnectionHandler`.
+- Use the correct connection handler method for the endpoint (`GetAsync`, `PostAsync`, `PutAsync`, `PatchAsync`, `Delete`, `GetBinaryAsync`, `PostActionAsync`, `PostSearchAsync`, `PostBulkAsync`).
 - Every method is `async`/`await` — no `.Result`/`.Wait()`.
 - All routes are composed from the `<Entity>Configuration` constants, never inlined literals.
 - `Get` follows the canonical pagination pattern: first call respects `queryParameter`, then `FetchAll` walks until `total_results`.
+- For `kb_position_*` endpoints, inherit from the abstract `PositionService` base class instead of `ConnectorService` to reuse shared CRUD logic.
 
 ---
 
