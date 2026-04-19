@@ -30,8 +30,10 @@ namespace BexioApiNet.IntegrationTests.Infrastructure;
 /// <summary>
 /// Verifies that <see cref="BexioConnectionHandler"/> maps HTTP response status codes to
 /// <see cref="Abstractions.Models.Api.ApiResult{T}"/> exactly per the documented contract:
-/// 2xx and 302 Found are success (with 302 carrying no body), 4xx/5xx are failures
+/// 2xx are success, everything else (including 302 Found, 4xx and 5xx) is a failure
 /// surfaced via <see cref="Abstractions.Models.Api.ApiError"/> rather than thrown exceptions.
+/// Auto-redirect is disabled on the underlying <see cref="HttpClient"/>, so 3xx responses are
+/// never followed — that would risk leaking the bearer token to a different host.
 /// </summary>
 public sealed class ErrorResponseTests : IntegrationTestBase
 {
@@ -126,12 +128,14 @@ public sealed class ErrorResponseTests : IntegrationTestBase
     }
 
     /// <summary>
-    /// A <c>302 Found</c> response (no auto-redirect, no body) is treated as success by
-    /// <see cref="BexioConnectionHandler"/> but with <see cref="Abstractions.Models.Api.ApiResult{T}.Data"/>=<c>null</c>
-    /// because there is nothing to deserialize.
+    /// A <c>302 Found</c> response is treated as non-successful by <see cref="BexioConnectionHandler"/>.
+    /// Auto-redirect is disabled on the underlying <see cref="HttpClient"/> to avoid leaking the bearer
+    /// token to a different host, and the redirect target carries no JSON body, so <see cref="Abstractions.Models.Api.ApiResult{T}.Data"/>
+    /// is <c>null</c> and the caller must inspect <see cref="Abstractions.Models.Api.ApiResult.StatusCode"/>
+    /// to react to the redirect.
     /// </summary>
     [Test]
-    public async Task GetAsync_On302Found_ReturnsIsSuccessTrue_WithNullData()
+    public async Task GetAsync_On302Found_ReturnsIsSuccessFalse_WithNullData()
     {
         Server.Given(Request.Create().WithPath("/2.0/accounts").UsingGet())
             .RespondWith(Response.Create()
@@ -141,7 +145,7 @@ public sealed class ErrorResponseTests : IntegrationTestBase
 
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.IsSuccess, Is.False);
             Assert.That(result.Data, Is.Null);
             Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.Found));
         });
