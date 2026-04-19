@@ -287,6 +287,316 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
         Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{id}"));
     }
 
+    /// <summary>
+    ///     Put forwards the payload and builds the path <c>{endpoint}/{manualEntryId}</c> via
+    ///     <see cref="IBexioConnectionHandler.PutAsync{TResult,TUpdate}" />.
+    /// </summary>
+    [Test]
+    public async Task Put_CallsPutAsyncWithExpectedPath()
+    {
+        const int manualEntryId = 42;
+        var payload = BuildUpdatePayload();
+        var response = new ApiResult<ManualEntry> { IsSuccess = true };
+        string? capturedPath = null;
+        ConnectionHandler
+            .PutAsync<ManualEntry, ManualEntryUpdate>(
+                Arg.Any<ManualEntryUpdate>(),
+                Arg.Do<string>(path => capturedPath = path),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        await _sut.Put(manualEntryId, payload);
+
+        await ConnectionHandler.Received(1).PutAsync<ManualEntry, ManualEntryUpdate>(
+            payload,
+            $"{ExpectedEndpoint}/{manualEntryId}",
+            Arg.Any<CancellationToken>());
+        Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{manualEntryId}"));
+    }
+
+    /// <summary>
+    ///     Put returns the <see cref="ApiResult{T}" /> produced by the connection handler unchanged.
+    /// </summary>
+    [Test]
+    public async Task Put_ReturnsApiResultFromConnectionHandler()
+    {
+        var payload = BuildUpdatePayload();
+        var response = new ApiResult<ManualEntry> { IsSuccess = true };
+        ConnectionHandler
+            .PutAsync<ManualEntry, ManualEntryUpdate>(
+                Arg.Any<ManualEntryUpdate>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Put(1, payload);
+
+        Assert.That(result, Is.SameAs(response));
+    }
+
+    /// <summary>
+    ///     GetNextRefNr builds <c>{endpoint}/next_ref_nr</c> and forwards to
+    ///     <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> with a null query parameter.
+    /// </summary>
+    [Test]
+    public async Task GetNextRefNr_CallsGetAsyncWithExpectedPath()
+    {
+        var response = new ApiResult<ManualEntryNextRefNr> { IsSuccess = true };
+        ConnectionHandler
+            .GetAsync<ManualEntryNextRefNr>(
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        await _sut.GetNextRefNr();
+
+        await ConnectionHandler.Received(1).GetAsync<ManualEntryNextRefNr>(
+            $"{ExpectedEndpoint}/next_ref_nr",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     GetFiles (no auto-page) calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> once
+    ///     with the expected compound-entry file listing path and does not trigger FetchAll.
+    /// </summary>
+    [Test]
+    public async Task GetFiles_WithoutAutoPage_CallsGetAsyncWithExpectedPath()
+    {
+        const int manualEntryId = 42;
+        var response = new ApiResult<List<ManualEntryFile>?> { IsSuccess = true, Data = [] };
+        ConnectionHandler
+            .GetAsync<List<ManualEntryFile>?>(
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        await _sut.GetFiles(manualEntryId);
+
+        await ConnectionHandler.Received(1).GetAsync<List<ManualEntryFile>?>(
+            $"{ExpectedEndpoint}/{manualEntryId}/files",
+            null,
+            Arg.Any<CancellationToken>());
+        await ConnectionHandler.DidNotReceive().FetchAll<ManualEntryFile>(
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            Arg.Any<string>(),
+            Arg.Any<QueryParameter?>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     GetFiles (autoPage = true) triggers
+    ///     <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> when the <c>X-Total-Count</c>
+    ///     header is present and the initial response only returned a page.
+    /// </summary>
+    [Test]
+    public async Task GetFiles_WithAutoPage_CallsFetchAll()
+    {
+        const int manualEntryId = 42;
+        const int totalResults = 10;
+        var initialData = new List<ManualEntryFile> { BuildManualEntryFile(1), BuildManualEntryFile(2) };
+        var initial = new ApiResult<List<ManualEntryFile>?>
+        {
+            IsSuccess = true,
+            Data = initialData,
+            ResponseHeaders = new Dictionary<string, int?>
+            {
+                { ApiHeaderNames.TotalResults, totalResults }
+            }
+        };
+        ConnectionHandler
+            .GetAsync<List<ManualEntryFile>?>(
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(initial);
+        ConnectionHandler
+            .FetchAll<ManualEntryFile>(
+                Arg.Any<int>(),
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns([]);
+
+        await _sut.GetFiles(manualEntryId, autoPage: true);
+
+        await ConnectionHandler.Received(1).FetchAll<ManualEntryFile>(
+            initialData.Count,
+            totalResults,
+            $"{ExpectedEndpoint}/{manualEntryId}/files",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     GetFileById builds <c>{endpoint}/{manualEntryId}/files/{fileId}</c> and forwards via
+    ///     <see cref="IBexioConnectionHandler.GetAsync{TResult}" />.
+    /// </summary>
+    [Test]
+    public async Task GetFileById_CallsGetAsyncWithExpectedPath()
+    {
+        const int manualEntryId = 42;
+        const int fileId = 7;
+        var response = new ApiResult<ManualEntryFileDetail> { IsSuccess = true };
+        ConnectionHandler
+            .GetAsync<ManualEntryFileDetail>(
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        await _sut.GetFileById(manualEntryId, fileId);
+
+        await ConnectionHandler.Received(1).GetAsync<ManualEntryFileDetail>(
+            $"{ExpectedEndpoint}/{manualEntryId}/files/{fileId}",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     GetEntryFiles builds <c>{endpoint}/{manualEntryId}/entries/{entryId}/files</c> and forwards
+    ///     via <see cref="IBexioConnectionHandler.GetAsync{TResult}" />.
+    /// </summary>
+    [Test]
+    public async Task GetEntryFiles_CallsGetAsyncWithExpectedPath()
+    {
+        const int manualEntryId = 42;
+        const int entryId = 7;
+        var response = new ApiResult<List<ManualEntryFile>?> { IsSuccess = true, Data = [] };
+        ConnectionHandler
+            .GetAsync<List<ManualEntryFile>?>(
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        await _sut.GetEntryFiles(manualEntryId, entryId);
+
+        await ConnectionHandler.Received(1).GetAsync<List<ManualEntryFile>?>(
+            $"{ExpectedEndpoint}/{manualEntryId}/entries/{entryId}/files",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     GetEntryFiles (autoPage = true) triggers
+    ///     <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> on the entry-files path.
+    /// </summary>
+    [Test]
+    public async Task GetEntryFiles_WithAutoPage_CallsFetchAllOnEntryPath()
+    {
+        const int manualEntryId = 42;
+        const int entryId = 7;
+        const int totalResults = 8;
+        var initialData = new List<ManualEntryFile> { BuildManualEntryFile(1) };
+        var initial = new ApiResult<List<ManualEntryFile>?>
+        {
+            IsSuccess = true,
+            Data = initialData,
+            ResponseHeaders = new Dictionary<string, int?>
+            {
+                { ApiHeaderNames.TotalResults, totalResults }
+            }
+        };
+        ConnectionHandler
+            .GetAsync<List<ManualEntryFile>?>(
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(initial);
+        ConnectionHandler
+            .FetchAll<ManualEntryFile>(
+                Arg.Any<int>(),
+                Arg.Any<int>(),
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns([]);
+
+        await _sut.GetEntryFiles(manualEntryId, entryId, autoPage: true);
+
+        await ConnectionHandler.Received(1).FetchAll<ManualEntryFile>(
+            initialData.Count,
+            totalResults,
+            $"{ExpectedEndpoint}/{manualEntryId}/entries/{entryId}/files",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     GetEntryFileById builds <c>{endpoint}/{manualEntryId}/entries/{entryId}/files/{fileId}</c>
+    ///     and forwards via <see cref="IBexioConnectionHandler.GetAsync{TResult}" />.
+    /// </summary>
+    [Test]
+    public async Task GetEntryFileById_CallsGetAsyncWithExpectedPath()
+    {
+        const int manualEntryId = 42;
+        const int entryId = 7;
+        const int fileId = 3;
+        var response = new ApiResult<ManualEntryFileDetail> { IsSuccess = true };
+        ConnectionHandler
+            .GetAsync<ManualEntryFileDetail>(
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        await _sut.GetEntryFileById(manualEntryId, entryId, fileId);
+
+        await ConnectionHandler.Received(1).GetAsync<ManualEntryFileDetail>(
+            $"{ExpectedEndpoint}/{manualEntryId}/entries/{entryId}/files/{fileId}",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     DeleteFile builds the request path <c>{endpoint}/{manualEntryId}/files/{fileId}</c> and
+    ///     forwards to <see cref="IBexioConnectionHandler.Delete" />.
+    /// </summary>
+    [Test]
+    public async Task DeleteFile_CallsDeleteWithExpectedPath()
+    {
+        const int manualEntryId = 42;
+        const int fileId = 7;
+        var response = new ApiResult<object> { IsSuccess = true };
+        ConnectionHandler
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        await _sut.DeleteFile(manualEntryId, fileId);
+
+        await ConnectionHandler.Received(1).Delete(
+            $"{ExpectedEndpoint}/{manualEntryId}/files/{fileId}",
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     DeleteEntryFile builds the request path
+    ///     <c>{endpoint}/{manualEntryId}/entries/{entryId}/files/{fileId}</c> and forwards to
+    ///     <see cref="IBexioConnectionHandler.Delete" />.
+    /// </summary>
+    [Test]
+    public async Task DeleteEntryFile_CallsDeleteWithExpectedPath()
+    {
+        const int manualEntryId = 42;
+        const int entryId = 7;
+        const int fileId = 3;
+        var response = new ApiResult<object> { IsSuccess = true };
+        ConnectionHandler
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        await _sut.DeleteEntryFile(manualEntryId, entryId, fileId);
+
+        await ConnectionHandler.Received(1).Delete(
+            $"{ExpectedEndpoint}/{manualEntryId}/entries/{entryId}/files/{fileId}",
+            Arg.Any<CancellationToken>());
+    }
+
     private static ManualEntryEntryCreate BuildCreatePayload()
     {
         return new ManualEntryEntryCreate(
@@ -294,6 +604,16 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
             new DateOnly(2025, 1, 1),
             "REF-1",
             []);
+    }
+
+    private static ManualEntryUpdate BuildUpdatePayload()
+    {
+        return new ManualEntryUpdate(
+            ManualEntryType.manual_single_entry,
+            new DateOnly(2025, 1, 1),
+            "REF-1",
+            [],
+            null);
     }
 
     private static ManualEntry BuildManualEntry(int id)
@@ -309,5 +629,22 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
             [],
             null,
             string.Empty);
+    }
+
+    private static ManualEntryFile BuildManualEntryFile(int id)
+    {
+        return new ManualEntryFile(
+            id,
+            Guid.NewGuid().ToString(),
+            $"file-{id}.pdf",
+            1024,
+            "pdf",
+            "application/pdf",
+            null,
+            1,
+            false,
+            null,
+            false,
+            DateTime.UtcNow);
     }
 }
