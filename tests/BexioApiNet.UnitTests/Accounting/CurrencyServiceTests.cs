@@ -23,7 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using System.Net;
 using BexioApiNet.Abstractions.Models.Accounting.Currencies;
+using BexioApiNet.Abstractions.Models.Accounting.Currencies.Views;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Accounting;
@@ -31,19 +33,31 @@ using BexioApiNet.Services.Connectors.Accounting;
 namespace BexioApiNet.UnitTests.Accounting;
 
 /// <summary>
-/// Offline unit tests for <see cref="CurrencyService"/>. Currency is a simple
-/// list endpoint — the connector forwards the request and result, optionally
-/// auto-paging through a <c>X-Total-Count</c> header.
+///     Offline unit tests for <see cref="CurrencyService" />. Each test verifies that the service
+///     forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected arguments and
+///     returns the handler's <see cref="ApiResult{T}" /> unchanged. No network, no filesystem access.
 /// </summary>
 [TestFixture]
 public sealed class CurrencyServiceTests : ServiceTestBase
 {
+    /// <summary>
+    ///     Creates a fresh <see cref="CurrencyService" /> per test, bound to the
+    ///     <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
+    /// </summary>
+    [SetUp]
+    public void CreateSut()
+    {
+        _sut = new CurrencyService(ConnectionHandler);
+    }
+
     private const string ExpectedPath = "3.0/currencies";
 
+    private CurrencyService _sut = null!;
+
     /// <summary>
-    /// With no parameters the service hits <c>3.0/currencies</c> exactly once
-    /// with a <see langword="null"/> query parameter and returns the connection
-    /// handler's <see cref="ApiResult{T}"/> as-is.
+    ///     With no parameters the service hits <c>3.0/currencies</c> exactly once
+    ///     with a <see langword="null" /> query parameter and returns the connection
+    ///     handler's <see cref="ApiResult{T}" /> as-is.
     /// </summary>
     [Test]
     public async Task Get_WithNoParams_CallsGetAsyncOnceWithExpectedPath()
@@ -51,15 +65,13 @@ public sealed class CurrencyServiceTests : ServiceTestBase
         var expected = new ApiResult<List<Currency>>
         {
             IsSuccess = true,
-            Data = [new Currency(Id: 1, Name: "CHF", RoundFactor: 0.05)]
+            Data = [new Currency(1, "CHF", 0.05)]
         };
         ConnectionHandler
             .GetAsync<List<Currency>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(expected));
 
-        var service = new CurrencyService(ConnectionHandler);
-
-        var result = await service.Get();
+        var result = await _sut.Get();
 
         Assert.That(result, Is.SameAs(expected));
         await ConnectionHandler.Received(1).GetAsync<List<Currency>>(
@@ -69,8 +81,8 @@ public sealed class CurrencyServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    /// The cancellation token supplied by the caller must be forwarded to the
-    /// connection handler so cooperative cancellation flows end-to-end.
+    ///     The cancellation token supplied by the caller must be forwarded to the
+    ///     connection handler so cooperative cancellation flows end-to-end.
     /// </summary>
     [Test]
     public async Task Get_ForwardsCancellationTokenToConnectionHandler()
@@ -80,9 +92,7 @@ public sealed class CurrencyServiceTests : ServiceTestBase
             .GetAsync<List<Currency>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ApiResult<List<Currency>> { IsSuccess = true, Data = [] }));
 
-        var service = new CurrencyService(ConnectionHandler);
-
-        await service.Get(cancellationToken: cts.Token);
+        await _sut.Get(cancellationToken: cts.Token);
 
         await ConnectionHandler.Received(1).GetAsync<List<Currency>>(
             ExpectedPath,
@@ -91,28 +101,234 @@ public sealed class CurrencyServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    /// A failing <see cref="ApiResult{T}"/> from the connection handler must
-    /// surface to the caller untouched — the service may not swallow errors.
+    ///     A failing <see cref="ApiResult{T}" /> from the connection handler must
+    ///     surface to the caller untouched — the service may not swallow errors.
     /// </summary>
     [Test]
     public async Task Get_ReturnsApiResultFromConnectionHandlerUnchanged()
     {
-        var apiError = new ApiError(ErrorCode: 401, Message: "unauthorized", Errors: new object());
+        var apiError = new ApiError(401, "unauthorized", new object());
         var response = new ApiResult<List<Currency>>
         {
             IsSuccess = false,
             ApiError = apiError,
-            StatusCode = System.Net.HttpStatusCode.Unauthorized,
+            StatusCode = HttpStatusCode.Unauthorized,
             Data = null
         };
         ConnectionHandler
             .GetAsync<List<Currency>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(response));
 
-        var service = new CurrencyService(ConnectionHandler);
-
-        var result = await service.Get();
+        var result = await _sut.Get();
 
         Assert.That(result, Is.SameAs(response));
+    }
+
+    /// <summary>
+    ///     <c>GetCodes</c> must hit <c>3.0/currencies/codes</c> exactly once
+    ///     with a <see langword="null" /> query parameter.
+    /// </summary>
+    [Test]
+    public async Task GetCodes_CallsGetAsyncWithCodesPath()
+    {
+        var response = new ApiResult<List<string>>
+        {
+            IsSuccess = true,
+            Data = ["EUR", "GBP", "PLN"]
+        };
+        ConnectionHandler
+            .GetAsync<List<string>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var result = await _sut.GetCodes();
+
+        Assert.That(result, Is.SameAs(response));
+        await ConnectionHandler.Received(1).GetAsync<List<string>>(
+            $"{ExpectedPath}/codes",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     <c>GetCodes</c> forwards the supplied cancellation token to the connection handler.
+    /// </summary>
+    [Test]
+    public async Task GetCodes_ForwardsCancellationTokenToConnectionHandler()
+    {
+        using var cts = new CancellationTokenSource();
+        ConnectionHandler
+            .GetAsync<List<string>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ApiResult<List<string>> { IsSuccess = true, Data = [] }));
+
+        await _sut.GetCodes(cts.Token);
+
+        await ConnectionHandler.Received(1).GetAsync<List<string>>(
+            $"{ExpectedPath}/codes",
+            null,
+            cts.Token);
+    }
+
+    /// <summary>
+    ///     <c>GetById</c> must build the request path with the currency id appended to the endpoint
+    ///     root and hit the handler exactly once.
+    /// </summary>
+    [Test]
+    public async Task GetById_CallsGetAsyncWithIdInPath()
+    {
+        const int id = 42;
+        var response = new ApiResult<Currency>
+        {
+            IsSuccess = true,
+            Data = new Currency(id, "CHF", 0.05)
+        };
+        ConnectionHandler
+            .GetAsync<Currency>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var result = await _sut.GetById(id);
+
+        Assert.That(result, Is.SameAs(response));
+        await ConnectionHandler.Received(1).GetAsync<Currency>(
+            $"{ExpectedPath}/{id}",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     <c>GetExchangeRates</c> calls the handler with the nested
+    ///     <c>3.0/currencies/{id}/exchange_rates</c> path and a <see langword="null" /> query parameter
+    ///     when no date filter is supplied.
+    /// </summary>
+    [Test]
+    public async Task GetExchangeRates_WithNoQueryParameter_CallsGetAsyncWithExpectedPath()
+    {
+        const int id = 7;
+        var response = new ApiResult<List<ExchangeRate>>
+        {
+            IsSuccess = true,
+            Data = []
+        };
+        ConnectionHandler
+            .GetAsync<List<ExchangeRate>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var result = await _sut.GetExchangeRates(id);
+
+        Assert.That(result, Is.SameAs(response));
+        await ConnectionHandler.Received(1).GetAsync<List<ExchangeRate>>(
+            $"{ExpectedPath}/{id}/exchange_rates",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     When a <see cref="QueryParameterExchangeRate" /> is supplied with a date, the wrapped
+    ///     <see cref="QueryParameter" /> must be passed through to the connection handler so the
+    ///     <c>date</c> filter reaches the API.
+    /// </summary>
+    [Test]
+    public async Task GetExchangeRates_WithDateQueryParameter_PassesQueryParameterToHandler()
+    {
+        const int id = 3;
+        var query = new QueryParameterExchangeRate(new DateOnly(2024, 5, 1));
+        var response = new ApiResult<List<ExchangeRate>>
+        {
+            IsSuccess = true,
+            Data = []
+        };
+        ConnectionHandler
+            .GetAsync<List<ExchangeRate>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        await _sut.GetExchangeRates(id, query);
+
+        await ConnectionHandler.Received(1).GetAsync<List<ExchangeRate>>(
+            $"{ExpectedPath}/{id}/exchange_rates",
+            query.QueryParameter,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     <c>Create</c> forwards the payload and the <c>3.0/currencies</c> endpoint path to
+    ///     <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />.
+    /// </summary>
+    [Test]
+    public async Task Create_CallsPostAsyncWithExpectedPath()
+    {
+        var payload = new CurrencyCreate("CHF", 0.05);
+        var response = new ApiResult<Currency>
+        {
+            IsSuccess = true,
+            Data = new Currency(1, "CHF", 0.05)
+        };
+        ConnectionHandler
+            .PostAsync<Currency, CurrencyCreate>(
+                Arg.Any<CurrencyCreate>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Create(payload);
+
+        Assert.That(result, Is.SameAs(response));
+        await ConnectionHandler.Received(1).PostAsync<Currency, CurrencyCreate>(
+            payload,
+            ExpectedPath,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     <c>Patch</c> forwards the patch payload and the <c>3.0/currencies/{id}</c> endpoint path
+    ///     to <see cref="IBexioConnectionHandler.PatchAsync{TResult,TPatch}" />.
+    /// </summary>
+    [Test]
+    public async Task Patch_CallsPatchAsyncWithIdInPath()
+    {
+        const int id = 99;
+        var payload = new CurrencyPatch(0.10);
+        var response = new ApiResult<Currency>
+        {
+            IsSuccess = true,
+            Data = new Currency(id, "CHF", 0.10)
+        };
+        ConnectionHandler
+            .PatchAsync<Currency, CurrencyPatch>(
+                Arg.Any<CurrencyPatch>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Patch(id, payload);
+
+        Assert.That(result, Is.SameAs(response));
+        await ConnectionHandler.Received(1).PatchAsync<Currency, CurrencyPatch>(
+            payload,
+            $"{ExpectedPath}/{id}",
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     <c>Delete</c> forwards the call to <see cref="IBexioConnectionHandler.Delete" /> exactly
+    ///     once, building the path with the currency id.
+    /// </summary>
+    [Test]
+    public async Task Delete_CallsConnectionHandlerDeleteWithIdInPath()
+    {
+        const int id = 42;
+        var response = new ApiResult<object> { IsSuccess = true };
+        string? capturedPath = null;
+        ConnectionHandler
+            .Delete(
+                Arg.Do<string>(path => capturedPath = path),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Delete(id);
+
+        Assert.That(result, Is.SameAs(response));
+        Assert.That(capturedPath, Is.EqualTo($"{ExpectedPath}/{id}"));
+        await ConnectionHandler.Received(1).Delete(
+            Arg.Any<string>(),
+            Arg.Any<CancellationToken>());
     }
 }
