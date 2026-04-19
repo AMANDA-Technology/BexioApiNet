@@ -109,6 +109,7 @@ public static class BexioServiceCollection
         services.AddScoped<IInvoiceService, InvoiceService>();
         services.AddScoped<IInvoiceReminderService, InvoiceReminderService>();
         services.AddScoped<IQuoteService, QuoteService>();
+        services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;

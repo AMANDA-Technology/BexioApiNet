@@ -94,7 +94,8 @@ public abstract class BexioE2eTestBase
             new AdditionalAddressService(connectionHandler),
             new InvoiceService(connectionHandler),
             new InvoiceReminderService(connectionHandler),
-            new QuoteService(connectionHandler));
+            new QuoteService(connectionHandler),
+            new OrderService(connectionHandler));
     }
 
     /// <summary>

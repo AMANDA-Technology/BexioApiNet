@@ -140,4 +140,9 @@ public interface IBexioApiClient : IDisposable
     /// Bexio quotes (offers) connector. <see href="https://docs.bexio.com/#tag/Quotes">Quotes</see>
     /// </summary>
     public IQuoteService Quotes { get; set; }
+
+    /// <summary>
+    /// Bexio orders (customer confirmations) connector. <see href="https://docs.bexio.com/#tag/Orders">Orders</see>
+    /// </summary>
+    public IOrderService Orders { get; set; }
 }
