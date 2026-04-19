@@ -173,7 +173,6 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     public async Task<ApiResult<byte[]>> GetBinaryAsync(string requestPath, [Optional] CancellationToken cancellationToken)
     {
         var response = await _client.SendAsync(CreateHttpRequestMessage(HttpMethod.Get, requestPath), cancellationToken);
-        var isSuccess = response.IsSuccessStatusCode || response.StatusCode is HttpStatusCode.Found;
         var headers = GetResponseHeaders(response);
 
         byte[]? data = null;
@@ -183,7 +182,7 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
         {
             data = await response.Content.ReadAsByteArrayAsync(cancellationToken);
         }
-        else if (!isSuccess)
+        else
         {
             var content = await response.Content.ReadAsStringAsync(cancellationToken);
             apiError = TryDeserialize<ApiError>(content);
@@ -191,7 +190,7 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
 
         return new()
         {
-            IsSuccess = isSuccess,
+            IsSuccess = response.IsSuccessStatusCode,
             ApiError = apiError,
             Data = data,
             ResponseHeaders = headers,
