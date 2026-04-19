@@ -14,6 +14,8 @@ Before starting, make sure you have read:
 - [`testing-guide.md`](./testing-guide.md) — how to test what you add.
 - Existing reference implementation: `ManualEntryService` (most complete example — GET, POST, DELETE, multipart upload, pagination).
 
+> **Prior art (optional reference):** [`substringag/bexio.net`](https://github.com/substringag/bexio.net) is another .NET Bexio client. Its architecture differs from ours (exception-based error model, API-token auth, no DI, .NET 8), so do **not** copy code — but its DTOs for domains we don't yet cover (Projects, Timesheets, Users, Items, Files, recurring-order repetitions) can be a useful sanity check when shaping models. The vendored OpenAPI spec at [`doc/openapi/bexio-v3.json`](../openapi/bexio-v3.json) remains the source of truth; use `substringag/bexio.net` only as a secondary cross-reference.
+
 ## Worked Example Used Below
 
 Throughout this guide we use an imaginary endpoint to make the steps concrete:
