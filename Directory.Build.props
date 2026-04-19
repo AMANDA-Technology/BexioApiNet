@@ -1,0 +1,10 @@
+<Project>
+
+    <PropertyGroup>
+        <LangVersion>13</LangVersion>
+        <Nullable>enable</Nullable>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <TargetFramework>net9.0</TargetFramework>
+    </PropertyGroup>
+
+</Project>

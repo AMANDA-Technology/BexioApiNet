@@ -15,18 +15,21 @@ BexioApiNet is a .NET client library for the Bexio REST API (v3.0.0). It provide
 - **Core Dependencies**: `Microsoft.Extensions.DependencyInjection`, `Microsoft.Extensions.Http` (for the AspNetCore package), `System.Text.Json`
 
 ## Solution Structure
-The solution `BexioApiNet.sln` is organized into four projects:
+The solution `BexioApiNet.sln` is organized into projects under `src/` and `tests/`:
 - `src/BexioApiNet.Abstractions`: Contains the domain models (DTOs), interfaces, exceptions, and enums. It holds no implementation logic.
 - `src/BexioApiNet`: The core implementation library. Contains `BexioApiClient`, `BexioConnectionHandler`, and the various connector services (e.g., `ManualEntryService`).
 - `src/BexioApiNet.AspNetCore`: Provides `IServiceCollection` extension methods to register BexioApiNet in ASP.NET Core applications (using typed `HttpClient` via `IHttpClientFactory`).
-- `src/BexioApiNet.Tests`: NUnit 4 tests. Split into offline `UnitTests/` and live `Tests/` (E2E).
+- `tests/BexioApiNet.UnitTests`: NUnit 4 unit tests (offline, mocked dependencies).
+- `tests/BexioApiNet.IntegrationTests`: NUnit 4 integration tests (offline, WireMock.Net stubs).
+- `tests/BexioApiNet.E2eTests`: NUnit 4 live tests (requires credentials).
 
 ## Build Commands
 - **Restore**: `dotnet restore`
 - **Build**: `dotnet build`
 - **Unit tests (offline, no creds)**: `dotnet test --filter TestCategory=Unit`
+- **Integration tests (offline, no creds)**: `dotnet test --filter TestCategory=Integration`
 - **Live E2E tests**: `dotnet test --filter TestCategory=E2E` (requires `BexioApiNet__BaseUri` + `BexioApiNet__JwtToken`)
-- **Skip live tests in CI**: `dotnet test --filter TestCategory!=E2E`
+- **Skip live tests in CI**: `dotnet test --filter TestCategory!=E2E` (runs Unit + Integration)
 - **Pack**: `dotnet pack` (NuGet packages are automatically generated on build via `GeneratePackageOnBuild`)
 
 ## Key Conventions

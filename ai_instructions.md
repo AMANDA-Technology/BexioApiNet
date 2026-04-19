@@ -76,15 +76,18 @@ If a change would require bumping any of these, stop and escalate.
 
 ## 5. Testing Rules (hard limits)
 
-1. **Never** run `dotnet test` against the live Bexio API unless the task prompt explicitly confirms credentials are provided. `BexioApiNet__BaseUri` and `BexioApiNet__JwtToken` must both be set — otherwise `TestBase` now calls `Assert.Ignore` and the test is skipped (no false failure).
-2. Live tests live in `src/BexioApiNet.Tests/Tests/<Domain>/...`, inherit from `TestBase`, and are automatically categorized `[Category("E2E")]`.
-3. **Every new connector method must also have an offline unit test** that does not require credentials. Mock `IBexioConnectionHandler` with NSubstitute, or mock `HttpMessageHandler` (via WireMock.Net or a hand-rolled test handler) and exercise the real `BexioConnectionHandler`.
-4. For unit tests: place them in `src/BexioApiNet.Tests/UnitTests/<Domain>/...` and mark them `[Category("Unit")]`.
-5. Filter for CI:
-   - Offline: `dotnet test --filter TestCategory=Unit`
-   - Live: `dotnet test --filter TestCategory=E2E` (only with credentials in env).
-6. Do **not** add test-only code paths to production types. Use fakes/mocks at the test boundary.
-7. See [`doc/development/testing-guide.md`](./doc/development/testing-guide.md) for full details.
+1. **Never** run `dotnet test` against the live Bexio API unless the task prompt explicitly confirms credentials are provided. `BexioApiNet__BaseUri` and `BexioApiNet__JwtToken` must both be set — otherwise `BexioE2eTestBase` now calls `Assert.Ignore` and the test is skipped (no false failure).
+2. Live E2E tests live in `tests/BexioApiNet.E2eTests/Tests/<Domain>/...`, inherit from `BexioE2eTestBase`, and are automatically categorized `[Category("E2E")]`.
+3. **Every new connector method must also have an offline unit test** that does not require credentials. Mock `IBexioConnectionHandler` with NSubstitute for unit tests, or use WireMock.Net for integration tests.
+4. For unit tests: place them in `tests/BexioApiNet.UnitTests/<Domain>/...` and mark them `[Category("Unit")]`.
+5. For integration tests: place them in `tests/BexioApiNet.IntegrationTests/<Domain>/...` and mark them `[Category("Integration")]`.
+6. Filter for CI:
+   - Offline Unit: `dotnet test --filter TestCategory=Unit`
+   - Offline Integration: `dotnet test --filter TestCategory=Integration`
+   - Live E2E: `dotnet test --filter TestCategory=E2E` (only with credentials in env).
+   - CI Default (Offline only): `dotnet test --filter TestCategory!=E2E`
+7. Do **not** add test-only code paths to production types. Use fakes/mocks at the test boundary.
+8. See [`doc/development/testing-guide.md`](./doc/development/testing-guide.md) for full details.
 
 ## 6. Build & Verification Rules
 
