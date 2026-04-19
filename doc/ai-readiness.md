@@ -22,26 +22,29 @@ The documentation landscape for this project is formal and AI-aware.
 - **Rate**: Ready
 
 ## Section 2: Test Coverage
-Two-layer strategy now in place: offline unit tests (mandatory for new code) and live integration tests (optional, gracefully skipped when credentials are missing).
+Three-tier testing strategy now in place: offline unit tests, offline integration tests (WireMock.Net), and live E2E tests (optional, gracefully skipped when credentials are missing).
 
 - **Test frameworks in use**:
-  - NUnit 4 + NUnit Analyzers + Coverlet, configured in `src/BexioApiNet.Tests/BexioApiNet.Tests.csproj`.
-  - Permitted mocking libraries for unit tests: **NSubstitute** (preferred for `IBexioConnectionHandler`) and **WireMock.Net** (for end-to-end stubs against the real `BexioConnectionHandler`).
+  - NUnit 4 + NUnit Analyzers + Coverlet, configured across `tests/BexioApiNet.*/*.csproj`.
+  - Permitted mocking libraries for offline tests: **NSubstitute** (preferred for `IBexioConnectionHandler` in unit tests) and **WireMock.Net** (for end-to-end stubs against the real `BexioConnectionHandler` in integration tests).
   - **Run commands**:
-    - Offline-only: `dotnet test --filter TestCategory=Unit`
+    - Offline Unit only: `dotnet test --filter TestCategory=Unit`
+    - Offline Integration only: `dotnet test --filter TestCategory=Integration`
     - Live E2E only: `dotnet test --filter TestCategory=E2E` (requires `BexioApiNet__BaseUri` + `BexioApiNet__JwtToken`)
-    - CI-safe default: `dotnet test --filter TestCategory!=E2E`
-- **What IS covered today (live integration only)**:
-  - `Accounting/Accounts/GetAll`
-  - `Accounting/Currencies/GetAll`
-  - `Accounting/ManualEntries` (Create, CreateAndAddFile, CreateAndAddFileFromStream, GetAll, GetAllAndDelete)
-  - `Accounting/Taxes/GetAll`
-  - `Banking/BankAccount/GetAll`
+    - CI-safe default (Offline only): `dotnet test --filter TestCategory!=E2E`
+- **What IS covered today**:
+  - **Unit tests**: AccountService, CurrencyService, TaxService, BankAccountService, ManualEntryService, BexioConnectionHandler
+  - **Integration tests**: Cancellation, Concurrency, ErrorResponse, Pagination, ParamValidation, Smoke tests
+  - **E2E tests**:
+    - `Accounting/Accounts/GetAll`
+    - `Accounting/Currencies/GetAll`
+    - `Accounting/ManualEntries` (Create, CreateAndAddFile, CreateAndAddFileFromStream, GetAll, GetAllAndDelete)
+    - `Accounting/Taxes/GetAll`
+    - `Banking/BankAccount/GetAll`
 - **What is NOT covered**:
-  - No offline unit tests yet — the scaffolding and guide are in place; adding unit coverage is a follow-up backlog item (see Section 4).
   - Significant portions of the Bexio API (Contacts, Invoices, Items, Projects, etc.) are not yet implemented.
 - **Test quality assessment**:
-  - Existing tests are high-fidelity integration tests. Previously they threw `InvalidOperationException` when env vars were missing; now `TestBase` calls `Assert.Ignore(...)` so the suite skips gracefully, unblocking agents and CI that lack credentials. The base class is categorized `[Category("E2E")]`.
+  - Offline tests are comprehensive and fast. The E2E test suite skips gracefully, unblocking agents and CI that lack credentials. The E2E base class `BexioE2eTestBase` is categorized `[Category("E2E")]`, and offline test classes are categorized `[Category("Unit")]` or `[Category("Integration")]`.
 - **Rate**: Partial Coverage (ready to expand; infrastructure is in place)
 
 ## Section 3: Technical Debt & Danger Zones
@@ -71,12 +74,11 @@ Two-layer strategy now in place: offline unit tests (mandatory for new code) and
 
 | Title | Description | Complexity | Priority |
 |-------|-------------|------------|----------|
-| Add Offline Unit Test Suite | Populate `src/BexioApiNet.Tests/UnitTests/` with NSubstitute- and WireMock.Net-based tests covering every existing connector method. Today the folder is scaffolded but empty. | M | High |
 | Expand API Connectors | Implement missing Bexio domains (Contacts, Projects, Invoices, Items, ...) per the feature-addition guide. | L | Medium |
 | Vendor Bexio OpenAPI Spec | Check a local copy of the Bexio OpenAPI spec into `doc/` so AI agents can generate models deterministically without relying on docs.bexio.com uptime. | M | Medium |
-| Wire Unit Tests into CI | Add a GitHub Actions job that runs `dotnet test --filter TestCategory=Unit` on every PR (independently of E2E credentials availability). | S | Medium |
+| Wire Unit Tests into CI | Add a GitHub Actions job that runs `dotnet test --filter TestCategory!=E2E` on every PR (independently of E2E credentials availability). | S | Medium |
 
-## Section 5: Completed (Issue #3)
+## Section 5: Completed (Issue #3 and Issue #7)
 
 | Title | Resolved In |
 |-------|-------------|
@@ -86,3 +88,5 @@ Two-layer strategy now in place: offline unit tests (mandatory for new code) and
 | Refactor to `IHttpClientFactory` | Issue #3 — dual constructor on `BexioConnectionHandler` + `AddHttpClient<>` in DI registration. |
 | Tests skip gracefully without credentials | Issue #3 — `TestBase.Setup` uses `Assert.Ignore`; base class `[Category("E2E")]`. |
 | Harmonize `CLAUDE.md` with agent docs | Issue #3 — cross-links added, redundant rules moved to `ai_instructions.md`. |
+| Scaffold three-tier test architecture | Issue #7 — UnitTests, IntegrationTests, and E2eTests projects. |
+| Add comprehensive offline Unit and Integration coverage | Issue #7 — comprehensive Unit tests and WireMock.Net integration tests added. |
