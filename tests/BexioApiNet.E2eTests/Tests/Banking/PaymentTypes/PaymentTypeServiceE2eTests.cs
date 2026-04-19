@@ -28,7 +28,7 @@ using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Services.Connectors.Banking;
 
-namespace BexioApiNet.E2eTests.Tests.Banking.PaymentType;
+namespace BexioApiNet.E2eTests.Tests.Banking.PaymentTypes;
 
 /// <summary>
 ///     Live end-to-end tests for <see cref="PaymentTypeService" />. Skipped
