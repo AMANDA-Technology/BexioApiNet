@@ -116,6 +116,156 @@ public sealed class TaxServiceTests : ServiceTestBase
         Assert.That(result, Is.SameAs(response));
     }
 
+    /// <summary>
+    /// GetById builds the request path with the tax id appended to the endpoint
+    /// root and forwards a single <c>GetAsync</c> call to the connection handler
+    /// with a <see langword="null"/> query parameter.
+    /// </summary>
+    [Test]
+    public async Task GetById_CallsGetAsyncWithExpectedPath()
+    {
+        const int id = 42;
+        var expected = new ApiResult<Tax>
+        {
+            IsSuccess = true,
+            Data = NewTax(id)
+        };
+        ConnectionHandler
+            .GetAsync<Tax>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(expected));
+
+        var service = new TaxService(ConnectionHandler);
+
+        var result = await service.GetById(id);
+
+        Assert.That(result, Is.SameAs(expected));
+        await ConnectionHandler.Received(1).GetAsync<Tax>(
+            $"{ExpectedPath}/{id}",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// GetById forwards the caller-supplied <see cref="CancellationToken"/> so
+    /// cooperative cancellation flows end-to-end.
+    /// </summary>
+    [Test]
+    public async Task GetById_ForwardsCancellationTokenToConnectionHandler()
+    {
+        const int id = 7;
+        using var cts = new CancellationTokenSource();
+        ConnectionHandler
+            .GetAsync<Tax>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ApiResult<Tax> { IsSuccess = true, Data = NewTax(id) }));
+
+        var service = new TaxService(ConnectionHandler);
+
+        await service.GetById(id, cts.Token);
+
+        await ConnectionHandler.Received(1).GetAsync<Tax>(
+            $"{ExpectedPath}/{id}",
+            null,
+            cts.Token);
+    }
+
+    /// <summary>
+    /// A failing <see cref="ApiResult{T}"/> from the connection handler must
+    /// surface to the caller untouched — the service may not swallow errors.
+    /// </summary>
+    [Test]
+    public async Task GetById_ReturnsApiResultFromConnectionHandlerUnchanged()
+    {
+        var apiError = new ApiError(ErrorCode: 404, Message: "not found", Errors: new object());
+        var response = new ApiResult<Tax>
+        {
+            IsSuccess = false,
+            ApiError = apiError,
+            StatusCode = System.Net.HttpStatusCode.NotFound,
+            Data = null
+        };
+        ConnectionHandler
+            .GetAsync<Tax>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var service = new TaxService(ConnectionHandler);
+
+        var result = await service.GetById(99);
+
+        Assert.That(result, Is.SameAs(response));
+    }
+
+    /// <summary>
+    /// Delete forwards a single call to <see cref="IBexioConnectionHandler.Delete"/>
+    /// with a path built from the endpoint root and the tax id, returning the
+    /// connection handler's <see cref="ApiResult{T}"/> as-is.
+    /// </summary>
+    [Test]
+    public async Task Delete_CallsConnectionHandlerDeleteWithExpectedPath()
+    {
+        const int id = 42;
+        var expected = new ApiResult<object> { IsSuccess = true };
+        ConnectionHandler
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(expected));
+
+        var service = new TaxService(ConnectionHandler);
+
+        var result = await service.Delete(id);
+
+        Assert.That(result, Is.SameAs(expected));
+        await ConnectionHandler.Received(1).Delete(
+            $"{ExpectedPath}/{id}",
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Delete forwards the caller-supplied <see cref="CancellationToken"/> so
+    /// cooperative cancellation flows end-to-end.
+    /// </summary>
+    [Test]
+    public async Task Delete_ForwardsCancellationTokenToConnectionHandler()
+    {
+        const int id = 7;
+        using var cts = new CancellationTokenSource();
+        ConnectionHandler
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ApiResult<object> { IsSuccess = true }));
+
+        var service = new TaxService(ConnectionHandler);
+
+        await service.Delete(id, cts.Token);
+
+        await ConnectionHandler.Received(1).Delete(
+            $"{ExpectedPath}/{id}",
+            cts.Token);
+    }
+
+    /// <summary>
+    /// A failing <see cref="ApiResult{T}"/> (e.g. a 409 Conflict when the tax is
+    /// referenced elsewhere) must propagate to the caller without mutation.
+    /// </summary>
+    [Test]
+    public async Task Delete_ReturnsApiResultFromConnectionHandlerUnchanged()
+    {
+        var apiError = new ApiError(ErrorCode: 409, Message: "Conflict", Errors: new object());
+        var response = new ApiResult<object>
+        {
+            IsSuccess = false,
+            ApiError = apiError,
+            StatusCode = System.Net.HttpStatusCode.Conflict,
+            Data = null
+        };
+        ConnectionHandler
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var service = new TaxService(ConnectionHandler);
+
+        var result = await service.Delete(1);
+
+        Assert.That(result, Is.SameAs(response));
+    }
+
     private static Tax NewTax(int id) =>
         new(
             Id: id,

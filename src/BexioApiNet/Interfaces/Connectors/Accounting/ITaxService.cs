@@ -43,4 +43,20 @@ public interface ITaxService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns></returns>
     public Task<ApiResult<List<Tax>>> Get([Optional] QueryParameterTax? queryParameterTax, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Fetch a single tax by id. <see href="https://docs.bexio.com/#tag/Taxes/operation/ShowTax">Show Tax</see>
+    /// </summary>
+    /// <param name="id">The id of the tax</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
+    public Task<ApiResult<Tax>> GetById(int id, [Optional] CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Delete a tax. <see href="https://docs.bexio.com/#tag/Taxes/operation/DeleteTax">Delete Tax</see>
+    /// </summary>
+    /// <param name="id">The id of the tax</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
+    public Task<ApiResult<object>> Delete(int id, [Optional] CancellationToken cancellationToken);
 }
