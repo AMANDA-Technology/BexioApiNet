@@ -23,19 +23,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using BexioApiNet.Abstractions.Models.Sales.Positions;
-
-namespace BexioApiNet.Abstractions.Models.Sales.Quotes.Views;
+namespace BexioApiNet.Abstractions.Models.Sales.Positions;
 
 /// <summary>
-/// Body for <c>POST /2.0/kb_offer/{quote_id}/invoice</c> and <c>POST /2.0/kb_offer/{quote_id}/order</c>.
-/// When <see cref="Positions"/> is <see langword="null"/>, Bexio copies every position from the source
-/// quote; otherwise the supplied subset is used. Positions are typed as the polymorphic
-/// <see cref="Position"/> union so callers can build the desired subtype strongly.
-/// <see href="https://docs.bexio.com/#tag/Quotes/operation/v2CreateInvoiceFromQuote"/>
-/// <see href="https://docs.bexio.com/#tag/Quotes/operation/v2CreateOrderFromQuote"/>
+///     Subtotal position that prints a running total of preceding positions and a free-text label.
+///     Corresponds to the Bexio <c>KbPositionSubtotal</c> / <c>PositionSubtotalExtended</c> schema.
+///     <see href="https://docs.bexio.com/#tag/Subtotal-positions" />
 /// </summary>
-/// <param name="Positions">Optional subset of positions to carry over to the new document. Omit to copy all.</param>
-public sealed record QuoteConvertRequest(
-    [property: JsonPropertyName("positions")] IReadOnlyList<Position>? Positions = null
-);
+public sealed record PositionSubtotal : Position
+{
+    /// <inheritdoc />
+    public override string Type => PositionTypes.Subtotal;
+
+    /// <summary>Subtotal label rendered on the document.</summary>
+    [JsonPropertyName("text")]
+    public string? Text { get; init; }
+
+    /// <summary>Running total up to this subtotal line as a formatted decimal string (read-only).</summary>
+    [JsonPropertyName("value")]
+    public string? Value { get; init; }
+
+    /// <summary>Internal 1-based position ordering (read-only).</summary>
+    [JsonPropertyName("internal_pos")]
+    public int? InternalPos { get; init; }
+
+    /// <summary>When <see langword="true" />, the position is marked as optional on quotes/orders (read-only).</summary>
+    [JsonPropertyName("is_optional")]
+    public bool? IsOptional { get; init; }
+}

@@ -25,17 +25,30 @@ SOFTWARE.
 
 using BexioApiNet.Abstractions.Models.Sales.Positions;
 
-namespace BexioApiNet.Abstractions.Models.Sales.Quotes.Views;
+namespace BexioApiNet.Abstractions.Json;
 
 /// <summary>
-/// Body for <c>POST /2.0/kb_offer/{quote_id}/invoice</c> and <c>POST /2.0/kb_offer/{quote_id}/order</c>.
-/// When <see cref="Positions"/> is <see langword="null"/>, Bexio copies every position from the source
-/// quote; otherwise the supplied subset is used. Positions are typed as the polymorphic
-/// <see cref="Position"/> union so callers can build the desired subtype strongly.
-/// <see href="https://docs.bexio.com/#tag/Quotes/operation/v2CreateInvoiceFromQuote"/>
-/// <see href="https://docs.bexio.com/#tag/Quotes/operation/v2CreateOrderFromQuote"/>
+///     <see cref="System.Text.Json.Serialization.JsonConverter{T}" /> that maps Bexio's
+///     <c>anyOf</c> position payload onto the strongly-typed <see cref="Position" /> hierarchy.
+///     Uses the <c>type</c> discriminator (<c>KbPositionArticle</c>, <c>KbPositionCustom</c>,
+///     <c>KbPositionText</c>, <c>KbPositionSubposition</c>, <c>KbPositionSubtotal</c>,
+///     <c>KbPositionPagebreak</c>, <c>KbPositionDiscount</c>) emitted on every position element.
 /// </summary>
-/// <param name="Positions">Optional subset of positions to carry over to the new document. Omit to copy all.</param>
-public sealed record QuoteConvertRequest(
-    [property: JsonPropertyName("positions")] IReadOnlyList<Position>? Positions = null
-);
+public sealed class PositionJsonConverter : DiscriminatedJsonConverter<Position>
+{
+    /// <inheritdoc />
+    protected override string DiscriminatorPropertyName => "type";
+
+    /// <inheritdoc />
+    protected override Type? ResolveType(string discriminator) => discriminator switch
+    {
+        PositionTypes.Article => typeof(PositionArticle),
+        PositionTypes.Custom => typeof(PositionCustom),
+        PositionTypes.Text => typeof(PositionText),
+        PositionTypes.Subposition => typeof(PositionSubposition),
+        PositionTypes.Subtotal => typeof(PositionSubtotal),
+        PositionTypes.Pagebreak => typeof(PositionPagebreak),
+        PositionTypes.Discount => typeof(PositionDiscount),
+        _ => null
+    };
+}

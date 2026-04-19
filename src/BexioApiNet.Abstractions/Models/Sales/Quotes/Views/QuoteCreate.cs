@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Text.Json;
+using BexioApiNet.Abstractions.Models.Sales.Positions;
 
 namespace BexioApiNet.Abstractions.Models.Sales.Quotes.Views;
 
@@ -57,7 +57,7 @@ namespace BexioApiNet.Abstractions.Models.Sales.Quotes.Views;
 /// <param name="ApiReference">Caller-supplied reference accessible only via the API.</param>
 /// <param name="KbTermsOfPaymentTemplateId">Optional reference to a terms-of-payment template.</param>
 /// <param name="TemplateSlug">References a document template slug.</param>
-/// <param name="Positions">Polymorphic list of positions to create. Bexio accepts a union of several position types, so they are accepted as raw <see cref="JsonElement"/> values.</param>
+/// <param name="Positions">Polymorphic list of positions to create. Pass any mix of <see cref="Position"/> subtypes — the converter emits the <c>type</c> discriminator expected by Bexio.</param>
 public sealed record QuoteCreate(
     [property: JsonPropertyName("user_id")] int UserId,
     [property: JsonPropertyName("document_nr")] string? DocumentNr = null,
@@ -83,5 +83,5 @@ public sealed record QuoteCreate(
     [property: JsonPropertyName("api_reference")] string? ApiReference = null,
     [property: JsonPropertyName("kb_terms_of_payment_template_id")] int? KbTermsOfPaymentTemplateId = null,
     [property: JsonPropertyName("template_slug")] string? TemplateSlug = null,
-    [property: JsonPropertyName("positions")] IReadOnlyList<JsonElement>? Positions = null
+    [property: JsonPropertyName("positions")] IReadOnlyList<Position>? Positions = null
 );

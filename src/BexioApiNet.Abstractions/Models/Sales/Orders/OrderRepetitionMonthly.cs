@@ -23,19 +23,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using BexioApiNet.Abstractions.Models.Sales.Positions;
-
-namespace BexioApiNet.Abstractions.Models.Sales.Quotes.Views;
+namespace BexioApiNet.Abstractions.Models.Sales.Orders;
 
 /// <summary>
-/// Body for <c>POST /2.0/kb_offer/{quote_id}/invoice</c> and <c>POST /2.0/kb_offer/{quote_id}/order</c>.
-/// When <see cref="Positions"/> is <see langword="null"/>, Bexio copies every position from the source
-/// quote; otherwise the supplied subset is used. Positions are typed as the polymorphic
-/// <see cref="Position"/> union so callers can build the desired subtype strongly.
-/// <see href="https://docs.bexio.com/#tag/Quotes/operation/v2CreateInvoiceFromQuote"/>
-/// <see href="https://docs.bexio.com/#tag/Quotes/operation/v2CreateOrderFromQuote"/>
+///     Monthly repetition schedule — fires every <see cref="OrderRepetitionSchedule.Interval" />
+///     months on the day described by <see cref="Schedule" />. Corresponds to the Bexio
+///     <c>OrderRepetitionMonthly</c> schema (<c>type = "monthly"</c>).
 /// </summary>
-/// <param name="Positions">Optional subset of positions to carry over to the new document. Omit to copy all.</param>
-public sealed record QuoteConvertRequest(
-    [property: JsonPropertyName("positions")] IReadOnlyList<Position>? Positions = null
-);
+public sealed record OrderRepetitionMonthly : OrderRepetitionSchedule
+{
+    /// <inheritdoc />
+    public override string Type => OrderRepetitionTypes.Monthly;
+
+    /// <summary>
+    ///     Day-of-month selector. One of the Bexio literals <c>fixed_day</c>, <c>week_day</c>,
+    ///     <c>first_day</c> or <c>last_day</c>.
+    /// </summary>
+    [JsonPropertyName("schedule")]
+    public string Schedule { get; init; } = string.Empty;
+}

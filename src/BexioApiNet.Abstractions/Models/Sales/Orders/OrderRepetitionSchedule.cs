@@ -23,27 +23,32 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Json;
+
 namespace BexioApiNet.Abstractions.Models.Sales.Orders;
 
 /// <summary>
-///     Order repetition payload returned by (and accepted by) the Bexio
-///     <c>/2.0/kb_order/{order_id}/repetition</c> endpoints. <see cref="Repetition" /> is the
-///     polymorphic <see cref="OrderRepetitionSchedule" /> union deserialized into the concrete subtype
-///     identified by its <c>type</c> discriminator.
+///     Discriminated union over the four repetition schedules Bexio accepts on an
+///     <see cref="OrderRepetition" /> payload — <see cref="OrderRepetitionDaily" />,
+///     <see cref="OrderRepetitionWeekly" />, <see cref="OrderRepetitionMonthly" /> and
+///     <see cref="OrderRepetitionYearly" />. The concrete subtype is selected from the
+///     <c>type</c> discriminator (<c>daily</c>, <c>weekly</c>, <c>monthly</c>, <c>yearly</c>).
 ///     <see href="https://docs.bexio.com/#tag/Orders/operation/v2ShowOrderRepetition" />
 /// </summary>
-/// <param name="Start">Repetition start date in Bexio's <c>yyyy-MM-dd</c> format.</param>
-/// <param name="End">
-///     Repetition end date in Bexio's <c>yyyy-MM-dd</c> format; <see langword="null" /> for indefinite
-///     repetitions.
-/// </param>
-/// <param name="Repetition">
-///     Polymorphic repetition descriptor. The <c>type</c> discriminator (<c>daily</c>, <c>weekly</c>,
-///     <c>monthly</c>, <c>yearly</c>) selects the concrete <see cref="OrderRepetitionSchedule" /> subtype.
-/// </param>
-public sealed record OrderRepetition(
-    [property: JsonPropertyName("start")] string? Start,
-    [property: JsonPropertyName("end")] string? End,
-    [property: JsonPropertyName("repetition")]
-    OrderRepetitionSchedule? Repetition
-);
+[JsonConverter(typeof(OrderRepetitionScheduleJsonConverter))]
+public abstract record OrderRepetitionSchedule
+{
+    /// <summary>
+    ///     Discriminator string identifying the concrete schedule (<c>daily</c>, <c>weekly</c>,
+    ///     <c>monthly</c> or <c>yearly</c>).
+    /// </summary>
+    [JsonPropertyName("type")]
+    public abstract string Type { get; }
+
+    /// <summary>
+    ///     Multiplier applied to the schedule's natural period (e.g. <c>interval = 2</c> on a
+    ///     weekly schedule means "every other week").
+    /// </summary>
+    [JsonPropertyName("interval")]
+    public int Interval { get; init; }
+}

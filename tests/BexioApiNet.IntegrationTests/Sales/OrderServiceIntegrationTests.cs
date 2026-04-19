@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Text.Json;
 using BexioApiNet.Abstractions.Models.Api;
+using BexioApiNet.Abstractions.Models.Sales.Orders;
 using BexioApiNet.Abstractions.Models.Sales.Orders.Views;
 using BexioApiNet.Services.Connectors.Sales;
 
@@ -468,10 +468,9 @@ public sealed class OrderServiceIntegrationTests : IntegrationTestBase
 
         var service = new OrderService(ConnectionHandler);
 
-        using var repetition = JsonDocument.Parse("""{"type":"daily","interval":1}""");
         var payload = new OrderRepetitionCreate(
             Start: "2026-04-01",
-            Repetition: repetition.RootElement.Clone());
+            Repetition: new OrderRepetitionDaily { Interval = 1 });
 
         var result = await service.CreateRepetition(id, payload, TestContext.CurrentContext.CancellationToken);
 

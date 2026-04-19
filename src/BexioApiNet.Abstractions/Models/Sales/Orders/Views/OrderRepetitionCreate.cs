@@ -23,8 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Text.Json;
-
 namespace BexioApiNet.Abstractions.Models.Sales.Orders.Views;
 
 /// <summary>
@@ -36,9 +34,10 @@ namespace BexioApiNet.Abstractions.Models.Sales.Orders.Views;
 /// </summary>
 /// <param name="Start">Repetition start date in Bexio's <c>yyyy-MM-dd</c> format.</param>
 /// <param name="Repetition">
-///     Polymorphic repetition descriptor (<c>daily</c>, <c>weekly</c>, <c>monthly</c> or
-///     <c>yearly</c>). Accepted as a raw <see cref="JsonElement" /> so callers can build the appropriate subtype without
-///     the library prescribing a schema.
+///     Polymorphic repetition descriptor. Pass the concrete <see cref="OrderRepetitionSchedule" /> subtype
+///     (<see cref="OrderRepetitionDaily" />, <see cref="OrderRepetitionWeekly" />,
+///     <see cref="OrderRepetitionMonthly" />, <see cref="OrderRepetitionYearly" />) — the converter emits
+///     the <c>type</c> discriminator expected by Bexio.
 /// </param>
 /// <param name="End">
 ///     Optional repetition end date in Bexio's <c>yyyy-MM-dd</c> format. When <see langword="null" /> the
@@ -47,6 +46,6 @@ namespace BexioApiNet.Abstractions.Models.Sales.Orders.Views;
 public sealed record OrderRepetitionCreate(
     [property: JsonPropertyName("start")] string Start,
     [property: JsonPropertyName("repetition")]
-    JsonElement Repetition,
+    OrderRepetitionSchedule Repetition,
     [property: JsonPropertyName("end")] string? End = null
 );

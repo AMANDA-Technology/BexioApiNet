@@ -23,7 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Text.Json;
+using BexioApiNet.Abstractions.Models.Sales.Positions;
 
 namespace BexioApiNet.Abstractions.Models.Sales.Orders.Views;
 
@@ -65,8 +65,8 @@ namespace BexioApiNet.Abstractions.Models.Sales.Orders.Views;
 /// <param name="ApiReference">Caller-supplied reference accessible only via the API.</param>
 /// <param name="TemplateSlug">References a document template slug.</param>
 /// <param name="Positions">
-///     Polymorphic list of positions to create. Bexio accepts a union of several position types, so
-///     they are accepted as raw <see cref="JsonElement" /> values.
+///     Polymorphic list of positions to create. Pass any mix of <see cref="Position" /> subtypes — the
+///     converter emits the <c>type</c> discriminator expected by Bexio.
 /// </param>
 public sealed record OrderCreate(
     [property: JsonPropertyName("user_id")]
@@ -111,5 +111,5 @@ public sealed record OrderCreate(
     [property: JsonPropertyName("template_slug")]
     string? TemplateSlug = null,
     [property: JsonPropertyName("positions")]
-    IReadOnlyList<JsonElement>? Positions = null
+    IReadOnlyList<Position>? Positions = null
 );

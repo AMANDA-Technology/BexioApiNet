@@ -23,19 +23,22 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using BexioApiNet.Abstractions.Models.Sales.Positions;
-
-namespace BexioApiNet.Abstractions.Models.Sales.Quotes.Views;
+namespace BexioApiNet.Abstractions.Models.Sales.Orders;
 
 /// <summary>
-/// Body for <c>POST /2.0/kb_offer/{quote_id}/invoice</c> and <c>POST /2.0/kb_offer/{quote_id}/order</c>.
-/// When <see cref="Positions"/> is <see langword="null"/>, Bexio copies every position from the source
-/// quote; otherwise the supplied subset is used. Positions are typed as the polymorphic
-/// <see cref="Position"/> union so callers can build the desired subtype strongly.
-/// <see href="https://docs.bexio.com/#tag/Quotes/operation/v2CreateInvoiceFromQuote"/>
-/// <see href="https://docs.bexio.com/#tag/Quotes/operation/v2CreateOrderFromQuote"/>
+///     Weekly repetition schedule — fires on the listed <see cref="Weekdays" /> every
+///     <see cref="OrderRepetitionSchedule.Interval" /> weeks. Corresponds to the Bexio
+///     <c>OrderRepetitionWeekly</c> schema (<c>type = "weekly"</c>).
 /// </summary>
-/// <param name="Positions">Optional subset of positions to carry over to the new document. Omit to copy all.</param>
-public sealed record QuoteConvertRequest(
-    [property: JsonPropertyName("positions")] IReadOnlyList<Position>? Positions = null
-);
+public sealed record OrderRepetitionWeekly : OrderRepetitionSchedule
+{
+    /// <inheritdoc />
+    public override string Type => OrderRepetitionTypes.Weekly;
+
+    /// <summary>
+    ///     Weekdays on which the schedule fires. Each entry is a lowercase English day name
+    ///     (<c>monday</c>, <c>tuesday</c>, …, <c>sunday</c>) as accepted by the Bexio API.
+    /// </summary>
+    [JsonPropertyName("weekdays")]
+    public IReadOnlyList<string> Weekdays { get; init; } = [];
+}

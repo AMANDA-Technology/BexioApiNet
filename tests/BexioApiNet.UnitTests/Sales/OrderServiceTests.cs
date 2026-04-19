@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Text.Json;
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Deliveries;
@@ -437,10 +436,9 @@ public sealed class OrderServiceTests : ServiceTestBase
 
     private static OrderRepetitionCreate BuildRepetitionCreatePayload()
     {
-        using var doc = JsonDocument.Parse("""{"type":"daily","interval":1}""");
         return new OrderRepetitionCreate(
             "2026-01-01",
-            doc.RootElement.Clone(),
+            new OrderRepetitionDaily { Interval = 1 },
             "2026-12-31");
     }
 

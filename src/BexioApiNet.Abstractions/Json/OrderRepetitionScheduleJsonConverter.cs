@@ -23,19 +23,28 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using BexioApiNet.Abstractions.Models.Sales.Positions;
+using BexioApiNet.Abstractions.Models.Sales.Orders;
 
-namespace BexioApiNet.Abstractions.Models.Sales.Quotes.Views;
+namespace BexioApiNet.Abstractions.Json;
 
 /// <summary>
-/// Body for <c>POST /2.0/kb_offer/{quote_id}/invoice</c> and <c>POST /2.0/kb_offer/{quote_id}/order</c>.
-/// When <see cref="Positions"/> is <see langword="null"/>, Bexio copies every position from the source
-/// quote; otherwise the supplied subset is used. Positions are typed as the polymorphic
-/// <see cref="Position"/> union so callers can build the desired subtype strongly.
-/// <see href="https://docs.bexio.com/#tag/Quotes/operation/v2CreateInvoiceFromQuote"/>
-/// <see href="https://docs.bexio.com/#tag/Quotes/operation/v2CreateOrderFromQuote"/>
+///     <see cref="System.Text.Json.Serialization.JsonConverter{T}" /> that maps Bexio's
+///     <c>oneOf</c> order-repetition payload onto the strongly-typed
+///     <see cref="OrderRepetitionSchedule" /> hierarchy. Uses the <c>type</c> discriminator
+///     (<c>daily</c>, <c>weekly</c>, <c>monthly</c>, <c>yearly</c>).
 /// </summary>
-/// <param name="Positions">Optional subset of positions to carry over to the new document. Omit to copy all.</param>
-public sealed record QuoteConvertRequest(
-    [property: JsonPropertyName("positions")] IReadOnlyList<Position>? Positions = null
-);
+public sealed class OrderRepetitionScheduleJsonConverter : DiscriminatedJsonConverter<OrderRepetitionSchedule>
+{
+    /// <inheritdoc />
+    protected override string DiscriminatorPropertyName => "type";
+
+    /// <inheritdoc />
+    protected override Type? ResolveType(string discriminator) => discriminator switch
+    {
+        OrderRepetitionTypes.Daily => typeof(OrderRepetitionDaily),
+        OrderRepetitionTypes.Weekly => typeof(OrderRepetitionWeekly),
+        OrderRepetitionTypes.Monthly => typeof(OrderRepetitionMonthly),
+        OrderRepetitionTypes.Yearly => typeof(OrderRepetitionYearly),
+        _ => null
+    };
+}
