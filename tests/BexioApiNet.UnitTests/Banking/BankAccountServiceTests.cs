@@ -168,6 +168,85 @@ public sealed class BankAccountServiceTests : ServiceTestBase
         Assert.That(result, Is.SameAs(response));
     }
 
+    /// <summary>
+    /// <c>GetById</c> hits <c>3.0/banking/accounts/{id}</c> exactly once with a
+    /// <see langword="null"/> query parameter and returns the connection
+    /// handler's <see cref="ApiResult{T}"/> as-is.
+    /// </summary>
+    [Test]
+    public async Task GetById_WithId_CallsGetAsyncOnceWithExpectedPath()
+    {
+        const int id = 42;
+        var expected = new ApiResult<BankAccountGet>
+        {
+            IsSuccess = true,
+            Data = NewBankAccount(id)
+        };
+        ConnectionHandler
+            .GetAsync<BankAccountGet>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(expected));
+
+        var service = new BankAccountService(ConnectionHandler);
+
+        var result = await service.GetById(id);
+
+        Assert.That(result, Is.SameAs(expected));
+        await ConnectionHandler.Received(1).GetAsync<BankAccountGet>(
+            $"{ExpectedPath}/{id}",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// The cancellation token supplied to <c>GetById</c> must be forwarded to
+    /// the connection handler so cooperative cancellation flows end-to-end.
+    /// </summary>
+    [Test]
+    public async Task GetById_ForwardsCancellationTokenToConnectionHandler()
+    {
+        const int id = 7;
+        using var cts = new CancellationTokenSource();
+        ConnectionHandler
+            .GetAsync<BankAccountGet>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ApiResult<BankAccountGet> { IsSuccess = true, Data = NewBankAccount(id) }));
+
+        var service = new BankAccountService(ConnectionHandler);
+
+        await service.GetById(id, cts.Token);
+
+        await ConnectionHandler.Received(1).GetAsync<BankAccountGet>(
+            $"{ExpectedPath}/{id}",
+            null,
+            cts.Token);
+    }
+
+    /// <summary>
+    /// A failing <see cref="ApiResult{T}"/> from the connection handler must
+    /// surface to the <c>GetById</c> caller untouched.
+    /// </summary>
+    [Test]
+    public async Task GetById_ReturnsApiResultFromConnectionHandlerUnchanged()
+    {
+        const int id = 99;
+        var apiError = new ApiError(ErrorCode: 404, Message: "not found", Errors: new object());
+        var response = new ApiResult<BankAccountGet>
+        {
+            IsSuccess = false,
+            ApiError = apiError,
+            StatusCode = System.Net.HttpStatusCode.NotFound,
+            Data = null
+        };
+        ConnectionHandler
+            .GetAsync<BankAccountGet>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var service = new BankAccountService(ConnectionHandler);
+
+        var result = await service.GetById(id);
+
+        Assert.That(result, Is.SameAs(response));
+    }
+
     private static BankAccountGet NewBankAccount(int id) =>
         new(
             Id: id,
