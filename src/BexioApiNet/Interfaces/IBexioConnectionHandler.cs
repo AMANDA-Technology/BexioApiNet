@@ -84,4 +84,77 @@ public interface IBexioConnectionHandler : IDisposable
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns></returns>
     public Task<ApiResult<object>> Delete(string requestPath, [Optional] CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Put any object type. Used for full replacement updates (e.g. manual entries, payments, bills, expenses).
+    /// </summary>
+    /// <param name="payload">The payload, normally an update view of a given object type</param>
+    /// <param name="requestPath">The api request path</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <typeparam name="TResult">The api result in the requested object type</typeparam>
+    /// <typeparam name="TUpdate">The update object view type</typeparam>
+    /// <returns></returns>
+    public Task<ApiResult<TResult>> PutAsync<TResult, TUpdate>(TUpdate payload, string requestPath, [Optional] CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Patch any object type. Used for partial updates (e.g. currencies, files, employees, fictional users).
+    /// </summary>
+    /// <param name="payload">The payload, normally a patch view of a given object type</param>
+    /// <param name="requestPath">The api request path</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <typeparam name="TResult">The api result in the requested object type</typeparam>
+    /// <typeparam name="TPatch">The patch object view type</typeparam>
+    /// <returns></returns>
+    public Task<ApiResult<TResult>> PatchAsync<TResult, TPatch>(TPatch payload, string requestPath, [Optional] CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Post an action endpoint without a request body, returning a typed response
+    /// (e.g. invoice issue/cancel/send, quote accept/reject, order delivery).
+    /// </summary>
+    /// <param name="requestPath">The api request path</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <typeparam name="TResult">The api result in the requested object type</typeparam>
+    /// <returns></returns>
+    public Task<ApiResult<TResult>> PostActionAsync<TResult>(string requestPath, [Optional] CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Post an action endpoint without a request body, returning no data
+    /// (e.g. mark as sent, revert issue).
+    /// </summary>
+    /// <param name="requestPath">The api request path</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
+    public Task<ApiResult<object>> PostActionAsync(string requestPath, [Optional] CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Get a binary payload (e.g. invoice/quote/order PDFs, paystubs, file download or preview).
+    /// </summary>
+    /// <param name="requestPath">The api request path</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns>An <see cref="ApiResult{T}"/> whose <c>Data</c> contains the response bytes on success, or null on failure.</returns>
+    public Task<ApiResult<byte[]>> GetBinaryAsync(string requestPath, [Optional] CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Post a search query with a list of <see cref="SearchCriteria"/> to a Bexio <c>/search</c> endpoint.
+    /// Optionally accepts a <see cref="QueryParameter"/> for pagination and sorting parameters
+    /// (e.g. <c>limit</c>, <c>offset</c>, <c>order_by</c>).
+    /// </summary>
+    /// <param name="searchCriteria">The search criteria list sent as the JSON body</param>
+    /// <param name="requestPath">The api request path</param>
+    /// <param name="queryParameter">Optional query parameter to append to the URI</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <typeparam name="TResult">The api result element type</typeparam>
+    /// <returns></returns>
+    public Task<ApiResult<List<TResult>>> PostSearchAsync<TResult>(List<SearchCriteria> searchCriteria, string requestPath, [Optional] QueryParameter? queryParameter, [Optional] CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Post a list of payloads for bulk creation (e.g. contact bulk create).
+    /// </summary>
+    /// <param name="payloads">The payload list sent as the JSON body</param>
+    /// <param name="requestPath">The api request path</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <typeparam name="TResult">The api result element type</typeparam>
+    /// <typeparam name="TCreate">The create object view type</typeparam>
+    /// <returns></returns>
+    public Task<ApiResult<List<TResult>>> PostBulkAsync<TResult, TCreate>(List<TCreate> payloads, string requestPath, [Optional] CancellationToken cancellationToken);
 }

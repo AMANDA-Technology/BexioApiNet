@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using System.Net;
+using System.Net.Http.Headers;
 using System.Text;
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
@@ -488,6 +489,296 @@ public class BexioConnectionHandlerTests
 
             Assert.CatchAsync<OperationCanceledException>(async () =>
                 await handler.GetAsync<TestItem>("2.0/accounts", null, cts.Token));
+        }
+    }
+
+    // -----------------------------------------------------------------------
+    // G. PUT / PATCH / action / binary / search / bulk
+    // -----------------------------------------------------------------------
+
+    /// <summary>
+    ///     A PUT call must emit an HTTP PUT request to the path provided and carry the serialized
+    ///     payload as JSON body.
+    /// </summary>
+    [Test]
+    public async Task PutAsync_SendsPutRequest_ToCorrectPath()
+    {
+        var (handler, httpClient, stub) = CreateHandler();
+        using (handler)
+        using (httpClient)
+        {
+            var payload = new TestPayload("alpha", 42);
+
+            await handler.PutAsync<TestItem, TestPayload>(payload, "3.0/accounting/manual_entries/7",
+                CancellationToken.None);
+
+            Assert.That(stub.CapturedRequest, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(stub.CapturedRequest!.Method, Is.EqualTo(HttpMethod.Put));
+                Assert.That(stub.CapturedRequest.RequestUri!.AbsolutePath,
+                    Is.EqualTo("/3.0/accounting/manual_entries/7"));
+                Assert.That(stub.CapturedRequestBody, Does.Contain("\"Name\":\"alpha\""));
+                Assert.That(stub.CapturedRequestBody, Does.Contain("\"Value\":42"));
+                Assert.That(stub.CapturedRequest.Content!.Headers.ContentType?.MediaType,
+                    Is.EqualTo("application/json"));
+            });
+        }
+    }
+
+    /// <summary>
+    ///     A PATCH call must emit an HTTP PATCH request to the path provided and carry the
+    ///     serialized payload as JSON body.
+    /// </summary>
+    [Test]
+    public async Task PatchAsync_SendsPatchRequest_ToCorrectPath()
+    {
+        var (handler, httpClient, stub) = CreateHandler();
+        using (handler)
+        using (httpClient)
+        {
+            var payload = new TestPayload("beta", 7);
+
+            await handler.PatchAsync<TestItem, TestPayload>(payload, "3.0/currencies/3",
+                CancellationToken.None);
+
+            Assert.That(stub.CapturedRequest, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(stub.CapturedRequest!.Method, Is.EqualTo(HttpMethod.Patch));
+                Assert.That(stub.CapturedRequest.RequestUri!.AbsolutePath, Is.EqualTo("/3.0/currencies/3"));
+                Assert.That(stub.CapturedRequestBody, Does.Contain("\"Name\":\"beta\""));
+                Assert.That(stub.CapturedRequest.Content!.Headers.ContentType?.MediaType,
+                    Is.EqualTo("application/json"));
+            });
+        }
+    }
+
+    /// <summary>
+    ///     The typed overload of <see cref="BexioConnectionHandler.PostActionAsync{TResult}" /> must
+    ///     emit a POST with no body to the supplied action endpoint path.
+    /// </summary>
+    [Test]
+    public async Task PostActionAsync_WithTResult_SendsPostRequest_ToCorrectPath()
+    {
+        var (handler, httpClient, stub) = CreateHandler();
+        using (handler)
+        using (httpClient)
+        {
+            await handler.PostActionAsync<TestItem>("2.0/kb_invoice/42/issue", CancellationToken.None);
+
+            Assert.That(stub.CapturedRequest, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(stub.CapturedRequest!.Method, Is.EqualTo(HttpMethod.Post));
+                Assert.That(stub.CapturedRequest.RequestUri!.AbsolutePath, Is.EqualTo("/2.0/kb_invoice/42/issue"));
+                Assert.That(stub.CapturedRequest.Content, Is.Null);
+            });
+        }
+    }
+
+    /// <summary>
+    ///     The void overload of <see cref="BexioConnectionHandler.PostActionAsync" /> must emit a
+    ///     POST with no body and surface success through the untyped <see cref="ApiResult{T}" />.
+    /// </summary>
+    [Test]
+    public async Task PostActionAsync_WithVoid_SendsPostRequest_ToCorrectPath()
+    {
+        var (handler, httpClient, stub) = CreateHandler();
+        using (handler)
+        using (httpClient)
+        {
+            var result = await handler.PostActionAsync("2.0/kb_invoice/42/mark_as_sent", CancellationToken.None);
+
+            Assert.That(stub.CapturedRequest, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(stub.CapturedRequest!.Method, Is.EqualTo(HttpMethod.Post));
+                Assert.That(stub.CapturedRequest.RequestUri!.AbsolutePath,
+                    Is.EqualTo("/2.0/kb_invoice/42/mark_as_sent"));
+                Assert.That(stub.CapturedRequest.Content, Is.Null);
+                Assert.That(result.IsSuccess, Is.True);
+            });
+        }
+    }
+
+    /// <summary>
+    ///     <see cref="BexioConnectionHandler.GetBinaryAsync" /> must emit a GET and return the raw
+    ///     response bytes verbatim in <see cref="ApiResult{T}.Data" /> instead of attempting JSON
+    ///     deserialisation.
+    /// </summary>
+    [Test]
+    public async Task GetBinaryAsync_SendsGetRequest_AndReturnsByteArrayData()
+    {
+        var (handler, httpClient, stub) = CreateHandler();
+        using (handler)
+        using (httpClient)
+        {
+            var pdfBytes = new byte[] { 0x25, 0x50, 0x44, 0x46, 0x2D, 0x31, 0x2E, 0x37 };
+            stub.Response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new ByteArrayContent(pdfBytes)
+                {
+                    Headers = { ContentType = new MediaTypeHeaderValue("application/pdf") }
+                }
+            };
+
+            var result = await handler.GetBinaryAsync("2.0/kb_invoice/42/pdf", CancellationToken.None);
+
+            Assert.That(stub.CapturedRequest, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(stub.CapturedRequest!.Method, Is.EqualTo(HttpMethod.Get));
+                Assert.That(stub.CapturedRequest.RequestUri!.AbsolutePath, Is.EqualTo("/2.0/kb_invoice/42/pdf"));
+                Assert.That(result.IsSuccess, Is.True);
+                Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.OK));
+                Assert.That(result.Data, Is.Not.Null);
+                Assert.That(result.Data!, Is.EqualTo(pdfBytes));
+                Assert.That(result.ApiError, Is.Null);
+            });
+        }
+    }
+
+    /// <summary>
+    ///     A non-success response from <see cref="BexioConnectionHandler.GetBinaryAsync" /> must
+    ///     leave <see cref="ApiResult{T}.Data" /> null and populate <see cref="ApiResult.ApiError" />.
+    /// </summary>
+    [Test]
+    public async Task GetBinaryAsync_On404_ReturnsIsSuccessFalse_WithApiError()
+    {
+        var (handler, httpClient, stub) = CreateHandler();
+        using (handler)
+        using (httpClient)
+        {
+            stub.Response = new HttpResponseMessage(HttpStatusCode.NotFound)
+            {
+                Content = new StringContent("{\"error_code\":404,\"message\":\"missing\",\"errors\":{}}",
+                    Encoding.UTF8, "application/json")
+            };
+
+            var result = await handler.GetBinaryAsync("2.0/kb_invoice/999/pdf", CancellationToken.None);
+
+            Assert.That(result, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(result.IsSuccess, Is.False);
+                Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.NotFound));
+                Assert.That(result.Data, Is.Null);
+                Assert.That(result.ApiError, Is.Not.Null);
+                Assert.That(result.ApiError!.Message, Is.EqualTo("missing"));
+            });
+        }
+    }
+
+    /// <summary>
+    ///     <see cref="BexioConnectionHandler.PostSearchAsync{TResult}" /> must POST the search
+    ///     criteria as a JSON array body and append supplied <see cref="QueryParameter" /> values
+    ///     to the request URI as a query string.
+    /// </summary>
+    [Test]
+    public async Task PostSearchAsync_SendsPostRequest_WithBodyAndQueryParameters()
+    {
+        var (handler, httpClient, stub) = CreateHandler();
+        using (handler)
+        using (httpClient)
+        {
+            stub.Response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("[]", Encoding.UTF8, "application/json")
+            };
+
+            var criteria = new List<SearchCriteria>
+            {
+                new() { Field = "name", Value = "Acme", Criteria = "like" },
+                new() { Field = "email", Value = "info@example.com", Criteria = "=" }
+            };
+            var queryParameter = new QueryParameter(new Dictionary<string, object>
+            {
+                ["limit"] = 25,
+                ["offset"] = 50
+            });
+
+            await handler.PostSearchAsync<TestItem>(criteria, "2.0/contact/search", queryParameter,
+                CancellationToken.None);
+
+            Assert.That(stub.CapturedRequest, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(stub.CapturedRequest!.Method, Is.EqualTo(HttpMethod.Post));
+                Assert.That(stub.CapturedRequest.RequestUri!.AbsolutePath, Is.EqualTo("/2.0/contact/search"));
+                Assert.That(stub.CapturedRequest.RequestUri.Query, Does.Contain("limit=25"));
+                Assert.That(stub.CapturedRequest.RequestUri.Query, Does.Contain("offset=50"));
+                Assert.That(stub.CapturedRequestBody, Does.Contain("\"field\":\"name\""));
+                Assert.That(stub.CapturedRequestBody, Does.Contain("\"value\":\"Acme\""));
+                Assert.That(stub.CapturedRequestBody, Does.Contain("\"criteria\":\"like\""));
+                Assert.That(stub.CapturedRequest.Content!.Headers.ContentType?.MediaType,
+                    Is.EqualTo("application/json"));
+            });
+        }
+    }
+
+    /// <summary>
+    ///     When no <see cref="QueryParameter" /> is supplied to <see cref="BexioConnectionHandler.PostSearchAsync{TResult}" />
+    ///     the request URI must carry no query string.
+    /// </summary>
+    [Test]
+    public async Task PostSearchAsync_WithoutQueryParameter_HasNoQueryString()
+    {
+        var (handler, httpClient, stub) = CreateHandler();
+        using (handler)
+        using (httpClient)
+        {
+            stub.Response = new HttpResponseMessage(HttpStatusCode.OK)
+            {
+                Content = new StringContent("[]", Encoding.UTF8, "application/json")
+            };
+
+            var criteria = new List<SearchCriteria>
+            {
+                new() { Field = "name", Value = "Acme", Criteria = "=" }
+            };
+
+            await handler.PostSearchAsync<TestItem>(criteria, "2.0/contact/search", null, CancellationToken.None);
+
+            Assert.That(stub.CapturedRequest, Is.Not.Null);
+            Assert.That(stub.CapturedRequest!.RequestUri!.Query, Is.Empty);
+        }
+    }
+
+    /// <summary>
+    ///     <see cref="BexioConnectionHandler.PostBulkAsync{TResult, TCreate}" /> must POST the full
+    ///     payload list as a JSON array body to the supplied bulk endpoint path.
+    /// </summary>
+    [Test]
+    public async Task PostBulkAsync_SendsPostRequest_WithArrayBody()
+    {
+        var (handler, httpClient, stub) = CreateHandler();
+        using (handler)
+        using (httpClient)
+        {
+            var payloads = new List<TestPayload>
+            {
+                new("first", 1),
+                new("second", 2),
+                new("third", 3)
+            };
+
+            await handler.PostBulkAsync<TestItem, TestPayload>(payloads, "2.0/contact/_bulk_create",
+                CancellationToken.None);
+
+            Assert.That(stub.CapturedRequest, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(stub.CapturedRequest!.Method, Is.EqualTo(HttpMethod.Post));
+                Assert.That(stub.CapturedRequest.RequestUri!.AbsolutePath, Is.EqualTo("/2.0/contact/_bulk_create"));
+                Assert.That(stub.CapturedRequestBody, Does.StartWith("["));
+                Assert.That(stub.CapturedRequestBody, Does.EndWith("]"));
+                Assert.That(stub.CapturedRequestBody, Does.Contain("\"Name\":\"first\""));
+                Assert.That(stub.CapturedRequestBody, Does.Contain("\"Name\":\"second\""));
+                Assert.That(stub.CapturedRequestBody, Does.Contain("\"Name\":\"third\""));
+                Assert.That(stub.CapturedRequest.Content!.Headers.ContentType?.MediaType,
+                    Is.EqualTo("application/json"));
+            });
         }
     }
 }
