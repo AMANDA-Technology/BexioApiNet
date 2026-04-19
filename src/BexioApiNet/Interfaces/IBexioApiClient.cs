@@ -145,4 +145,9 @@ public interface IBexioApiClient : IDisposable
     /// Bexio orders (customer confirmations) connector. <see href="https://docs.bexio.com/#tag/Orders">Orders</see>
     /// </summary>
     public IOrderService Orders { get; set; }
+
+    /// <summary>
+    /// Bexio deliveries connector. <see href="https://docs.bexio.com/#tag/Deliveries">Deliveries</see>
+    /// </summary>
+    public IDeliveryService Deliveries { get; set; }
 }

@@ -95,7 +95,8 @@ public abstract class BexioE2eTestBase
             new InvoiceService(connectionHandler),
             new InvoiceReminderService(connectionHandler),
             new QuoteService(connectionHandler),
-            new OrderService(connectionHandler));
+            new OrderService(connectionHandler),
+            new DeliveryService(connectionHandler));
     }
 
     /// <summary>

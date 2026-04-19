@@ -72,7 +72,8 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IInvoiceService>(),
             Substitute.For<IInvoiceReminderService>(),
             Substitute.For<IQuoteService>(),
-            Substitute.For<IOrderService>());
+            Substitute.For<IOrderService>(),
+            Substitute.For<IDeliveryService>());
 
         Assert.Multiple(() =>
         {
@@ -98,6 +99,7 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.InvoiceReminders, Is.Not.Null);
             Assert.That(client.Quotes, Is.Not.Null);
             Assert.That(client.Orders, Is.Not.Null);
+            Assert.That(client.Deliveries, Is.Not.Null);
         });
     }
 }
