@@ -25,6 +25,7 @@ SOFTWARE.
 
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
+using BexioApiNet.Interfaces.Connectors.Contacts;
 
 namespace BexioApiNet.Interfaces;
 
@@ -57,4 +58,69 @@ public interface IBexioApiClient : IDisposable
     /// Bexio currency connector. <see href="https://docs.bexio.com/#tag/Taxes">Taxes</see>
     /// </summary>
     public ITaxService Taxes { get; set; }
+
+    /// <summary>
+    /// Bexio account group connector. <see href="https://docs.bexio.com/#tag/Account-Groups">Account Groups</see>
+    /// </summary>
+    public IAccountGroupService AccountGroups { get; set; }
+
+    /// <summary>
+    /// Bexio accounting business years connector. <see href="https://docs.bexio.com/#tag/Business-Years">Business Years</see>
+    /// </summary>
+    public IBusinessYearService AccountingBusinessYears { get; set; }
+
+    /// <summary>
+    /// Bexio accounting calendar years connector. <see href="https://docs.bexio.com/#tag/Calendar-Years">Calendar Years</see>
+    /// </summary>
+    public ICalendarYearService AccountingCalendarYears { get; set; }
+
+    /// <summary>
+    /// Bexio accounting VAT periods connector. <see href="https://docs.bexio.com/#tag/Vat-Periods">Vat Periods</see>
+    /// </summary>
+    public IVatPeriodService AccountingVatPeriods { get; set; }
+
+    /// <summary>
+    /// Bexio accounting reports connector. <see href="https://docs.bexio.com/#tag/Reports">Reports</see>
+    /// </summary>
+    public IReportService AccountingReports { get; set; }
+
+    /// <summary>
+    /// Bexio payment types connector. <see href="https://docs.bexio.com/#tag/Payment-Types">Payment Types</see>
+    /// </summary>
+    public IPaymentTypeService PaymentTypes { get; set; }
+
+    /// <summary>
+    /// Bexio banking payments connector. <see href="https://docs.bexio.com/#tag/Payments">Payments</see>
+    /// </summary>
+    public IPaymentService BankingPayments { get; set; }
+
+    /// <summary>
+    /// Bexio purchase outgoing payments connector. <see href="https://docs.bexio.com/#tag/Outgoing-Payment">Outgoing Payment</see>
+    /// </summary>
+    public IOutgoingPaymentService PurchaseOutgoingPayments { get; set; }
+
+    /// <summary>
+    /// Bexio contacts connector. <see href="https://docs.bexio.com/#tag/Contacts">Contacts</see>
+    /// </summary>
+    public IContactService Contacts { get; set; }
+
+    /// <summary>
+    /// Bexio contact groups connector. <see href="https://docs.bexio.com/#tag/Contact-Groups">Contact Groups</see>
+    /// </summary>
+    public IContactGroupService ContactGroups { get; set; }
+
+    /// <summary>
+    /// Bexio contact relations connector. <see href="https://docs.bexio.com/#tag/Contact-Relations">Contact Relations</see>
+    /// </summary>
+    public IContactRelationService ContactRelations { get; set; }
+
+    /// <summary>
+    /// Bexio contact sectors connector. <see href="https://docs.bexio.com/#tag/Contact-Sectors">Contact Sectors</see>
+    /// </summary>
+    public IContactSectorService ContactSectors { get; set; }
+
+    /// <summary>
+    /// Bexio additional addresses connector, nested under contacts. <see href="https://docs.bexio.com/#tag/Additional-Addresses">Additional Addresses</see>
+    /// </summary>
+    public IAdditionalAddressService ContactAdditionalAddresses { get; set; }
 }

@@ -35,7 +35,7 @@ using BexioApiNet.Services.Connectors.Base;
 namespace BexioApiNet.Services.Connectors.Banking;
 
 /// <inheritdoc cref="IPaymentService" />
-internal sealed class PaymentService : ConnectorService, IPaymentService
+public sealed class PaymentService : ConnectorService, IPaymentService
 {
     /// <summary>
     /// The api endpoint version
