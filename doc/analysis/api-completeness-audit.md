@@ -22,9 +22,9 @@ Full inventory of the Bexio REST API v3.0.0 mapped against BexioApiNet implement
 | 1 | Accounting (Extended) | 8 | 35 | 35 | 0 | 1 |
 | 2 | Banking & Payments | 4 | 15 | 15 | 0 | 1 |
 | 3 | Contacts & CRM | 5 | 28 | 28 | 0 | 1 |
-| 4 | Sales — Invoices | 1 | 26 | 0 | 26 | 2 |
-| 5 | Sales — Quotes | 1 | 17 | 0 | 17 | 2 |
-| 6 | Sales — Orders & Deliveries | 2 | 15 | 0 | 15 | 2 |
+| 4 | Sales — Invoices | 1 | 26 | 26 | 0 | 2 |
+| 5 | Sales — Quotes | 1 | 17 | 17 | 0 | 2 |
+| 6 | Sales — Orders & Deliveries | 2 | 15 | 15 | 0 | 2 |
 | 7 | Items & Inventory | 4 | 16 | 0 | 16 | 3 |
 | 8 | Document Positions | 7 | 35 | 0 | 35 | 3 |
 | 9 | Projects | 1 | 20 | 0 | 20 | 4 |
@@ -33,7 +33,7 @@ Full inventory of the Bexio REST API v3.0.0 mapped against BexioApiNet implement
 | 12 | Payroll | 3 | 10 | 0 | 10 | 5 |
 | 13 | Files & Documents | 3 | 11 | 0 | 11 | 6 |
 | 14 | Master Data & Settings | 9 | 42 | 0 | 42 | 6 |
-| | **TOTAL** | **56** | **309** | **83** | **226** | |
+| | **TOTAL** | **56** | **309** | **141** | **168** | |
 
 ---
 
@@ -217,93 +217,93 @@ Full inventory of the Bexio REST API v3.0.0 mapped against BexioApiNet implement
 
 ---
 
-## Domain Group 4: Sales — Invoices — Wave 2
+## Domain Group 4: Sales — Invoices — Wave 2 — DONE
 
-### Tag: Invoices (26 endpoints)
+### Tag: Invoices (26 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/kb_invoice` | TODO | InvoiceService |
-| GET | `/2.0/kb_invoice/{invoice_id}` | TODO | InvoiceService |
-| GET | `/2.0/kb_invoice/{invoice_id}/pdf` | TODO | InvoiceService |
-| GET | `/2.0/kb_invoice/{invoice_id}/payment` | TODO | InvoiceService |
-| GET | `/2.0/kb_invoice/{invoice_id}/payment/{payment_id}` | TODO | InvoiceService |
-| GET | `/2.0/kb_invoice/{invoice_id}/kb_reminder` | TODO | InvoiceReminderService |
-| GET | `/2.0/kb_invoice/{invoice_id}/kb_reminder/{reminder_id}` | TODO | InvoiceReminderService |
-| GET | `/2.0/kb_invoice/{invoice_id}/kb_reminder/{reminder_id}/pdf` | TODO | InvoiceReminderService |
-| POST | `/2.0/kb_invoice` | TODO | InvoiceService |
-| POST | `/2.0/kb_invoice/search` | TODO | InvoiceService |
-| POST | `/2.0/kb_invoice/{invoice_id}` | TODO | InvoiceService |
-| POST | `/2.0/kb_invoice/{invoice_id}/issue` | TODO | InvoiceService |
-| POST | `/2.0/kb_invoice/{invoice_id}/cancel` | TODO | InvoiceService |
-| POST | `/2.0/kb_invoice/{invoice_id}/copy` | TODO | InvoiceService |
-| POST | `/2.0/kb_invoice/{invoice_id}/send` | TODO | InvoiceService |
-| POST | `/2.0/kb_invoice/{invoice_id}/mark_as_sent` | TODO | InvoiceService |
-| POST | `/2.0/kb_invoice/{invoice_id}/revert_issue` | TODO | InvoiceService |
-| POST | `/2.0/kb_invoice/{invoice_id}/payment` | TODO | InvoiceService |
-| POST | `/2.0/kb_invoice/{invoice_id}/kb_reminder` | TODO | InvoiceReminderService |
-| POST | `/2.0/kb_invoice/{invoice_id}/kb_reminder/search` | TODO | InvoiceReminderService |
-| POST | `/2.0/kb_invoice/{invoice_id}/kb_reminder/{id}/send` | TODO | InvoiceReminderService |
-| POST | `/2.0/kb_invoice/{invoice_id}/kb_reminder/{id}/mark_as_sent` | TODO | InvoiceReminderService |
-| POST | `/2.0/kb_invoice/{invoice_id}/kb_reminder/{id}/mark_as_unsent` | TODO | InvoiceReminderService |
-| DELETE | `/2.0/kb_invoice/{invoice_id}` | TODO | InvoiceService |
-| DELETE | `/2.0/kb_invoice/{invoice_id}/payment/{payment_id}` | TODO | InvoiceService |
-| DELETE | `/2.0/kb_invoice/{invoice_id}/kb_reminder/{reminder_id}` | TODO | InvoiceReminderService |
+| GET | `/2.0/kb_invoice` | DONE | InvoiceService |
+| GET | `/2.0/kb_invoice/{invoice_id}` | DONE | InvoiceService |
+| GET | `/2.0/kb_invoice/{invoice_id}/pdf` | DONE | InvoiceService |
+| GET | `/2.0/kb_invoice/{invoice_id}/payment` | DONE | InvoiceService |
+| GET | `/2.0/kb_invoice/{invoice_id}/payment/{payment_id}` | DONE | InvoiceService |
+| GET | `/2.0/kb_invoice/{invoice_id}/kb_reminder` | DONE | InvoiceReminderService |
+| GET | `/2.0/kb_invoice/{invoice_id}/kb_reminder/{reminder_id}` | DONE | InvoiceReminderService |
+| GET | `/2.0/kb_invoice/{invoice_id}/kb_reminder/{reminder_id}/pdf` | DONE | InvoiceReminderService |
+| POST | `/2.0/kb_invoice` | DONE | InvoiceService |
+| POST | `/2.0/kb_invoice/search` | DONE | InvoiceService |
+| POST | `/2.0/kb_invoice/{invoice_id}` | DONE | InvoiceService |
+| POST | `/2.0/kb_invoice/{invoice_id}/issue` | DONE | InvoiceService |
+| POST | `/2.0/kb_invoice/{invoice_id}/cancel` | DONE | InvoiceService |
+| POST | `/2.0/kb_invoice/{invoice_id}/copy` | DONE | InvoiceService |
+| POST | `/2.0/kb_invoice/{invoice_id}/send` | DONE | InvoiceService |
+| POST | `/2.0/kb_invoice/{invoice_id}/mark_as_sent` | DONE | InvoiceService |
+| POST | `/2.0/kb_invoice/{invoice_id}/revert_issue` | DONE | InvoiceService |
+| POST | `/2.0/kb_invoice/{invoice_id}/payment` | DONE | InvoiceService |
+| POST | `/2.0/kb_invoice/{invoice_id}/kb_reminder` | DONE | InvoiceReminderService |
+| POST | `/2.0/kb_invoice/{invoice_id}/kb_reminder/search` | DONE | InvoiceReminderService |
+| POST | `/2.0/kb_invoice/{invoice_id}/kb_reminder/{id}/send` | DONE | InvoiceReminderService |
+| POST | `/2.0/kb_invoice/{invoice_id}/kb_reminder/{id}/mark_as_sent` | DONE | InvoiceReminderService |
+| POST | `/2.0/kb_invoice/{invoice_id}/kb_reminder/{id}/mark_as_unsent` | DONE | InvoiceReminderService |
+| DELETE | `/2.0/kb_invoice/{invoice_id}` | DONE | InvoiceService |
+| DELETE | `/2.0/kb_invoice/{invoice_id}/payment/{payment_id}` | DONE | InvoiceService |
+| DELETE | `/2.0/kb_invoice/{invoice_id}/kb_reminder/{reminder_id}` | DONE | InvoiceReminderService |
 
 ---
 
-## Domain Group 5: Sales — Quotes — Wave 2
+## Domain Group 5: Sales — Quotes — Wave 2 — DONE
 
-### Tag: Quotes (17 endpoints)
+### Tag: Quotes (17 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/kb_offer` | TODO | QuoteService |
-| GET | `/2.0/kb_offer/{quote_id}` | TODO | QuoteService |
-| GET | `/2.0/kb_offer/{quote_id}/pdf` | TODO | QuoteService |
-| POST | `/2.0/kb_offer` | TODO | QuoteService |
-| POST | `/2.0/kb_offer/search` | TODO | QuoteService |
-| POST | `/2.0/kb_offer/{quote_id}` | TODO | QuoteService |
-| POST | `/2.0/kb_offer/{quote_id}/issue` | TODO | QuoteService |
-| POST | `/2.0/kb_offer/{quote_id}/reissue` | TODO | QuoteService |
-| POST | `/2.0/kb_offer/{quote_id}/revertIssue` | TODO | QuoteService |
-| POST | `/2.0/kb_offer/{quote_id}/accept` | TODO | QuoteService |
-| POST | `/2.0/kb_offer/{quote_id}/reject` | TODO | QuoteService |
-| POST | `/2.0/kb_offer/{quote_id}/copy` | TODO | QuoteService |
-| POST | `/2.0/kb_offer/{quote_id}/invoice` | TODO | QuoteService |
-| POST | `/2.0/kb_offer/{quote_id}/order` | TODO | QuoteService |
-| POST | `/2.0/kb_offer/{quote_id}/mark_as_sent` | TODO | QuoteService |
-| POST | `/2.0/kb_offer/{quote_id}/send` | TODO | QuoteService |
-| DELETE | `/2.0/kb_offer/{quote_id}` | TODO | QuoteService |
+| GET | `/2.0/kb_offer` | DONE | QuoteService |
+| GET | `/2.0/kb_offer/{quote_id}` | DONE | QuoteService |
+| GET | `/2.0/kb_offer/{quote_id}/pdf` | DONE | QuoteService |
+| POST | `/2.0/kb_offer` | DONE | QuoteService |
+| POST | `/2.0/kb_offer/search` | DONE | QuoteService |
+| POST | `/2.0/kb_offer/{quote_id}` | DONE | QuoteService |
+| POST | `/2.0/kb_offer/{quote_id}/issue` | DONE | QuoteService |
+| POST | `/2.0/kb_offer/{quote_id}/reissue` | DONE | QuoteService |
+| POST | `/2.0/kb_offer/{quote_id}/revertIssue` | DONE | QuoteService |
+| POST | `/2.0/kb_offer/{quote_id}/accept` | DONE | QuoteService |
+| POST | `/2.0/kb_offer/{quote_id}/reject` | DONE | QuoteService |
+| POST | `/2.0/kb_offer/{quote_id}/copy` | DONE | QuoteService |
+| POST | `/2.0/kb_offer/{quote_id}/invoice` | DONE | QuoteService |
+| POST | `/2.0/kb_offer/{quote_id}/order` | DONE | QuoteService |
+| POST | `/2.0/kb_offer/{quote_id}/mark_as_sent` | DONE | QuoteService |
+| POST | `/2.0/kb_offer/{quote_id}/send` | DONE | QuoteService |
+| DELETE | `/2.0/kb_offer/{quote_id}` | DONE | QuoteService |
 
 ---
 
-## Domain Group 6: Sales — Orders & Deliveries — Wave 2
+## Domain Group 6: Sales — Orders & Deliveries — Wave 2 — DONE
 
-### Tag: Orders (12 endpoints)
-
-| Method | Path | Status | Service |
-|--------|------|--------|---------|
-| GET | `/2.0/kb_order` | TODO | OrderService |
-| GET | `/2.0/kb_order/{order_id}` | TODO | OrderService |
-| GET | `/2.0/kb_order/{order_id}/pdf` | TODO | OrderService |
-| GET | `/2.0/kb_order/{order_id}/repetition` | TODO | OrderService |
-| POST | `/2.0/kb_order` | TODO | OrderService |
-| POST | `/2.0/kb_order/search` | TODO | OrderService |
-| POST | `/2.0/kb_order/{order_id}` | TODO | OrderService |
-| POST | `/2.0/kb_order/{order_id}/delivery` | TODO | OrderService |
-| POST | `/2.0/kb_order/{order_id}/invoice` | TODO | OrderService |
-| POST | `/2.0/kb_order/{order_id}/repetition` | TODO | OrderService |
-| DELETE | `/2.0/kb_order/{order_id}` | TODO | OrderService |
-| DELETE | `/2.0/kb_order/{order_id}/repetition` | TODO | OrderService |
-
-### Tag: Deliveries (3 endpoints)
+### Tag: Orders (12 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/kb_delivery` | TODO | DeliveryService |
-| GET | `/2.0/kb_delivery/{delivery_id}` | TODO | DeliveryService |
-| POST | `/2.0/kb_delivery/{delivery_id}/issue` | TODO | DeliveryService |
+| GET | `/2.0/kb_order` | DONE | OrderService |
+| GET | `/2.0/kb_order/{order_id}` | DONE | OrderService |
+| GET | `/2.0/kb_order/{order_id}/pdf` | DONE | OrderService |
+| GET | `/2.0/kb_order/{order_id}/repetition` | DONE | OrderService |
+| POST | `/2.0/kb_order` | DONE | OrderService |
+| POST | `/2.0/kb_order/search` | DONE | OrderService |
+| POST | `/2.0/kb_order/{order_id}` | DONE | OrderService |
+| POST | `/2.0/kb_order/{order_id}/delivery` | DONE | OrderService |
+| POST | `/2.0/kb_order/{order_id}/invoice` | DONE | OrderService |
+| POST | `/2.0/kb_order/{order_id}/repetition` | DONE | OrderService |
+| DELETE | `/2.0/kb_order/{order_id}` | DONE | OrderService |
+| DELETE | `/2.0/kb_order/{order_id}/repetition` | DONE | OrderService |
+
+### Tag: Deliveries (3 endpoints) — DONE
+
+| Method | Path | Status | Service |
+|--------|------|--------|---------|
+| GET | `/2.0/kb_delivery` | DONE | DeliveryService |
+| GET | `/2.0/kb_delivery/{delivery_id}` | DONE | DeliveryService |
+| POST | `/2.0/kb_delivery/{delivery_id}/issue` | DONE | DeliveryService |
 
 ---
 
@@ -733,3 +733,4 @@ When an endpoint is implemented:
 1. Change its status from `TODO` to `DONE` in this document.
 2. Update the summary table counts.
 3. Update `doc/ai-readiness.md` coverage percentages.
+entages.
