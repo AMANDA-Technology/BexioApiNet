@@ -28,26 +28,26 @@ using BexioApiNet.Abstractions.Json;
 namespace BexioApiNet.Abstractions.Models.Sales.Orders;
 
 /// <summary>
-///     Discriminated union over the four repetition schedules Bexio accepts on an
-///     <see cref="OrderRepetition" /> payload — <see cref="OrderRepetitionDaily" />,
-///     <see cref="OrderRepetitionWeekly" />, <see cref="OrderRepetitionMonthly" /> and
-///     <see cref="OrderRepetitionYearly" />. The concrete subtype is selected from the
-///     <c>type</c> discriminator (<c>daily</c>, <c>weekly</c>, <c>monthly</c>, <c>yearly</c>).
-///     <see href="https://docs.bexio.com/#tag/Orders/operation/v2ShowOrderRepetition" />
+/// Discriminated union over the four repetition schedules Bexio accepts on an
+/// <see cref="OrderRepetition" /> payload — <see cref="OrderRepetitionDaily" />,
+/// <see cref="OrderRepetitionWeekly" />, <see cref="OrderRepetitionMonthly" /> and
+/// <see cref="OrderRepetitionYearly" />. The concrete subtype is selected from the
+/// <c>type</c> discriminator (<c>daily</c>, <c>weekly</c>, <c>monthly</c>, <c>yearly</c>).
+/// <see href="https://docs.bexio.com/#tag/Orders/operation/v2ShowOrderRepetition" />
 /// </summary>
 [JsonConverter(typeof(OrderRepetitionScheduleJsonConverter))]
 public abstract record OrderRepetitionSchedule
 {
     /// <summary>
-    ///     Discriminator string identifying the concrete schedule (<c>daily</c>, <c>weekly</c>,
-    ///     <c>monthly</c> or <c>yearly</c>).
+    /// Discriminator string identifying the concrete schedule (<c>daily</c>, <c>weekly</c>,
+    /// <c>monthly</c> or <c>yearly</c>).
     /// </summary>
     [JsonPropertyName("type")]
     public abstract string Type { get; }
 
     /// <summary>
-    ///     Multiplier applied to the schedule's natural period (e.g. <c>interval = 2</c> on a
-    ///     weekly schedule means "every other week").
+    /// Multiplier applied to the schedule's natural period (e.g. <c>interval = 2</c> on a
+    /// weekly schedule means "every other week").
     /// </summary>
     [JsonPropertyName("interval")]
     public int Interval { get; init; }

@@ -28,23 +28,23 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Accounting.BusinessYears.Enums;
 
 /// <summary>
-///     Status of a business year. <see href="https://docs.bexio.com/#tag/Business-Years" />
+/// Status of a business year. <see href="https://docs.bexio.com/#tag/Business-Years" />
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum BusinessYearStatus
 {
     /// <summary>
-    ///     The business year period is open for new bookings.
+    /// The business year period is open for new bookings.
     /// </summary>
     open,
 
     /// <summary>
-    ///     The business year period is closed for new bookings, but without an ordinary year end closing.
+    /// The business year period is closed for new bookings, but without an ordinary year end closing.
     /// </summary>
     locked,
 
     /// <summary>
-    ///     The business year period is closed for new bookings, but with an ordinary year end closing.
+    /// The business year period is closed for new bookings, but with an ordinary year end closing.
     /// </summary>
     closed
 }

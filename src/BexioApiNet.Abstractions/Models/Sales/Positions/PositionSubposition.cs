@@ -26,11 +26,11 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Positions;
 
 /// <summary>
-///     Container / heading position used to group other positions underneath a shared label and
-///     a running subtotal. Other positions point to it via their <see cref="Position.ParentId" />.
-///     Corresponds to the Bexio <c>KbPositionSubposition</c> / <c>PositionSubpositionExtended</c>
-///     schema. Sub-positions are only valid on quotes, orders and invoices — not deliveries.
-///     <see href="https://docs.bexio.com/#tag/Sub-positions" />
+/// Container / heading position used to group other positions underneath a shared label and
+/// a running subtotal. Other positions point to it via their <see cref="Position.ParentId" />.
+/// Corresponds to the Bexio <c>KbPositionSubposition</c> / <c>PositionSubpositionExtended</c>
+/// schema. Sub-positions are only valid on quotes, orders and invoices — not deliveries.
+/// <see href="https://docs.bexio.com/#tag/Sub-positions" />
 /// </summary>
 public sealed record PositionSubposition : Position
 {

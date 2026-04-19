@@ -26,8 +26,8 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Orders;
 
 /// <summary>
-///     Daily repetition schedule — fires every <see cref="OrderRepetitionSchedule.Interval" /> days.
-///     Corresponds to the Bexio <c>OrderRepetitionDaily</c> schema (<c>type = "daily"</c>).
+/// Daily repetition schedule — fires every <see cref="OrderRepetitionSchedule.Interval" /> days.
+/// Corresponds to the Bexio <c>OrderRepetitionDaily</c> schema (<c>type = "daily"</c>).
 /// </summary>
 public sealed record OrderRepetitionDaily : OrderRepetitionSchedule
 {

@@ -26,8 +26,8 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Orders;
 
 /// <summary>
-///     String literals for the Bexio <c>type</c> discriminator that identifies each concrete
-///     <see cref="OrderRepetitionSchedule" /> variant on the wire.
+/// String literals for the Bexio <c>type</c> discriminator that identifies each concrete
+/// <see cref="OrderRepetitionSchedule" /> variant on the wire.
 /// </summary>
 internal static class OrderRepetitionTypes
 {

@@ -26,13 +26,13 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Orders.Views;
 
 /// <summary>
-///     Update view for an order — body of <c>POST /2.0/kb_order/{order_id}</c>. Bexio uses
-///     <c>POST</c> (not <c>PUT</c>) for full-replacement edits on this resource. Read-only fields
-///     (id, totals, contact_address, delivery_address, kb_item_status_id, is_recurring, updated_at,
-///     taxs, network_link, project_id, viewed_by_client_at) are intentionally omitted — positions
-///     are managed via the dedicated position sub-resources, so they live only on
-///     <see cref="OrderCreate" />.
-///     <see href="https://docs.bexio.com/#tag/Orders/operation/v2EditOrder" />
+/// Update view for an order — body of <c>POST /2.0/kb_order/{order_id}</c>. Bexio uses
+/// <c>POST</c> (not <c>PUT</c>) for full-replacement edits on this resource. Read-only fields
+/// (id, totals, contact_address, delivery_address, kb_item_status_id, is_recurring, updated_at,
+/// taxs, network_link, project_id, viewed_by_client_at) are intentionally omitted — positions
+/// are managed via the dedicated position sub-resources, so they live only on
+/// <see cref="OrderCreate" />.
+/// <see href="https://docs.bexio.com/#tag/Orders/operation/v2EditOrder" />
 /// </summary>
 /// <param name="UserId">References the user that owns the order.</param>
 /// <param name="DocumentNr">Order number. Must be omitted when automatic numbering is enabled.</param>
@@ -49,19 +49,19 @@ namespace BexioApiNet.Abstractions.Models.Sales.Orders.Views;
 /// <param name="Footer">Free-text footer printed below the positions.</param>
 /// <param name="MwstType">VAT/MwSt. handling flag: <c>0</c> including taxes, <c>1</c> excluding taxes, <c>2</c> exempt.</param>
 /// <param name="MwstIsNet">
-///     When <see langword="true" /> and <see cref="MwstType" /> is <c>0</c>, totals are interpreted as
-///     net.
+/// When <see langword="true" /> and <see cref="MwstType" /> is <c>0</c>, totals are interpreted as
+/// net.
 /// </param>
 /// <param name="ShowPositionTaxes">When <see langword="true" />, per-position taxes are shown on the printed document.</param>
 /// <param name="IsValidFrom">Order validity start in Bexio's <c>yyyy-MM-dd</c> format.</param>
 /// <param name="ContactAddressManual">Manually overridden contact address (write-only).</param>
 /// <param name="DeliveryAddressType">
-///     Delivery address selector: <c>0</c> use invoice address, <c>1</c> use custom delivery
-///     address.
+/// Delivery address selector: <c>0</c> use invoice address, <c>1</c> use custom delivery
+/// address.
 /// </param>
 /// <param name="DeliveryAddressManual">
-///     Manually overridden delivery address (write-only, used when
-///     <see cref="DeliveryAddressType" /> is <c>1</c>).
+/// Manually overridden delivery address (write-only, used when
+/// <see cref="DeliveryAddressType" /> is <c>1</c>).
 /// </param>
 /// <param name="ApiReference">Caller-supplied reference accessible only via the API.</param>
 /// <param name="TemplateSlug">References a document template slug.</param>

@@ -26,10 +26,10 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Positions;
 
 /// <summary>
-///     Page-break position that forces a hard page break at its location on the printed document.
-///     Corresponds to the Bexio <c>KbPositionPagebreak</c> / <c>PositionPagebreakExtended</c>
-///     schema.
-///     <see href="https://docs.bexio.com/#tag/Pagebreak-positions" />
+/// Page-break position that forces a hard page break at its location on the printed document.
+/// Corresponds to the Bexio <c>KbPositionPagebreak</c> / <c>PositionPagebreakExtended</c>
+/// schema.
+/// <see href="https://docs.bexio.com/#tag/Pagebreak-positions" />
 /// </summary>
 public sealed record PositionPagebreak : Position
 {
@@ -45,8 +45,8 @@ public sealed record PositionPagebreak : Position
     public bool? IsOptional { get; init; }
 
     /// <summary>
-    ///     Must be <see langword="true" /> on create to actually insert a pagebreak (write-only flag
-    ///     echoed back by the spec).
+    /// Must be <see langword="true" /> on create to actually insert a pagebreak (write-only flag
+    /// echoed back by the spec).
     /// </summary>
     [JsonPropertyName("pagebreak")]
     public bool? Pagebreak { get; init; }

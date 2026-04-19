@@ -28,41 +28,41 @@ using BexioApiNet.Abstractions.Json;
 namespace BexioApiNet.Abstractions.Models.Sales.Positions;
 
 /// <summary>
-///     Discriminated union over Bexio's seven <c>kb_position_*</c> position types exposed on
-///     quotes, orders, invoices and deliveries. The concrete subtype is selected from the
-///     <c>type</c> discriminator emitted by Bexio (<c>KbPositionArticle</c>,
-///     <c>KbPositionCustom</c>, <c>KbPositionText</c>, <c>KbPositionSubposition</c>,
-///     <c>KbPositionSubtotal</c>, <c>KbPositionPagebreak</c>, <c>KbPositionDiscount</c>).
-///     <see href="https://docs.bexio.com/#tag/Item-positions" />
+/// Discriminated union over Bexio's seven <c>kb_position_*</c> position types exposed on
+/// quotes, orders, invoices and deliveries. The concrete subtype is selected from the
+/// <c>type</c> discriminator emitted by Bexio (<c>KbPositionArticle</c>,
+/// <c>KbPositionCustom</c>, <c>KbPositionText</c>, <c>KbPositionSubposition</c>,
+/// <c>KbPositionSubtotal</c>, <c>KbPositionPagebreak</c>, <c>KbPositionDiscount</c>).
+/// <see href="https://docs.bexio.com/#tag/Item-positions" />
 /// </summary>
 /// <remarks>
-///     Consumers should construct one of the sealed subtypes (<see cref="PositionArticle" />,
-///     <see cref="PositionCustom" />, <see cref="PositionText" />, <see cref="PositionSubposition" />,
-///     <see cref="PositionSubtotal" />, <see cref="PositionPagebreak" />,
-///     <see cref="PositionDiscount" />) directly. Serialization is handled by
-///     <see cref="PositionJsonConverter" /> which reads/writes the <c>type</c> discriminator.
+/// Consumers should construct one of the sealed subtypes (<see cref="PositionArticle" />,
+/// <see cref="PositionCustom" />, <see cref="PositionText" />, <see cref="PositionSubposition" />,
+/// <see cref="PositionSubtotal" />, <see cref="PositionPagebreak" />,
+/// <see cref="PositionDiscount" />) directly. Serialization is handled by
+/// <see cref="PositionJsonConverter" /> which reads/writes the <c>type</c> discriminator.
 /// </remarks>
 [JsonConverter(typeof(PositionJsonConverter))]
 public abstract record Position
 {
     /// <summary>
-    ///     Unique position identifier assigned by Bexio (read-only on show responses, ignored when
-    ///     creating a new position).
+    /// Unique position identifier assigned by Bexio (read-only on show responses, ignored when
+    /// creating a new position).
     /// </summary>
     [JsonPropertyName("id")]
     public int? Id { get; init; }
 
     /// <summary>
-    ///     Optional id of a parent <see cref="PositionSubposition" /> used to group positions on
-    ///     the document. <see langword="null" /> for top-level positions.
+    /// Optional id of a parent <see cref="PositionSubposition" /> used to group positions on
+    /// the document. <see langword="null" /> for top-level positions.
     /// </summary>
     [JsonPropertyName("parent_id")]
     public int? ParentId { get; init; }
 
     /// <summary>
-    ///     The literal Bexio discriminator string identifying this concrete position type (for
-    ///     example <c>KbPositionArticle</c>). Each sealed subtype overrides this with the matching
-    ///     constant.
+    /// The literal Bexio discriminator string identifying this concrete position type (for
+    /// example <c>KbPositionArticle</c>). Each sealed subtype overrides this with the matching
+    /// constant.
     /// </summary>
     [JsonPropertyName("type")]
     public abstract string Type { get; }

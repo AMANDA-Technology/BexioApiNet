@@ -26,17 +26,17 @@ SOFTWARE.
 namespace BexioApiNet.Services.Connectors.Sales;
 
 /// <summary>
-///     Order endpoint configuration
+/// Order endpoint configuration
 /// </summary>
 public struct OrderConfiguration
 {
     /// <summary>
-    ///     Current api version of the endpoint
+    /// Current api version of the endpoint
     /// </summary>
     public const string ApiVersion = "2.0";
 
     /// <summary>
-    ///     The request path
+    /// The request path
     /// </summary>
     public const string EndpointRoot = "kb_order";
 }

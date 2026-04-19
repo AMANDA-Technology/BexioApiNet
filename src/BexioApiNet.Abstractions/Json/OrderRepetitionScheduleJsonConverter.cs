@@ -28,10 +28,10 @@ using BexioApiNet.Abstractions.Models.Sales.Orders;
 namespace BexioApiNet.Abstractions.Json;
 
 /// <summary>
-///     <see cref="System.Text.Json.Serialization.JsonConverter{T}" /> that maps Bexio's
-///     <c>oneOf</c> order-repetition payload onto the strongly-typed
-///     <see cref="OrderRepetitionSchedule" /> hierarchy. Uses the <c>type</c> discriminator
-///     (<c>daily</c>, <c>weekly</c>, <c>monthly</c>, <c>yearly</c>).
+/// <see cref="System.Text.Json.Serialization.JsonConverter{T}" /> that maps Bexio's
+/// <c>oneOf</c> order-repetition payload onto the strongly-typed
+/// <see cref="OrderRepetitionSchedule" /> hierarchy. Uses the <c>type</c> discriminator
+/// (<c>daily</c>, <c>weekly</c>, <c>monthly</c>, <c>yearly</c>).
 /// </summary>
 public sealed class OrderRepetitionScheduleJsonConverter : DiscriminatedJsonConverter<OrderRepetitionSchedule>
 {

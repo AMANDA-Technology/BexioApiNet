@@ -26,9 +26,9 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Orders;
 
 /// <summary>
-///     Weekly repetition schedule — fires on the listed <see cref="Weekdays" /> every
-///     <see cref="OrderRepetitionSchedule.Interval" /> weeks. Corresponds to the Bexio
-///     <c>OrderRepetitionWeekly</c> schema (<c>type = "weekly"</c>).
+/// Weekly repetition schedule — fires on the listed <see cref="Weekdays" /> every
+/// <see cref="OrderRepetitionSchedule.Interval" /> weeks. Corresponds to the Bexio
+/// <c>OrderRepetitionWeekly</c> schema (<c>type = "weekly"</c>).
 /// </summary>
 public sealed record OrderRepetitionWeekly : OrderRepetitionSchedule
 {
@@ -36,8 +36,8 @@ public sealed record OrderRepetitionWeekly : OrderRepetitionSchedule
     public override string Type => OrderRepetitionTypes.Weekly;
 
     /// <summary>
-    ///     Weekdays on which the schedule fires. Each entry is a lowercase English day name
-    ///     (<c>monday</c>, <c>tuesday</c>, …, <c>sunday</c>) as accepted by the Bexio API.
+    /// Weekdays on which the schedule fires. Each entry is a lowercase English day name
+    /// (<c>monday</c>, <c>tuesday</c>, …, <c>sunday</c>) as accepted by the Bexio API.
     /// </summary>
     [JsonPropertyName("weekdays")]
     public IReadOnlyList<string> Weekdays { get; init; } = [];

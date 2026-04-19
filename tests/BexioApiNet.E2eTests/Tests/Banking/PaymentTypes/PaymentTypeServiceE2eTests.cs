@@ -31,11 +31,11 @@ using BexioApiNet.Services.Connectors.Banking;
 namespace BexioApiNet.E2eTests.Tests.Banking.PaymentTypes;
 
 /// <summary>
-///     Live end-to-end tests for <see cref="PaymentTypeService" />. Skipped
-///     automatically when <c>BexioApiNet__BaseUri</c> / <c>BexioApiNet__JwtToken</c>
-///     are missing. The service is instantiated directly here because wiring the
-///     connector into <see cref="IBexioApiClient" /> is deferred to the Wave 1
-///     aggregation issue (#49).
+/// Live end-to-end tests for <see cref="PaymentTypeService" />. Skipped
+/// automatically when <c>BexioApiNet__BaseUri</c> / <c>BexioApiNet__JwtToken</c>
+/// are missing. The service is instantiated directly here because wiring the
+/// connector into <see cref="IBexioApiClient" /> is deferred to the Wave 1
+/// aggregation issue (#49).
 /// </summary>
 [Category("E2E")]
 public sealed class PaymentTypeServiceE2eTests
@@ -44,10 +44,10 @@ public sealed class PaymentTypeServiceE2eTests
     private IPaymentTypeService? _paymentTypeService;
 
     /// <summary>
-    ///     Builds a dedicated <see cref="BexioConnectionHandler" /> and
-    ///     <see cref="PaymentTypeService" /> per test. Calls <see cref="Assert.Ignore(string)" />
-    ///     when credentials are not provided via environment variables so CI and
-    ///     agent runs without a Bexio tenant do not surface false failures.
+    /// Builds a dedicated <see cref="BexioConnectionHandler" /> and
+    /// <see cref="PaymentTypeService" /> per test. Calls <see cref="Assert.Ignore(string)" />
+    /// when credentials are not provided via environment variables so CI and
+    /// agent runs without a Bexio tenant do not surface false failures.
     /// </summary>
     [SetUp]
     public void Setup()
@@ -72,7 +72,7 @@ public sealed class PaymentTypeServiceE2eTests
     }
 
     /// <summary>
-    ///     Disposes the connection handler if one was created for the test.
+    /// Disposes the connection handler if one was created for the test.
     /// </summary>
     [TearDown]
     public void Teardown()
@@ -81,9 +81,9 @@ public sealed class PaymentTypeServiceE2eTests
     }
 
     /// <summary>
-    ///     <c>GET /2.0/payment_type</c> must return a non-null, non-empty list of
-    ///     payment types for a provisioned Bexio tenant. Bexio ships default entries
-    ///     (e.g., <c>Cash</c>, <c>Bank</c>) so the list is expected to be populated.
+    /// <c>GET /2.0/payment_type</c> must return a non-null, non-empty list of
+    /// payment types for a provisioned Bexio tenant. Bexio ships default entries
+    /// (e.g., <c>Cash</c>, <c>Bank</c>) so the list is expected to be populated.
     /// </summary>
     [Test]
     public async Task GetAll_ReturnsPaymentTypes()
@@ -103,9 +103,9 @@ public sealed class PaymentTypeServiceE2eTests
     }
 
     /// <summary>
-    ///     <c>POST /2.0/payment_type/search</c> with an <c>is_null=false</c>
-    ///     <c>name</c> criterion must return a non-null list of payment types
-    ///     matching the search filter.
+    /// <c>POST /2.0/payment_type/search</c> with an <c>is_null=false</c>
+    /// <c>name</c> criterion must return a non-null list of payment types
+    /// matching the search filter.
     /// </summary>
     [Test]
     public async Task Search_WithNameCriteria_ReturnsPaymentTypes()

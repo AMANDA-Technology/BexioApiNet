@@ -28,10 +28,10 @@ using BexioApiNet.Abstractions.Models.Sales.Positions;
 namespace BexioApiNet.Abstractions.Models.Sales.Orders;
 
 /// <summary>
-///     Order as returned by the Bexio <c>/2.0/kb_order</c> endpoint. Covers both the plain
-///     <c>Order</c> schema returned by list and the <c>OrderWithDetails</c> variant returned by
-///     show/create/update (which additionally populates <see cref="Positions" />).
-///     <see href="https://docs.bexio.com/#tag/Orders/operation/v2ListOrders" />
+/// Order as returned by the Bexio <c>/2.0/kb_order</c> endpoint. Covers both the plain
+/// <c>Order</c> schema returned by list and the <c>OrderWithDetails</c> variant returned by
+/// show/create/update (which additionally populates <see cref="Positions" />).
+/// <see href="https://docs.bexio.com/#tag/Orders/operation/v2ListOrders" />
 /// </summary>
 /// <param name="Id">Unique order identifier (read-only).</param>
 /// <param name="DocumentNr">Order number. Must be omitted when automatic numbering is enabled, required otherwise.</param>
@@ -55,21 +55,21 @@ namespace BexioApiNet.Abstractions.Models.Sales.Orders;
 /// <param name="TotalRoundingDifference">Rounding difference applied to the total (read-only).</param>
 /// <param name="MwstType">VAT/MwSt. handling flag: <c>0</c> including taxes, <c>1</c> excluding taxes, <c>2</c> exempt.</param>
 /// <param name="MwstIsNet">
-///     When <see langword="true" /> and <see cref="MwstType" /> is <c>0</c>, totals are interpreted as
-///     net.
+/// When <see langword="true" /> and <see cref="MwstType" /> is <c>0</c>, totals are interpreted as
+/// net.
 /// </param>
 /// <param name="ShowPositionTaxes">When <see langword="true" />, per-position taxes are shown on the printed document.</param>
 /// <param name="IsValidFrom">Order validity start in Bexio's <c>yyyy-MM-dd</c> format.</param>
 /// <param name="ContactAddress">Composed contact address string (read-only).</param>
 /// <param name="ContactAddressManual">Manually overridden contact address (write-only).</param>
 /// <param name="DeliveryAddressType">
-///     Delivery address selector: <c>0</c> use invoice address, <c>1</c> use custom delivery
-///     address.
+/// Delivery address selector: <c>0</c> use invoice address, <c>1</c> use custom delivery
+/// address.
 /// </param>
 /// <param name="DeliveryAddress">Composed delivery address string (read-only).</param>
 /// <param name="DeliveryAddressManual">
-///     Manually overridden delivery address (write-only, used when
-///     <see cref="DeliveryAddressType" /> is <c>1</c>).
+/// Manually overridden delivery address (write-only, used when
+/// <see cref="DeliveryAddressType" /> is <c>1</c>).
 /// </param>
 /// <param name="KbItemStatusId">Read-only order status id (5 Pending, 6 Done, 15 Partial, 21 Canceled).</param>
 /// <param name="IsRecurring">When <see langword="true" />, the order has a repetition schedule attached (read-only).</param>
@@ -80,8 +80,8 @@ namespace BexioApiNet.Abstractions.Models.Sales.Orders;
 /// <param name="Taxs">Read-only aggregated tax summary lines.</param>
 /// <param name="NetworkLink">Read-only network link used by the Bexio document viewer.</param>
 /// <param name="Positions">
-///     Optional polymorphic positions array populated on show/create/update responses. Each element is
-///     deserialized into the concrete <see cref="Position" /> subtype identified by its <c>type</c> discriminator.
+/// Optional polymorphic positions array populated on show/create/update responses. Each element is
+/// deserialized into the concrete <see cref="Position" /> subtype identified by its <c>type</c> discriminator.
 /// </param>
 public sealed record Order(
     [property: JsonPropertyName("id")] int Id,

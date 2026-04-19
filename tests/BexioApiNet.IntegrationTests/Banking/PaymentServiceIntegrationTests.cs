@@ -31,10 +31,10 @@ using BexioApiNet.Services.Connectors.Banking;
 namespace BexioApiNet.IntegrationTests.Banking;
 
 /// <summary>
-///     Integration tests covering the CRUD and Cancel entry points of <see cref="PaymentService" /> against
-///     WireMock stubs. Verifies the path composed from <see cref="PaymentConfiguration" />
-///     (<c>4.0/banking/payments</c>) reaches the handler correctly and that the expected HTTP verbs
-///     are used for each operation (Get, GetById, Create, Cancel, Update, Delete).
+/// Integration tests covering the CRUD and Cancel entry points of <see cref="PaymentService" /> against
+/// WireMock stubs. Verifies the path composed from <see cref="PaymentConfiguration" />
+/// (<c>4.0/banking/payments</c>) reaches the handler correctly and that the expected HTTP verbs
+/// are used for each operation (Get, GetById, Create, Cancel, Update, Delete).
 /// </summary>
 public sealed class PaymentServiceIntegrationTests : IntegrationTestBase
 {
@@ -67,9 +67,9 @@ public sealed class PaymentServiceIntegrationTests : IntegrationTestBase
     private static readonly Guid TestPaymentId = Guid.Parse("a1b2c3d4-e5f6-7890-abcd-ef1234567890");
 
     /// <summary>
-    ///     <c>PaymentService.Get()</c> must issue a <c>GET</c> against
-    ///     <c>/4.0/banking/payments</c> and return a successful <c>ApiResult</c> when the
-    ///     server responds with an empty collection.
+    /// <c>PaymentService.Get()</c> must issue a <c>GET</c> against
+    /// <c>/4.0/banking/payments</c> and return a successful <c>ApiResult</c> when the
+    /// server responds with an empty collection.
     /// </summary>
     [Test]
     public async Task PaymentService_Get_SendsGetRequestToCorrectPath()
@@ -93,8 +93,8 @@ public sealed class PaymentServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>PaymentService.GetById</c> must issue a <c>GET</c> request that includes the target
-    ///     <see cref="Guid" /> in the URL path and surface the returned payment on success.
+    /// <c>PaymentService.GetById</c> must issue a <c>GET</c> request that includes the target
+    /// <see cref="Guid" /> in the URL path and surface the returned payment on success.
     /// </summary>
     [Test]
     public async Task PaymentService_GetById_SendsGetRequestWithIdInPath()
@@ -121,8 +121,8 @@ public sealed class PaymentServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>PaymentService.Create</c> must send a <c>POST</c> request whose body is the serialized
-    ///     <see cref="PaymentCreate" /> payload, and must surface the returned payment on success.
+    /// <c>PaymentService.Create</c> must send a <c>POST</c> request whose body is the serialized
+    /// <see cref="PaymentCreate" /> payload, and must surface the returned payment on success.
     /// </summary>
     [Test]
     public async Task PaymentService_Create_SendsPostRequestWithPayload()
@@ -166,8 +166,8 @@ public sealed class PaymentServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>PaymentService.Cancel</c> must send a <c>POST</c> request against
-    ///     <c>/4.0/banking/payments/{id}/cancel</c> with no body — Bexio uses POST for this action.
+    /// <c>PaymentService.Cancel</c> must send a <c>POST</c> request against
+    /// <c>/4.0/banking/payments/{id}/cancel</c> with no body — Bexio uses POST for this action.
     /// </summary>
     [Test]
     public async Task PaymentService_Cancel_SendsPostRequestToCancelPath()
@@ -194,8 +194,8 @@ public sealed class PaymentServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>PaymentService.Delete</c> must issue a <c>DELETE</c> request that includes the target
-    ///     <see cref="Guid" /> in the URL path.
+    /// <c>PaymentService.Delete</c> must issue a <c>DELETE</c> request that includes the target
+    /// <see cref="Guid" /> in the URL path.
     /// </summary>
     [Test]
     public async Task PaymentService_Delete_SendsDeleteRequestWithIdInPath()

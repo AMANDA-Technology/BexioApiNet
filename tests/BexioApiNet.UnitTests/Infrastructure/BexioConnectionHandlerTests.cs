@@ -33,12 +33,12 @@ using BexioApiNet.Models;
 namespace BexioApiNet.UnitTests.Infrastructure;
 
 /// <summary>
-///     Unit tests for <see cref="BexioConnectionHandler" />. These tests exercise the real
-///     implementation with a hand-rolled stub <see cref="HttpMessageHandler" /> so no network
-///     traffic occurs. They cover request construction, query-parameter serialization,
-///     <see cref="ApiResult{T}" /> mapping for success/error/redirect responses, response
-///     header extraction, cancellation propagation and the <see cref="IDisposable" /> contract
-///     including the owned-vs-borrowed <see cref="HttpClient" /> branching.
+/// Unit tests for <see cref="BexioConnectionHandler" />. These tests exercise the real
+/// implementation with a hand-rolled stub <see cref="HttpMessageHandler" /> so no network
+/// traffic occurs. They cover request construction, query-parameter serialization,
+/// <see cref="ApiResult{T}" /> mapping for success/error/redirect responses, response
+/// header extraction, cancellation propagation and the <see cref="IDisposable" /> contract
+/// including the owned-vs-borrowed <see cref="HttpClient" /> branching.
 /// </summary>
 [TestFixture]
 [Category("Unit")]
@@ -47,22 +47,22 @@ public class BexioConnectionHandlerTests
     private const string BaseUri = "https://api.example.local/";
 
     /// <summary>
-    ///     Fake payload record used for JSON serialization / deserialization assertions.
+    /// Fake payload record used for JSON serialization / deserialization assertions.
     /// </summary>
     /// <param name="Id">Arbitrary identifier.</param>
     private sealed record TestItem(int Id);
 
     /// <summary>
-    ///     Minimal request body used by the POST serialization test.
+    /// Minimal request body used by the POST serialization test.
     /// </summary>
     /// <param name="Name">A name-like field.</param>
     /// <param name="Value">A numeric field.</param>
     private sealed record TestPayload(string Name, int Value);
 
     /// <summary>
-    ///     Test double for <see cref="HttpMessageHandler" />. Captures the last request, honours
-    ///     the supplied cancellation token (so cancellation tests propagate correctly) and returns
-    ///     a configurable <see cref="HttpResponseMessage" />.
+    /// Test double for <see cref="HttpMessageHandler" />. Captures the last request, honours
+    /// the supplied cancellation token (so cancellation tests propagate correctly) and returns
+    /// a configurable <see cref="HttpResponseMessage" />.
     /// </summary>
     private sealed class StubHandler : HttpMessageHandler
     {
@@ -89,9 +89,9 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     Builds a <see cref="BexioConnectionHandler" /> wired to the supplied stub message handler
-    ///     via an externally managed <see cref="HttpClient" />. Uses the DI-style two-argument
-    ///     constructor so disposal of the returned handler does not dispose the HTTP client.
+    /// Builds a <see cref="BexioConnectionHandler" /> wired to the supplied stub message handler
+    /// via an externally managed <see cref="HttpClient" />. Uses the DI-style two-argument
+    /// constructor so disposal of the returned handler does not dispose the HTTP client.
     /// </summary>
     private static (BexioConnectionHandler handler, HttpClient httpClient, StubHandler stub) CreateHandler()
     {
@@ -112,8 +112,8 @@ public class BexioConnectionHandlerTests
     // -----------------------------------------------------------------------
 
     /// <summary>
-    ///     A GET call must emit an HTTP GET request to the path provided, joined with the configured
-    ///     base URI.
+    /// A GET call must emit an HTTP GET request to the path provided, joined with the configured
+    /// base URI.
     /// </summary>
     [Test]
     public async Task GetAsync_SendsGetRequest_ToCorrectPath()
@@ -136,7 +136,7 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     A POST call must emit an HTTP POST request to the path provided.
+    /// A POST call must emit an HTTP POST request to the path provided.
     /// </summary>
     [Test]
     public async Task PostAsync_SendsPostRequest_ToCorrectPath()
@@ -158,7 +158,7 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     A Delete call must emit an HTTP DELETE request to the path provided.
+    /// A Delete call must emit an HTTP DELETE request to the path provided.
     /// </summary>
     [Test]
     public async Task Delete_SendsDeleteRequest_ToCorrectPath()
@@ -179,8 +179,8 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     Multipart uploads must emit an HTTP POST request whose content is a
-    ///     <see cref="MultipartFormDataContent" /> instance.
+    /// Multipart uploads must emit an HTTP POST request whose content is a
+    /// <see cref="MultipartFormDataContent" /> instance.
     /// </summary>
     [Test]
     public async Task PostMultiPartFileAsync_SendsPostRequest()
@@ -211,8 +211,8 @@ public class BexioConnectionHandlerTests
     // -----------------------------------------------------------------------
 
     /// <summary>
-    ///     Parameters supplied via <see cref="QueryParameter" /> must be appended to the request URI
-    ///     as a percent-encoded query string.
+    /// Parameters supplied via <see cref="QueryParameter" /> must be appended to the request URI
+    /// as a percent-encoded query string.
     /// </summary>
     [Test]
     public async Task GetAsync_WithQueryParameter_AppendsToUri()
@@ -241,7 +241,7 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     When no <see cref="QueryParameter" /> is supplied the request URI must have no query string.
+    /// When no <see cref="QueryParameter" /> is supplied the request URI must have no query string.
     /// </summary>
     [Test]
     public async Task GetAsync_WithNullQueryParameter_HasNoQueryString()
@@ -266,8 +266,8 @@ public class BexioConnectionHandlerTests
     // -----------------------------------------------------------------------
 
     /// <summary>
-    ///     POST must serialize the supplied payload to JSON using System.Text.Json defaults
-    ///     (PascalCase property names) and send it as the request body.
+    /// POST must serialize the supplied payload to JSON using System.Text.Json defaults
+    /// (PascalCase property names) and send it as the request body.
     /// </summary>
     [Test]
     public async Task PostAsync_SerializesPayloadAsJson()
@@ -298,8 +298,8 @@ public class BexioConnectionHandlerTests
     // -----------------------------------------------------------------------
 
     /// <summary>
-    ///     A 200 response must produce an <see cref="ApiResult{T}" /> with
-    ///     <c>IsSuccess == true</c> and a deserialized payload.
+    /// A 200 response must produce an <see cref="ApiResult{T}" /> with
+    /// <c>IsSuccess == true</c> and a deserialized payload.
     /// </summary>
     [Test]
     public async Task GetAsync_On200_ReturnsIsSuccessTrue_WithDeserializedData()
@@ -329,8 +329,8 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     A 400 response must produce an <see cref="ApiResult{T}" /> with
-    ///     <c>IsSuccess == false</c>, a populated <see cref="ApiError" /> and null <c>Data</c>.
+    /// A 400 response must produce an <see cref="ApiResult{T}" /> with
+    /// <c>IsSuccess == false</c>, a populated <see cref="ApiError" /> and null <c>Data</c>.
     /// </summary>
     [Test]
     public async Task GetAsync_On400_ReturnsIsSuccessFalse_WithApiError()
@@ -361,10 +361,10 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     A 302 Found response is non-successful: the status code is outside the 2xx range, so
-    ///     <c>IsSuccess</c> is false and <c>Data</c> is null. The redirect target (<c>Location</c>
-    ///     header) is not followed — auto-redirect is disabled on the underlying <see cref="HttpClient"/>
-    ///     to prevent the bearer token from leaking to a different host.
+    /// A 302 Found response is non-successful: the status code is outside the 2xx range, so
+    /// <c>IsSuccess</c> is false and <c>Data</c> is null. The redirect target (<c>Location</c>
+    /// header) is not followed — auto-redirect is disabled on the underlying <see cref="HttpClient"/>
+    /// to prevent the bearer token from leaking to a different host.
     /// </summary>
     [Test]
     public async Task GetAsync_On302Found_ReturnsIsSuccessFalse_WithNullData()
@@ -392,9 +392,9 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     Standard Bexio pagination headers on the response must be parsed into the
-    ///     <see cref="ApiResult.ResponseHeaders" /> dictionary using the documented
-    ///     <see cref="ApiHeaderNames" /> keys.
+    /// Standard Bexio pagination headers on the response must be parsed into the
+    /// <see cref="ApiResult.ResponseHeaders" /> dictionary using the documented
+    /// <see cref="ApiHeaderNames" /> keys.
     /// </summary>
     [Test]
     public async Task GetAsync_ResponseHeaders_AreMappedCorrectly()
@@ -429,9 +429,9 @@ public class BexioConnectionHandlerTests
     // -----------------------------------------------------------------------
 
     /// <summary>
-    ///     When constructed with a configuration only the handler owns its <see cref="HttpClient" />,
-    ///     so disposing the handler must dispose the client. A subsequent HTTP call must therefore
-    ///     fail with <see cref="ObjectDisposedException" />.
+    /// When constructed with a configuration only the handler owns its <see cref="HttpClient" />,
+    /// so disposing the handler must dispose the client. A subsequent HTTP call must therefore
+    /// fail with <see cref="ObjectDisposedException" />.
     /// </summary>
     [Test]
     public void Dispose_WhenOwnsHttpClient_DisposesClient()
@@ -451,8 +451,8 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     When constructed with an externally supplied <see cref="HttpClient" /> the handler must
-    ///     leave the client alone on dispose so DI-managed clients keep working for their owner.
+    /// When constructed with an externally supplied <see cref="HttpClient" /> the handler must
+    /// leave the client alone on dispose so DI-managed clients keep working for their owner.
     /// </summary>
     [Test]
     public async Task Dispose_WhenDoesNotOwnHttpClient_DoesNotDisposeClient()
@@ -475,8 +475,8 @@ public class BexioConnectionHandlerTests
     // -----------------------------------------------------------------------
 
     /// <summary>
-    ///     An already-cancelled <see cref="CancellationToken" /> must propagate through the handler
-    ///     as an <see cref="OperationCanceledException" /> (or a derived <see cref="TaskCanceledException" />).
+    /// An already-cancelled <see cref="CancellationToken" /> must propagate through the handler
+    /// as an <see cref="OperationCanceledException" /> (or a derived <see cref="TaskCanceledException" />).
     /// </summary>
     [Test]
     public void GetAsync_WhenCancelled_ThrowsOperationCanceledException()
@@ -498,8 +498,8 @@ public class BexioConnectionHandlerTests
     // -----------------------------------------------------------------------
 
     /// <summary>
-    ///     A PUT call must emit an HTTP PUT request to the path provided and carry the serialized
-    ///     payload as JSON body.
+    /// A PUT call must emit an HTTP PUT request to the path provided and carry the serialized
+    /// payload as JSON body.
     /// </summary>
     [Test]
     public async Task PutAsync_SendsPutRequest_ToCorrectPath()
@@ -528,8 +528,8 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     A PATCH call must emit an HTTP PATCH request to the path provided and carry the
-    ///     serialized payload as JSON body.
+    /// A PATCH call must emit an HTTP PATCH request to the path provided and carry the
+    /// serialized payload as JSON body.
     /// </summary>
     [Test]
     public async Task PatchAsync_SendsPatchRequest_ToCorrectPath()
@@ -556,8 +556,8 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     The typed overload of <see cref="BexioConnectionHandler.PostActionAsync{TResult}" /> must
-    ///     emit a POST with no body to the supplied action endpoint path.
+    /// The typed overload of <see cref="BexioConnectionHandler.PostActionAsync{TResult}" /> must
+    /// emit a POST with no body to the supplied action endpoint path.
     /// </summary>
     [Test]
     public async Task PostActionAsync_WithTResult_SendsPostRequest_ToCorrectPath()
@@ -579,8 +579,8 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     The void overload of <see cref="BexioConnectionHandler.PostActionAsync" /> must emit a
-    ///     POST with no body and surface success through the untyped <see cref="ApiResult{T}" />.
+    /// The void overload of <see cref="BexioConnectionHandler.PostActionAsync" /> must emit a
+    /// POST with no body and surface success through the untyped <see cref="ApiResult{T}" />.
     /// </summary>
     [Test]
     public async Task PostActionAsync_WithVoid_SendsPostRequest_ToCorrectPath()
@@ -604,9 +604,9 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     <see cref="BexioConnectionHandler.GetBinaryAsync" /> must emit a GET and return the raw
-    ///     response bytes verbatim in <see cref="ApiResult{T}.Data" /> instead of attempting JSON
-    ///     deserialisation.
+    /// <see cref="BexioConnectionHandler.GetBinaryAsync" /> must emit a GET and return the raw
+    /// response bytes verbatim in <see cref="ApiResult{T}.Data" /> instead of attempting JSON
+    /// deserialisation.
     /// </summary>
     [Test]
     public async Task GetBinaryAsync_SendsGetRequest_AndReturnsByteArrayData()
@@ -641,8 +641,8 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     A non-success response from <see cref="BexioConnectionHandler.GetBinaryAsync" /> must
-    ///     leave <see cref="ApiResult{T}.Data" /> null and populate <see cref="ApiResult.ApiError" />.
+    /// A non-success response from <see cref="BexioConnectionHandler.GetBinaryAsync" /> must
+    /// leave <see cref="ApiResult{T}.Data" /> null and populate <see cref="ApiResult.ApiError" />.
     /// </summary>
     [Test]
     public async Task GetBinaryAsync_On404_ReturnsIsSuccessFalse_WithApiError()
@@ -672,9 +672,9 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     <see cref="BexioConnectionHandler.PostSearchAsync{TResult}" /> must POST the search
-    ///     criteria as a JSON array body and append supplied <see cref="QueryParameter" /> values
-    ///     to the request URI as a query string.
+    /// <see cref="BexioConnectionHandler.PostSearchAsync{TResult}" /> must POST the search
+    /// criteria as a JSON array body and append supplied <see cref="QueryParameter" /> values
+    /// to the request URI as a query string.
     /// </summary>
     [Test]
     public async Task PostSearchAsync_SendsPostRequest_WithBodyAndQueryParameters()
@@ -719,8 +719,8 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     When no <see cref="QueryParameter" /> is supplied to <see cref="BexioConnectionHandler.PostSearchAsync{TResult}" />
-    ///     the request URI must carry no query string.
+    /// When no <see cref="QueryParameter" /> is supplied to <see cref="BexioConnectionHandler.PostSearchAsync{TResult}" />
+    /// the request URI must carry no query string.
     /// </summary>
     [Test]
     public async Task PostSearchAsync_WithoutQueryParameter_HasNoQueryString()
@@ -747,8 +747,8 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     <see cref="BexioConnectionHandler.PostBulkAsync{TResult, TCreate}" /> must POST the full
-    ///     payload list as a JSON array body to the supplied bulk endpoint path.
+    /// <see cref="BexioConnectionHandler.PostBulkAsync{TResult, TCreate}" /> must POST the full
+    /// payload list as a JSON array body to the supplied bulk endpoint path.
     /// </summary>
     [Test]
     public async Task PostBulkAsync_SendsPostRequest_WithArrayBody()

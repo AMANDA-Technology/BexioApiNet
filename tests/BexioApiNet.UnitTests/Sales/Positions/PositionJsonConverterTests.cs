@@ -29,17 +29,17 @@ using BexioApiNet.Abstractions.Models.Sales.Positions;
 namespace BexioApiNet.UnitTests.Sales.Positions;
 
 /// <summary>
-///     Round-trip tests for the polymorphic <see cref="Position" /> union. Each concrete variant
-///     must serialize to the JSON shape Bexio expects (including the <c>type</c> discriminator) and
-///     must deserialize back into the same concrete subtype when read from a Bexio response.
+/// Round-trip tests for the polymorphic <see cref="Position" /> union. Each concrete variant
+/// must serialize to the JSON shape Bexio expects (including the <c>type</c> discriminator) and
+/// must deserialize back into the same concrete subtype when read from a Bexio response.
 /// </summary>
 [TestFixture]
 public sealed class PositionJsonConverterTests
 {
     /// <summary>
-    ///     A <see cref="PositionArticle" /> round-trips through
-    ///     <see cref="JsonSerializer" /> preserving every field and the <c>KbPositionArticle</c>
-    ///     discriminator.
+    /// A <see cref="PositionArticle" /> round-trips through
+    /// <see cref="JsonSerializer" /> preserving every field and the <c>KbPositionArticle</c>
+    /// discriminator.
     /// </summary>
     [Test]
     public void PositionArticle_RoundTrips_PreservesAllFields()
@@ -73,8 +73,8 @@ public sealed class PositionJsonConverterTests
     }
 
     /// <summary>
-    ///     A <see cref="PositionCustom" /> round-trips preserving its fields and its
-    ///     <c>KbPositionCustom</c> discriminator.
+    /// A <see cref="PositionCustom" /> round-trips preserving its fields and its
+    /// <c>KbPositionCustom</c> discriminator.
     /// </summary>
     [Test]
     public void PositionCustom_RoundTrips_PreservesAllFields()
@@ -106,8 +106,8 @@ public sealed class PositionJsonConverterTests
     }
 
     /// <summary>
-    ///     A <see cref="PositionText" /> round-trips preserving its fields and its
-    ///     <c>KbPositionText</c> discriminator.
+    /// A <see cref="PositionText" /> round-trips preserving its fields and its
+    /// <c>KbPositionText</c> discriminator.
     /// </summary>
     [Test]
     public void PositionText_RoundTrips_PreservesAllFields()
@@ -134,8 +134,8 @@ public sealed class PositionJsonConverterTests
     }
 
     /// <summary>
-    ///     A <see cref="PositionSubposition" /> round-trips preserving its fields and its
-    ///     <c>KbPositionSubposition</c> discriminator.
+    /// A <see cref="PositionSubposition" /> round-trips preserving its fields and its
+    /// <c>KbPositionSubposition</c> discriminator.
     /// </summary>
     [Test]
     public void PositionSubposition_RoundTrips_PreservesAllFields()
@@ -164,8 +164,8 @@ public sealed class PositionJsonConverterTests
     }
 
     /// <summary>
-    ///     A <see cref="PositionSubtotal" /> round-trips preserving its fields and its
-    ///     <c>KbPositionSubtotal</c> discriminator.
+    /// A <see cref="PositionSubtotal" /> round-trips preserving its fields and its
+    /// <c>KbPositionSubtotal</c> discriminator.
     /// </summary>
     [Test]
     public void PositionSubtotal_RoundTrips_PreservesAllFields()
@@ -191,8 +191,8 @@ public sealed class PositionJsonConverterTests
     }
 
     /// <summary>
-    ///     A <see cref="PositionPagebreak" /> round-trips preserving its fields and its
-    ///     <c>KbPositionPagebreak</c> discriminator.
+    /// A <see cref="PositionPagebreak" /> round-trips preserving its fields and its
+    /// <c>KbPositionPagebreak</c> discriminator.
     /// </summary>
     [Test]
     public void PositionPagebreak_RoundTrips_PreservesAllFields()
@@ -217,8 +217,8 @@ public sealed class PositionJsonConverterTests
     }
 
     /// <summary>
-    ///     A <see cref="PositionDiscount" /> round-trips preserving its fields and its
-    ///     <c>KbPositionDiscount</c> discriminator.
+    /// A <see cref="PositionDiscount" /> round-trips preserving its fields and its
+    /// <c>KbPositionDiscount</c> discriminator.
     /// </summary>
     [Test]
     public void PositionDiscount_RoundTrips_PreservesAllFields()
@@ -244,9 +244,9 @@ public sealed class PositionJsonConverterTests
     }
 
     /// <summary>
-    ///     A mixed list of <see cref="Position" /> variants round-trips through serialization
-    ///     preserving order, runtime types and field values — the path exercised by Bexio's document
-    ///     responses, which return a heterogeneous <c>positions</c> array.
+    /// A mixed list of <see cref="Position" /> variants round-trips through serialization
+    /// preserving order, runtime types and field values — the path exercised by Bexio's document
+    /// responses, which return a heterogeneous <c>positions</c> array.
     /// </summary>
     [Test]
     public void MixedPositionList_RoundTrips_PreservesRuntimeTypes()
@@ -275,9 +275,9 @@ public sealed class PositionJsonConverterTests
     }
 
     /// <summary>
-    ///     Deserializing a position payload whose <c>type</c> discriminator is unknown to the
-    ///     converter must surface a <see cref="JsonException" /> rather than silently returning a
-    ///     default instance — a payload Bexio should never emit, but worth failing fast on.
+    /// Deserializing a position payload whose <c>type</c> discriminator is unknown to the
+    /// converter must surface a <see cref="JsonException" /> rather than silently returning a
+    /// default instance — a payload Bexio should never emit, but worth failing fast on.
     /// </summary>
     [Test]
     public void UnknownDiscriminator_ThrowsJsonException()
@@ -288,8 +288,8 @@ public sealed class PositionJsonConverterTests
     }
 
     /// <summary>
-    ///     Deserializing a position payload missing the <c>type</c> discriminator altogether must
-    ///     surface a <see cref="JsonException" /> rather than silently returning a default instance.
+    /// Deserializing a position payload missing the <c>type</c> discriminator altogether must
+    /// surface a <see cref="JsonException" /> rather than silently returning a default instance.
     /// </summary>
     [Test]
     public void MissingDiscriminator_ThrowsJsonException()

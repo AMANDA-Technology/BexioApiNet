@@ -28,30 +28,30 @@ using System.Text.Json;
 namespace BexioApiNet.Abstractions.Json;
 
 /// <summary>
-///     Reusable <see cref="JsonConverter{T}" /> base for discriminated-union style polymorphic
-///     hierarchies. Derived converters only need to name the discriminator JSON property and map
-///     the discriminator value to a concrete CLR type. On write, each value is serialized under
-///     its runtime type so the concrete record's own property metadata drives the output.
+/// Reusable <see cref="JsonConverter{T}" /> base for discriminated-union style polymorphic
+/// hierarchies. Derived converters only need to name the discriminator JSON property and map
+/// the discriminator value to a concrete CLR type. On write, each value is serialized under
+/// its runtime type so the concrete record's own property metadata drives the output.
 /// </summary>
 /// <remarks>
-///     Registering the converter with <c>[JsonConverter(typeof(...))]</c> on the abstract base only
-///     applies to that base (the attribute lookup uses <c>inherit: false</c>); concrete subtypes
-///     therefore do not re-enter the converter on write and the <c>Read</c>/<c>Write</c> paths
-///     stay recursion-free.
+/// Registering the converter with <c>[JsonConverter(typeof(...))]</c> on the abstract base only
+/// applies to that base (the attribute lookup uses <c>inherit: false</c>); concrete subtypes
+/// therefore do not re-enter the converter on write and the <c>Read</c>/<c>Write</c> paths
+/// stay recursion-free.
 /// </remarks>
 /// <typeparam name="TBase">The polymorphic base type handled by this converter.</typeparam>
 public abstract class DiscriminatedJsonConverter<TBase> : JsonConverter<TBase>
     where TBase : class
 {
     /// <summary>
-    ///     Name of the JSON property that carries the discriminator value (e.g. <c>"type"</c>).
+    /// Name of the JSON property that carries the discriminator value (e.g. <c>"type"</c>).
     /// </summary>
     protected abstract string DiscriminatorPropertyName { get; }
 
     /// <summary>
-    ///     Map a discriminator value read from the JSON payload to the concrete CLR type that
-    ///     should be instantiated. Return <see langword="null" /> to signal an unknown value and
-    ///     have <see cref="Read" /> throw a <see cref="JsonException" />.
+    /// Map a discriminator value read from the JSON payload to the concrete CLR type that
+    /// should be instantiated. Return <see langword="null" /> to signal an unknown value and
+    /// have <see cref="Read" /> throw a <see cref="JsonException" />.
     /// </summary>
     /// <param name="discriminator">The discriminator string extracted from the payload.</param>
     /// <returns>The concrete subtype to deserialize into, or <see langword="null" /> if unknown.</returns>

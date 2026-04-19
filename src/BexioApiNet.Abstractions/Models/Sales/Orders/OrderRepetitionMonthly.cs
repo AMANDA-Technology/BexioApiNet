@@ -26,9 +26,9 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Orders;
 
 /// <summary>
-///     Monthly repetition schedule — fires every <see cref="OrderRepetitionSchedule.Interval" />
-///     months on the day described by <see cref="Schedule" />. Corresponds to the Bexio
-///     <c>OrderRepetitionMonthly</c> schema (<c>type = "monthly"</c>).
+/// Monthly repetition schedule — fires every <see cref="OrderRepetitionSchedule.Interval" />
+/// months on the day described by <see cref="Schedule" />. Corresponds to the Bexio
+/// <c>OrderRepetitionMonthly</c> schema (<c>type = "monthly"</c>).
 /// </summary>
 public sealed record OrderRepetitionMonthly : OrderRepetitionSchedule
 {
@@ -36,8 +36,8 @@ public sealed record OrderRepetitionMonthly : OrderRepetitionSchedule
     public override string Type => OrderRepetitionTypes.Monthly;
 
     /// <summary>
-    ///     Day-of-month selector. One of the Bexio literals <c>fixed_day</c>, <c>week_day</c>,
-    ///     <c>first_day</c> or <c>last_day</c>.
+    /// Day-of-month selector. One of the Bexio literals <c>fixed_day</c>, <c>week_day</c>,
+    /// <c>first_day</c> or <c>last_day</c>.
     /// </summary>
     [JsonPropertyName("schedule")]
     public string Schedule { get; init; } = string.Empty;

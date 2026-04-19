@@ -26,9 +26,9 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Positions;
 
 /// <summary>
-///     Free-form / custom line item not backed by an article.
-///     Corresponds to the Bexio <c>KbPositionCustom</c> / <c>PositionCustomExtended</c> schema.
-///     <see href="https://docs.bexio.com/#tag/Custom-positions" />
+/// Free-form / custom line item not backed by an article.
+/// Corresponds to the Bexio <c>KbPositionCustom</c> / <c>PositionCustomExtended</c> schema.
+/// <see href="https://docs.bexio.com/#tag/Custom-positions" />
 /// </summary>
 public sealed record PositionCustom : Position
 {

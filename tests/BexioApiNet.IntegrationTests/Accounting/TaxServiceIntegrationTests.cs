@@ -28,9 +28,9 @@ using BexioApiNet.Services.Connectors.Accounting;
 namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-///     Integration tests covering the <see cref="TaxService" /> entry points against WireMock stubs.
-///     Verifies the path composed from <see cref="TaxConfiguration" /> (<c>3.0/taxes</c>)
-///     reaches the handler correctly and that the expected HTTP verbs are used.
+/// Integration tests covering the <see cref="TaxService" /> entry points against WireMock stubs.
+/// Verifies the path composed from <see cref="TaxConfiguration" /> (<c>3.0/taxes</c>)
+/// reaches the handler correctly and that the expected HTTP verbs are used.
 /// </summary>
 public sealed class TaxServiceIntegrationTests : IntegrationTestBase
 {
@@ -58,8 +58,8 @@ public sealed class TaxServiceIntegrationTests : IntegrationTestBase
                                        """;
 
     /// <summary>
-    ///     <c>TaxService.Get()</c> must issue a <c>GET</c> request against <c>/3.0/taxes</c>
-    ///     and return a successful <c>ApiResult</c> when the server returns an empty array.
+    /// <c>TaxService.Get()</c> must issue a <c>GET</c> request against <c>/3.0/taxes</c>
+    /// and return a successful <c>ApiResult</c> when the server returns an empty array.
     /// </summary>
     [Test]
     public async Task TaxService_Get_SendsGetRequest()
@@ -83,8 +83,8 @@ public sealed class TaxServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>TaxService.GetById</c> must issue a <c>GET</c> request that includes the target id
-    ///     in the URL path and surface the returned tax on success.
+    /// <c>TaxService.GetById</c> must issue a <c>GET</c> request that includes the target id
+    /// in the URL path and surface the returned tax on success.
     /// </summary>
     [Test]
     public async Task TaxService_GetById_SendsGetRequestWithIdInPath()
@@ -113,8 +113,8 @@ public sealed class TaxServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>TaxService.Delete</c> must issue a <c>DELETE</c> request that includes the target id
-    ///     in the URL path.
+    /// <c>TaxService.Delete</c> must issue a <c>DELETE</c> request that includes the target id
+    /// in the URL path.
     /// </summary>
     [Test]
     public async Task TaxService_Delete_SendsDeleteRequest()

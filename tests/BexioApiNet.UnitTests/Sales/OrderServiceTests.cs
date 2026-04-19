@@ -35,16 +35,16 @@ using BexioApiNet.Services.Connectors.Sales;
 namespace BexioApiNet.UnitTests.Sales;
 
 /// <summary>
-///     Offline unit tests for <see cref="OrderService" />. Each test verifies that the service
-///     forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected arguments and
-///     returns the handler's result unchanged. No network, no filesystem access.
+/// Offline unit tests for <see cref="OrderService" />. Each test verifies that the service
+/// forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected arguments and
+/// returns the handler's result unchanged. No network, no filesystem access.
 /// </summary>
 [TestFixture]
 public sealed class OrderServiceTests : ServiceTestBase
 {
     /// <summary>
-    ///     Creates a fresh <see cref="OrderService" /> per test, bound to the
-    ///     <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
+    /// Creates a fresh <see cref="OrderService" /> per test, bound to the
+    /// <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
     /// </summary>
     [SetUp]
     public void CreateSut()
@@ -57,8 +57,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     private OrderService _sut = null!;
 
     /// <summary>
-    ///     Get (no parameters) calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> once with
-    ///     the expected endpoint path and a null query parameter.
+    /// Get (no parameters) calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> once with
+    /// the expected endpoint path and a null query parameter.
     /// </summary>
     [Test]
     public async Task Get_WithNoParams_CallsGetAsync()
@@ -80,8 +80,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get forwards the <see cref="QueryParameterOrder" />'s underlying <see cref="QueryParameter" />
-    ///     to the connection handler so the caller's filters (limit/offset/order_by) reach the API.
+    /// Get forwards the <see cref="QueryParameterOrder" />'s underlying <see cref="QueryParameter" />
+    /// to the connection handler so the caller's filters (limit/offset/order_by) reach the API.
     /// </summary>
     [Test]
     public async Task Get_WithQueryParameter_PassesQueryParameterToConnectionHandler()
@@ -104,9 +104,9 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get (autoPage = true) triggers <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> when
-    ///     the <c>X-Total-Count</c> header is present and the initial response only returned a page of
-    ///     the full result set.
+    /// Get (autoPage = true) triggers <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> when
+    /// the <c>X-Total-Count</c> header is present and the initial response only returned a page of
+    /// the full result set.
     /// </summary>
     [Test]
     public async Task Get_WithAutoPage_CallsFetchAll()
@@ -148,8 +148,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get returns the <see cref="ApiResult{T}" /> produced by the connection handler when
-    ///     auto-paging is not requested.
+    /// Get returns the <see cref="ApiResult{T}" /> produced by the connection handler when
+    /// auto-paging is not requested.
     /// </summary>
     [Test]
     public async Task Get_ReturnsApiResult()
@@ -168,8 +168,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetById calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> with the expected
-    ///     endpoint path including the order id.
+    /// GetById calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> with the expected
+    /// endpoint path including the order id.
     /// </summary>
     [Test]
     public async Task GetById_CallsGetAsync_WithIdInPath()
@@ -190,8 +190,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetPdf calls <see cref="IBexioConnectionHandler.GetBinaryAsync" /> against the
-    ///     <c>/{id}/pdf</c> sub-resource.
+    /// GetPdf calls <see cref="IBexioConnectionHandler.GetBinaryAsync" /> against the
+    /// <c>/{id}/pdf</c> sub-resource.
     /// </summary>
     [Test]
     public async Task GetPdf_CallsGetBinaryAsync_WithIdInPath()
@@ -211,8 +211,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetRepetition calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> with the
-    ///     expected endpoint path including the order id and the <c>/repetition</c> sub-resource.
+    /// GetRepetition calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> with the
+    /// expected endpoint path including the order id and the <c>/repetition</c> sub-resource.
     /// </summary>
     [Test]
     public async Task GetRepetition_CallsGetAsync_WithRepetitionPath()
@@ -233,8 +233,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Create forwards the payload and the expected endpoint path to
-    ///     <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />.
+    /// Create forwards the payload and the expected endpoint path to
+    /// <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />.
     /// </summary>
     [Test]
     public async Task Create_CallsPostAsync()
@@ -257,8 +257,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Update calls <see cref="IBexioConnectionHandler.PostAsync{TResult,TUpdate}" /> (not PUT) at
-    ///     <c>/2.0/kb_order/{id}</c> — Bexio edits orders via POST on this resource.
+    /// Update calls <see cref="IBexioConnectionHandler.PostAsync{TResult,TUpdate}" /> (not PUT) at
+    /// <c>/2.0/kb_order/{id}</c> — Bexio edits orders via POST on this resource.
     /// </summary>
     [Test]
     public async Task Update_CallsPostAsync_WithIdInPath()
@@ -280,8 +280,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Delete forwards the call to <see cref="IBexioConnectionHandler.Delete" /> with the order id
-    ///     appended to the endpoint root.
+    /// Delete forwards the call to <see cref="IBexioConnectionHandler.Delete" /> with the order id
+    /// appended to the endpoint root.
     /// </summary>
     [Test]
     public async Task Delete_CallsConnectionHandlerDelete_WithIdInPath()
@@ -301,8 +301,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Search forwards the criteria, the <c>/search</c> path and the optional query parameter to
-    ///     <see cref="IBexioConnectionHandler.PostSearchAsync{TResult}" />.
+    /// Search forwards the criteria, the <c>/search</c> path and the optional query parameter to
+    /// <see cref="IBexioConnectionHandler.PostSearchAsync{TResult}" />.
     /// </summary>
     [Test]
     public async Task Search_CallsPostSearchAsync()
@@ -331,8 +331,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     CreateDeliveryFromOrder posts the optional <see cref="OrderConvertRequest" /> body to the
-    ///     <c>/{id}/delivery</c> endpoint and returns the newly created <see cref="Delivery" />.
+    /// CreateDeliveryFromOrder posts the optional <see cref="OrderConvertRequest" /> body to the
+    /// <c>/{id}/delivery</c> endpoint and returns the newly created <see cref="Delivery" />.
     /// </summary>
     [Test]
     public async Task CreateDeliveryFromOrder_CallsPostAsync_WithDeliveryPath()
@@ -354,8 +354,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     CreateInvoiceFromOrder posts the optional <see cref="OrderConvertRequest" /> body to the
-    ///     <c>/{id}/invoice</c> endpoint and returns the newly created <see cref="Invoice" />.
+    /// CreateInvoiceFromOrder posts the optional <see cref="OrderConvertRequest" /> body to the
+    /// <c>/{id}/invoice</c> endpoint and returns the newly created <see cref="Invoice" />.
     /// </summary>
     [Test]
     public async Task CreateInvoiceFromOrder_CallsPostAsync_WithInvoicePath()
@@ -377,8 +377,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     CreateRepetition posts the <see cref="OrderRepetitionCreate" /> body to the
-    ///     <c>/{id}/repetition</c> endpoint and returns the resulting <see cref="OrderRepetition" />.
+    /// CreateRepetition posts the <see cref="OrderRepetitionCreate" /> body to the
+    /// <c>/{id}/repetition</c> endpoint and returns the resulting <see cref="OrderRepetition" />.
     /// </summary>
     [Test]
     public async Task CreateRepetition_CallsPostAsync_WithRepetitionPath()
@@ -404,8 +404,8 @@ public sealed class OrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     DeleteRepetition calls <see cref="IBexioConnectionHandler.Delete" /> against the
-    ///     <c>/{id}/repetition</c> sub-resource.
+    /// DeleteRepetition calls <see cref="IBexioConnectionHandler.Delete" /> against the
+    /// <c>/{id}/repetition</c> sub-resource.
     /// </summary>
     [Test]
     public async Task DeleteRepetition_CallsConnectionHandlerDelete_WithRepetitionPath()

@@ -26,9 +26,9 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Positions;
 
 /// <summary>
-///     String literals for the Bexio <c>type</c> discriminator that identifies each concrete
-///     <see cref="Position" /> variant on the wire. Kept in one place so the converter and each
-///     concrete record share a single source of truth.
+/// String literals for the Bexio <c>type</c> discriminator that identifies each concrete
+/// <see cref="Position" /> variant on the wire. Kept in one place so the converter and each
+/// concrete record share a single source of truth.
 /// </summary>
 internal static class PositionTypes
 {

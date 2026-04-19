@@ -30,11 +30,11 @@ using BexioApiNet.Services.Connectors.Contacts;
 namespace BexioApiNet.IntegrationTests.Contacts;
 
 /// <summary>
-///     Integration tests covering the CRUD entry points of <see cref="ContactRelationService" /> against
-///     WireMock stubs. Verifies the path composed from <see cref="ContactRelationConfiguration" />
-///     (<c>2.0/contact_relation</c>) reaches the handler correctly, that the expected HTTP verbs are
-///     used (including the Bexio-specific <c>POST</c> for edits), and that payloads are serialized with
-///     the expected snake_case field names.
+/// Integration tests covering the CRUD entry points of <see cref="ContactRelationService" /> against
+/// WireMock stubs. Verifies the path composed from <see cref="ContactRelationConfiguration" />
+/// (<c>2.0/contact_relation</c>) reaches the handler correctly, that the expected HTTP verbs are
+/// used (including the Bexio-specific <c>POST</c> for edits), and that payloads are serialized with
+/// the expected snake_case field names.
 /// </summary>
 public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
 {
@@ -51,9 +51,9 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
                                                    """;
 
     /// <summary>
-    ///     <c>ContactRelationService.Get()</c> must issue a <c>GET</c> request against
-    ///     <c>/2.0/contact_relation</c> and return a successful <c>ApiResult</c> when the server
-    ///     returns an empty array.
+    /// <c>ContactRelationService.Get()</c> must issue a <c>GET</c> request against
+    /// <c>/2.0/contact_relation</c> and return a successful <c>ApiResult</c> when the server
+    /// returns an empty array.
     /// </summary>
     [Test]
     public async Task ContactRelationService_Get_SendsGetRequest()
@@ -77,8 +77,8 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ContactRelationService.GetById</c> must issue a <c>GET</c> request that includes the
-    ///     target id in the URL path and surface the returned contact relation on success.
+    /// <c>ContactRelationService.GetById</c> must issue a <c>GET</c> request that includes the
+    /// target id in the URL path and surface the returned contact relation on success.
     /// </summary>
     [Test]
     public async Task ContactRelationService_GetById_SendsGetRequest()
@@ -107,9 +107,9 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ContactRelationService.Create</c> must send a <c>POST</c> request whose body is the
-    ///     serialized <see cref="ContactRelationCreate" /> payload, and must surface the returned
-    ///     contact relation on success.
+    /// <c>ContactRelationService.Create</c> must send a <c>POST</c> request whose body is the
+    /// serialized <see cref="ContactRelationCreate" /> payload, and must surface the returned
+    /// contact relation on success.
     /// </summary>
     [Test]
     public async Task ContactRelationService_Create_SendsPostRequest()
@@ -142,9 +142,9 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ContactRelationService.Search</c> must send a <c>POST</c> request against
-    ///     <c>/2.0/contact_relation/search</c> with the <see cref="SearchCriteria" /> list as the
-    ///     JSON body.
+    /// <c>ContactRelationService.Search</c> must send a <c>POST</c> request against
+    /// <c>/2.0/contact_relation/search</c> with the <see cref="SearchCriteria" /> list as the
+    /// JSON body.
     /// </summary>
     [Test]
     public async Task ContactRelationService_Search_SendsPostRequest_ToSearchPath()
@@ -177,9 +177,9 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ContactRelationService.Update</c> must send a <c>POST</c> (not <c>PUT</c>) request
-    ///     against <c>/2.0/contact_relation/{id}</c> — Bexio uses POST for full-replacement edits on
-    ///     v2.0 resources.
+    /// <c>ContactRelationService.Update</c> must send a <c>POST</c> (not <c>PUT</c>) request
+    /// against <c>/2.0/contact_relation/{id}</c> — Bexio uses POST for full-replacement edits on
+    /// v2.0 resources.
     /// </summary>
     [Test]
     public async Task ContactRelationService_Update_SendsPostRequest_WithIdInPath()
@@ -213,8 +213,8 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ContactRelationService.Delete</c> must issue a <c>DELETE</c> request that includes the
-    ///     target id in the URL path.
+    /// <c>ContactRelationService.Delete</c> must issue a <c>DELETE</c> request that includes the
+    /// target id in the URL path.
     /// </summary>
     [Test]
     public async Task ContactRelationService_Delete_SendsDeleteRequest()

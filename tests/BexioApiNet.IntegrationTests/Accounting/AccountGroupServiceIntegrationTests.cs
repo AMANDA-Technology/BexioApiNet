@@ -28,19 +28,19 @@ using BexioApiNet.Services.Connectors.Accounting;
 namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-///     Integration tests covering the <see cref="AccountGroupService" /> entry points against
-///     WireMock stubs. Verifies the path composed from <see cref="AccountGroupConfiguration" />
-///     (<c>2.0/account_groups</c>) reaches the handler correctly and that the expected HTTP
-///     verb is used.
+/// Integration tests covering the <see cref="AccountGroupService" /> entry points against
+/// WireMock stubs. Verifies the path composed from <see cref="AccountGroupConfiguration" />
+/// (<c>2.0/account_groups</c>) reaches the handler correctly and that the expected HTTP
+/// verb is used.
 /// </summary>
 public sealed class AccountGroupServiceIntegrationTests : IntegrationTestBase
 {
     private const string AccountGroupsPath = "/2.0/account_groups";
 
     /// <summary>
-    ///     <c>AccountGroupService.Get()</c> must issue a <c>GET</c> request against
-    ///     <c>/2.0/account_groups</c> and return a successful <c>ApiResult</c> when the server
-    ///     returns an empty array.
+    /// <c>AccountGroupService.Get()</c> must issue a <c>GET</c> request against
+    /// <c>/2.0/account_groups</c> and return a successful <c>ApiResult</c> when the server
+    /// returns an empty array.
     /// </summary>
     [Test]
     public async Task AccountGroupService_Get_SendsGetRequest()

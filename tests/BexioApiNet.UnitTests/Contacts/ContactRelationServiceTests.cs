@@ -33,9 +33,9 @@ using BexioApiNet.Services.Connectors.Contacts;
 namespace BexioApiNet.UnitTests.Contacts;
 
 /// <summary>
-///     Offline unit tests for <see cref="ContactRelationService" />. Each test verifies that the service
-///     forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected arguments and
-///     returns the handler's result unchanged. No network, no filesystem access.
+/// Offline unit tests for <see cref="ContactRelationService" />. Each test verifies that the service
+/// forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected arguments and
+/// returns the handler's result unchanged. No network, no filesystem access.
 /// </summary>
 [TestFixture]
 public sealed class ContactRelationServiceTests : ServiceTestBase
@@ -45,8 +45,8 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     private ContactRelationService _sut = null!;
 
     /// <summary>
-    ///     Creates a fresh <see cref="ContactRelationService" /> per test, bound to the
-    ///     <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
+    /// Creates a fresh <see cref="ContactRelationService" /> per test, bound to the
+    /// <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
     /// </summary>
     [SetUp]
     public void CreateSut()
@@ -55,8 +55,8 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get (no parameters) calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> once with
-    ///     the expected endpoint path and a null query parameter.
+    /// Get (no parameters) calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> once with
+    /// the expected endpoint path and a null query parameter.
     /// </summary>
     [Test]
     public async Task Get_WithNoParams_CallsGetAsync()
@@ -78,8 +78,8 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get forwards the wrapped <see cref="QueryParameter"/> from a typed
-    ///     <see cref="QueryParameterContactRelation"/> to the connection handler.
+    /// Get forwards the wrapped <see cref="QueryParameter"/> from a typed
+    /// <see cref="QueryParameterContactRelation"/> to the connection handler.
     /// </summary>
     [Test]
     public async Task Get_WithQueryParameter_ForwardsQueryParameter()
@@ -102,9 +102,9 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get (autoPage = true) triggers <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> when
-    ///     the <c>X-Total-Count</c> header is present and the initial response only returned a page of
-    ///     the full result set.
+    /// Get (autoPage = true) triggers <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> when
+    /// the <c>X-Total-Count</c> header is present and the initial response only returned a page of
+    /// the full result set.
     /// </summary>
     [Test]
     public async Task Get_WithAutoPage_CallsFetchAll()
@@ -146,8 +146,8 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get returns the <see cref="ApiResult{T}" /> produced by the connection handler when
-    ///     auto-paging is not requested.
+    /// Get returns the <see cref="ApiResult{T}" /> produced by the connection handler when
+    /// auto-paging is not requested.
     /// </summary>
     [Test]
     public async Task Get_ReturnsApiResult()
@@ -166,8 +166,8 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetById forwards the call to <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> with
-    ///     the endpoint path that includes the supplied id.
+    /// GetById forwards the call to <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> with
+    /// the endpoint path that includes the supplied id.
     /// </summary>
     [Test]
     public async Task GetById_PathContainsId()
@@ -188,8 +188,8 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetById returns the <see cref="ApiResult{T}" /> produced by the connection handler without
-    ///     modification.
+    /// GetById returns the <see cref="ApiResult{T}" /> produced by the connection handler without
+    /// modification.
     /// </summary>
     [Test]
     public async Task GetById_ReturnsApiResultFromConnectionHandler()
@@ -212,8 +212,8 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Create forwards the payload and the expected endpoint path to
-    ///     <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />.
+    /// Create forwards the payload and the expected endpoint path to
+    /// <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />.
     /// </summary>
     [Test]
     public async Task Create_CallsPostAsync()
@@ -236,8 +236,8 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Create returns the <see cref="ApiResult{T}" /> produced by the connection handler without
-    ///     modification.
+    /// Create returns the <see cref="ApiResult{T}" /> produced by the connection handler without
+    /// modification.
     /// </summary>
     [Test]
     public async Task Create_ReturnsApiResultFromConnectionHandler()
@@ -257,8 +257,8 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Search forwards the provided criteria list to
-    ///     <see cref="IBexioConnectionHandler.PostSearchAsync{TResult}" /> with the search endpoint path.
+    /// Search forwards the provided criteria list to
+    /// <see cref="IBexioConnectionHandler.PostSearchAsync{TResult}" /> with the search endpoint path.
     /// </summary>
     [Test]
     public async Task Search_CallsPostSearchAsync()
@@ -286,8 +286,8 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Search forwards the optional <see cref="QueryParameterContactRelation"/> through to the
-    ///     connection handler as a <see cref="QueryParameter"/>.
+    /// Search forwards the optional <see cref="QueryParameterContactRelation"/> through to the
+    /// connection handler as a <see cref="QueryParameter"/>.
     /// </summary>
     [Test]
     public async Task Search_WithQueryParameter_ForwardsQueryParameter()
@@ -316,9 +316,9 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Update forwards the payload and the id-scoped endpoint path to
-    ///     <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />. Bexio v2.0 endpoints
-    ///     use HTTP POST on the resource URL to perform an edit.
+    /// Update forwards the payload and the id-scoped endpoint path to
+    /// <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />. Bexio v2.0 endpoints
+    /// use HTTP POST on the resource URL to perform an edit.
     /// </summary>
     [Test]
     public async Task Update_CallsPostAsync_WithIdInPath()
@@ -344,8 +344,8 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Update returns the <see cref="ApiResult{T}" /> produced by the connection handler without
-    ///     modification.
+    /// Update returns the <see cref="ApiResult{T}" /> produced by the connection handler without
+    /// modification.
     /// </summary>
     [Test]
     public async Task Update_ReturnsApiResultFromConnectionHandler()
@@ -365,7 +365,7 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Delete forwards the call to <see cref="IBexioConnectionHandler.Delete" /> exactly once.
+    /// Delete forwards the call to <see cref="IBexioConnectionHandler.Delete" /> exactly once.
     /// </summary>
     [Test]
     public async Task Delete_CallsConnectionHandlerDelete()
@@ -383,7 +383,7 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Delete builds the request path with the contact-relation id appended to the endpoint root.
+    /// Delete builds the request path with the contact-relation id appended to the endpoint root.
     /// </summary>
     [Test]
     public async Task Delete_PathContainsId()

@@ -26,22 +26,22 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Orders.Views;
 
 /// <summary>
-///     Create/edit view for an order repetition — body of <c>POST /2.0/kb_order/{order_id}/repetition</c>.
-///     Bexio exposes the same <c>OrderRepetition</c> schema on the way in and out, and uses the same
-///     endpoint for both creating a fresh repetition and replacing an existing one (there is no
-///     dedicated PUT).
-///     <see href="https://docs.bexio.com/#tag/Orders/operation/v2EditOrderRepetition" />
+/// Create/edit view for an order repetition — body of <c>POST /2.0/kb_order/{order_id}/repetition</c>.
+/// Bexio exposes the same <c>OrderRepetition</c> schema on the way in and out, and uses the same
+/// endpoint for both creating a fresh repetition and replacing an existing one (there is no
+/// dedicated PUT).
+/// <see href="https://docs.bexio.com/#tag/Orders/operation/v2EditOrderRepetition" />
 /// </summary>
 /// <param name="Start">Repetition start date in Bexio's <c>yyyy-MM-dd</c> format.</param>
 /// <param name="Repetition">
-///     Polymorphic repetition descriptor. Pass the concrete <see cref="OrderRepetitionSchedule" /> subtype
-///     (<see cref="OrderRepetitionDaily" />, <see cref="OrderRepetitionWeekly" />,
-///     <see cref="OrderRepetitionMonthly" />, <see cref="OrderRepetitionYearly" />) — the converter emits
-///     the <c>type</c> discriminator expected by Bexio.
+/// Polymorphic repetition descriptor. Pass the concrete <see cref="OrderRepetitionSchedule" /> subtype
+/// (<see cref="OrderRepetitionDaily" />, <see cref="OrderRepetitionWeekly" />,
+/// <see cref="OrderRepetitionMonthly" />, <see cref="OrderRepetitionYearly" />) — the converter emits
+/// the <c>type</c> discriminator expected by Bexio.
 /// </param>
 /// <param name="End">
-///     Optional repetition end date in Bexio's <c>yyyy-MM-dd</c> format. When <see langword="null" /> the
-///     repetition runs indefinitely.
+/// Optional repetition end date in Bexio's <c>yyyy-MM-dd</c> format. When <see langword="null" /> the
+/// repetition runs indefinitely.
 /// </param>
 public sealed record OrderRepetitionCreate(
     [property: JsonPropertyName("start")] string Start,

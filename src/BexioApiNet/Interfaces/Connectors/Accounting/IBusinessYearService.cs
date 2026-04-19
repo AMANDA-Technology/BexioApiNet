@@ -31,14 +31,14 @@ using BexioApiNet.Models;
 namespace BexioApiNet.Interfaces.Connectors.Accounting;
 
 /// <summary>
-///     Service for getting business year entries in accounting namespace.
-///     <see href="https://docs.bexio.com/#tag/Business-Years">Business Years</see>
+/// Service for getting business year entries in accounting namespace.
+/// <see href="https://docs.bexio.com/#tag/Business-Years">Business Years</see>
 /// </summary>
 public interface IBusinessYearService
 {
     /// <summary>
-    ///     Get a list of business years.
-    ///     <see href="https://docs.bexio.com/#tag/Business-Years/operation/ListBusinessYears">List Business Years</see>
+    /// Get a list of business years.
+    /// <see href="https://docs.bexio.com/#tag/Business-Years/operation/ListBusinessYears">List Business Years</see>
     /// </summary>
     /// <param name="queryParameterBusinessYear">Query parameter specific for business years</param>
     /// <param name="autoPage">Fetch all possible results</param>
@@ -48,8 +48,8 @@ public interface IBusinessYearService
         [Optional] bool autoPage, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Get a single business year by id.
-    ///     <see href="https://docs.bexio.com/#tag/Business-Years/operation/ShowBusinessYear">Show Business Year</see>
+    /// Get a single business year by id.
+    /// <see href="https://docs.bexio.com/#tag/Business-Years/operation/ShowBusinessYear">Show Business Year</see>
     /// </summary>
     /// <param name="id">The id of the business year</param>
     /// <param name="cancellationToken">Cancellation token</param>

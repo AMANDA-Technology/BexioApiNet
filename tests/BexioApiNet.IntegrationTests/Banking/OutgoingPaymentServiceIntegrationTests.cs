@@ -31,11 +31,11 @@ using BexioApiNet.Services.Connectors.Banking;
 namespace BexioApiNet.IntegrationTests.Banking;
 
 /// <summary>
-///     Integration tests covering the CRUD entry points of <see cref="OutgoingPaymentService" /> against
-///     WireMock stubs. Verifies the path composed from <see cref="OutgoingPaymentConfiguration" />
-///     (<c>4.0/purchase/outgoing-payments</c>) reaches the handler correctly and that the expected
-///     HTTP verbs are used for each operation (Get, GetById, Create, Update, Delete).
-///     Note: Update uses <c>PUT</c> on the collection path (no <c>/{id}</c>) per the Bexio API spec.
+/// Integration tests covering the CRUD entry points of <see cref="OutgoingPaymentService" /> against
+/// WireMock stubs. Verifies the path composed from <see cref="OutgoingPaymentConfiguration" />
+/// (<c>4.0/purchase/outgoing-payments</c>) reaches the handler correctly and that the expected
+/// HTTP verbs are used for each operation (Get, GetById, Create, Update, Delete).
+/// Note: Update uses <c>PUT</c> on the collection path (no <c>/{id}</c>) per the Bexio API spec.
 /// </summary>
 public sealed class OutgoingPaymentServiceIntegrationTests : IntegrationTestBase
 {
@@ -102,9 +102,9 @@ public sealed class OutgoingPaymentServiceIntegrationTests : IntegrationTestBase
     private static readonly Guid TestBillId = Guid.Parse("c3d4e5f6-a7b8-9012-cdef-123456789012");
 
     /// <summary>
-    ///     <c>OutgoingPaymentService.Get</c> must issue a <c>GET</c> against
-    ///     <c>/4.0/purchase/outgoing-payments</c> with the required <c>bill_id</c> query parameter
-    ///     and return a successful <c>ApiResult</c> when the server responds with an empty page.
+    /// <c>OutgoingPaymentService.Get</c> must issue a <c>GET</c> against
+    /// <c>/4.0/purchase/outgoing-payments</c> with the required <c>bill_id</c> query parameter
+    /// and return a successful <c>ApiResult</c> when the server responds with an empty page.
     /// </summary>
     [Test]
     public async Task OutgoingPaymentService_Get_SendsGetRequestWithBillIdQueryParameter()
@@ -132,8 +132,8 @@ public sealed class OutgoingPaymentServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>OutgoingPaymentService.GetById</c> must issue a <c>GET</c> request that includes the target
-    ///     <see cref="Guid" /> in the URL path and surface the returned outgoing payment on success.
+    /// <c>OutgoingPaymentService.GetById</c> must issue a <c>GET</c> request that includes the target
+    /// <see cref="Guid" /> in the URL path and surface the returned outgoing payment on success.
     /// </summary>
     [Test]
     public async Task OutgoingPaymentService_GetById_SendsGetRequestWithIdInPath()
@@ -161,9 +161,9 @@ public sealed class OutgoingPaymentServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>OutgoingPaymentService.Create</c> must send a <c>POST</c> request whose body is the
-    ///     serialized <see cref="OutgoingPaymentCreate" /> payload, and must surface the returned
-    ///     outgoing payment on success.
+    /// <c>OutgoingPaymentService.Create</c> must send a <c>POST</c> request whose body is the
+    /// serialized <see cref="OutgoingPaymentCreate" /> payload, and must surface the returned
+    /// outgoing payment on success.
     /// </summary>
     [Test]
     public async Task OutgoingPaymentService_Create_SendsPostRequestWithPayload()
@@ -201,10 +201,10 @@ public sealed class OutgoingPaymentServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>OutgoingPaymentService.Update</c> must send a <c>PUT</c> request against
-    ///     <c>/4.0/purchase/outgoing-payments</c> (collection path, no <c>/{id}</c>) whose body is the
-    ///     serialized <see cref="OutgoingPaymentUpdate" /> payload containing the <c>payment_id</c>.
-    ///     This is correct per the Bexio API spec.
+    /// <c>OutgoingPaymentService.Update</c> must send a <c>PUT</c> request against
+    /// <c>/4.0/purchase/outgoing-payments</c> (collection path, no <c>/{id}</c>) whose body is the
+    /// serialized <see cref="OutgoingPaymentUpdate" /> payload containing the <c>payment_id</c>.
+    /// This is correct per the Bexio API spec.
     /// </summary>
     [Test]
     public async Task OutgoingPaymentService_Update_SendsPutRequestToCollectionPath()
@@ -236,8 +236,8 @@ public sealed class OutgoingPaymentServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>OutgoingPaymentService.Delete</c> must issue a <c>DELETE</c> request that includes the
-    ///     target <see cref="Guid" /> in the URL path.
+    /// <c>OutgoingPaymentService.Delete</c> must issue a <c>DELETE</c> request that includes the
+    /// target <see cref="Guid" /> in the URL path.
     /// </summary>
     [Test]
     public async Task OutgoingPaymentService_Delete_SendsDeleteRequestWithIdInPath()

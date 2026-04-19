@@ -28,11 +28,11 @@ using BexioApiNet.Abstractions.Models.Sales.Positions;
 namespace BexioApiNet.Abstractions.Json;
 
 /// <summary>
-///     <see cref="System.Text.Json.Serialization.JsonConverter{T}" /> that maps Bexio's
-///     <c>anyOf</c> position payload onto the strongly-typed <see cref="Position" /> hierarchy.
-///     Uses the <c>type</c> discriminator (<c>KbPositionArticle</c>, <c>KbPositionCustom</c>,
-///     <c>KbPositionText</c>, <c>KbPositionSubposition</c>, <c>KbPositionSubtotal</c>,
-///     <c>KbPositionPagebreak</c>, <c>KbPositionDiscount</c>) emitted on every position element.
+/// <see cref="System.Text.Json.Serialization.JsonConverter{T}" /> that maps Bexio's
+/// <c>anyOf</c> position payload onto the strongly-typed <see cref="Position" /> hierarchy.
+/// Uses the <c>type</c> discriminator (<c>KbPositionArticle</c>, <c>KbPositionCustom</c>,
+/// <c>KbPositionText</c>, <c>KbPositionSubposition</c>, <c>KbPositionSubtotal</c>,
+/// <c>KbPositionPagebreak</c>, <c>KbPositionDiscount</c>) emitted on every position element.
 /// </summary>
 public sealed class PositionJsonConverter : DiscriminatedJsonConverter<Position>
 {

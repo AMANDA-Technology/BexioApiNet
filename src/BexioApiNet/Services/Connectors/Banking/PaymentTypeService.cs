@@ -38,12 +38,12 @@ namespace BexioApiNet.Services.Connectors.Banking;
 public sealed class PaymentTypeService : ConnectorService, IPaymentTypeService
 {
     /// <summary>
-    ///     The api endpoint version
+    /// The api endpoint version
     /// </summary>
     private const string ApiVersion = PaymentTypeConfiguration.ApiVersion;
 
     /// <summary>
-    ///     The api request path
+    /// The api request path
     /// </summary>
     private const string EndpointRoot = PaymentTypeConfiguration.EndpointRoot;
 

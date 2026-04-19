@@ -26,9 +26,9 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Positions;
 
 /// <summary>
-///     Subtotal position that prints a running total of preceding positions and a free-text label.
-///     Corresponds to the Bexio <c>KbPositionSubtotal</c> / <c>PositionSubtotalExtended</c> schema.
-///     <see href="https://docs.bexio.com/#tag/Subtotal-positions" />
+/// Subtotal position that prints a running total of preceding positions and a free-text label.
+/// Corresponds to the Bexio <c>KbPositionSubtotal</c> / <c>PositionSubtotalExtended</c> schema.
+/// <see href="https://docs.bexio.com/#tag/Subtotal-positions" />
 /// </summary>
 public sealed record PositionSubtotal : Position
 {

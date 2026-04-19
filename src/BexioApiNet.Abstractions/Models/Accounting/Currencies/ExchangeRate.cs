@@ -26,23 +26,23 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Accounting.Currencies;
 
 /// <summary>
-///     Exchange rate for a currency.
-///     <see href="https://docs.bexio.com/#tag/Currencies/operation/ListExchangeRatesForCurrency">
-///         List Exchange Rates For
-///         Currency
-///     </see>
+/// Exchange rate for a currency.
+/// <see href="https://docs.bexio.com/#tag/Currencies/operation/ListExchangeRatesForCurrency">
+/// List Exchange Rates For
+/// Currency
+/// </see>
 /// </summary>
 /// <param name="FactorNr">
-///     The exchange rate of the currency in comparison with the currency listed in
-///     <paramref name="ExchangeCurrency" />.
+/// The exchange rate of the currency in comparison with the currency listed in
+/// <paramref name="ExchangeCurrency" />.
 /// </param>
 /// <param name="ExchangeCurrency">The currency that the exchange rate is compared against.</param>
 /// <param name="Ratio">The ratio representing how much of the base currency equals one unit of the quote currency.</param>
 /// <param name="ExchangeRateToRatio">The exchange rate of the currency multiplied by the ratio.</param>
 /// <param name="Source">The source where the exchange rate is fetched from (<c>custom</c>, <c>monthly_average</c>).</param>
 /// <param name="SourceReason">
-///     The reason why the source of the exchange rate was chosen (<c>monthly_average_provided</c>,
-///     <c>monthly_average_unavailable</c>, <c>monthly_average_unreachable</c>, <c>source_custom</c>).
+/// The reason why the source of the exchange rate was chosen (<c>monthly_average_provided</c>,
+/// <c>monthly_average_unavailable</c>, <c>monthly_average_unreachable</c>, <c>source_custom</c>).
 /// </param>
 /// <param name="ExchangeRateDate">The validity date of the exchange rate.</param>
 public sealed record ExchangeRate(

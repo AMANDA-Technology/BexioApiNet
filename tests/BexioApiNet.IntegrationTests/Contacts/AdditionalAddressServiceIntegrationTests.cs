@@ -30,12 +30,12 @@ using BexioApiNet.Services.Connectors.Contacts;
 namespace BexioApiNet.IntegrationTests.Contacts;
 
 /// <summary>
-///     Integration tests covering the CRUD entry points of <see cref="AdditionalAddressService" /> against
-///     WireMock stubs. Additional addresses are nested under a parent contact, so all routes follow the
-///     pattern <c>2.0/contact/{contactId}/additional_address</c> (see
-///     <see cref="AdditionalAddressConfiguration" />). Verifies URL construction with the parent contact
-///     id, that the expected HTTP verbs are used (including the Bexio-specific <c>POST</c> for edits),
-///     and that payloads are serialized with the expected snake_case field names.
+/// Integration tests covering the CRUD entry points of <see cref="AdditionalAddressService" /> against
+/// WireMock stubs. Additional addresses are nested under a parent contact, so all routes follow the
+/// pattern <c>2.0/contact/{contactId}/additional_address</c> (see
+/// <see cref="AdditionalAddressConfiguration" />). Verifies URL construction with the parent contact
+/// id, that the expected HTTP verbs are used (including the Bexio-specific <c>POST</c> for edits),
+/// and that payloads are serialized with the expected snake_case field names.
 /// </summary>
 public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBase
 {
@@ -60,9 +60,9 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
                                                      """;
 
     /// <summary>
-    ///     <c>AdditionalAddressService.Get()</c> must issue a <c>GET</c> request against
-    ///     <c>/2.0/contact/{contactId}/additional_address</c> and return a successful <c>ApiResult</c>
-    ///     when the server returns an empty array.
+    /// <c>AdditionalAddressService.Get()</c> must issue a <c>GET</c> request against
+    /// <c>/2.0/contact/{contactId}/additional_address</c> and return a successful <c>ApiResult</c>
+    /// when the server returns an empty array.
     /// </summary>
     [Test]
     public async Task AdditionalAddressService_Get_SendsGetRequest()
@@ -86,8 +86,8 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
     }
 
     /// <summary>
-    ///     <c>AdditionalAddressService.GetById</c> must issue a <c>GET</c> request that includes both
-    ///     the parent contact id and the address id in the URL path.
+    /// <c>AdditionalAddressService.GetById</c> must issue a <c>GET</c> request that includes both
+    /// the parent contact id and the address id in the URL path.
     /// </summary>
     [Test]
     public async Task AdditionalAddressService_GetById_SendsGetRequest()
@@ -116,9 +116,9 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
     }
 
     /// <summary>
-    ///     <c>AdditionalAddressService.Create</c> must send a <c>POST</c> request whose body is the
-    ///     serialized <see cref="AdditionalAddressCreate" /> payload, and must surface the returned
-    ///     additional address on success.
+    /// <c>AdditionalAddressService.Create</c> must send a <c>POST</c> request whose body is the
+    /// serialized <see cref="AdditionalAddressCreate" /> payload, and must surface the returned
+    /// additional address on success.
     /// </summary>
     [Test]
     public async Task AdditionalAddressService_Create_SendsPostRequest()
@@ -158,9 +158,9 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
     }
 
     /// <summary>
-    ///     <c>AdditionalAddressService.Search</c> must send a <c>POST</c> request against
-    ///     <c>/2.0/contact/{contactId}/additional_address/search</c> with the <see cref="SearchCriteria" />
-    ///     list as the JSON body.
+    /// <c>AdditionalAddressService.Search</c> must send a <c>POST</c> request against
+    /// <c>/2.0/contact/{contactId}/additional_address/search</c> with the <see cref="SearchCriteria" />
+    /// list as the JSON body.
     /// </summary>
     [Test]
     public async Task AdditionalAddressService_Search_SendsPostRequest_ToSearchPath()
@@ -194,9 +194,9 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
     }
 
     /// <summary>
-    ///     <c>AdditionalAddressService.Update</c> must send a <c>POST</c> (not <c>PUT</c>) request
-    ///     against <c>/2.0/contact/{contactId}/additional_address/{id}</c> — Bexio uses POST for
-    ///     full-replacement edits on v2.0 resources.
+    /// <c>AdditionalAddressService.Update</c> must send a <c>POST</c> (not <c>PUT</c>) request
+    /// against <c>/2.0/contact/{contactId}/additional_address/{id}</c> — Bexio uses POST for
+    /// full-replacement edits on v2.0 resources.
     /// </summary>
     [Test]
     public async Task AdditionalAddressService_Update_SendsPostRequest_WithIdInPath()
@@ -237,8 +237,8 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
     }
 
     /// <summary>
-    ///     <c>AdditionalAddressService.Delete</c> must issue a <c>DELETE</c> request that includes
-    ///     both the parent contact id and the address id in the URL path.
+    /// <c>AdditionalAddressService.Delete</c> must issue a <c>DELETE</c> request that includes
+    /// both the parent contact id and the address id in the URL path.
     /// </summary>
     [Test]
     public async Task AdditionalAddressService_Delete_SendsDeleteRequest()

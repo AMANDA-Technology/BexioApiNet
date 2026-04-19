@@ -26,9 +26,9 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Positions;
 
 /// <summary>
-///     Article-backed position — a line item referencing an item from the Bexio item catalogue.
-///     Corresponds to the Bexio <c>KbPositionArticle</c> / <c>PositionArticleExtended</c> schema.
-///     <see href="https://docs.bexio.com/#tag/Article-positions" />
+/// Article-backed position — a line item referencing an item from the Bexio item catalogue.
+/// Corresponds to the Bexio <c>KbPositionArticle</c> / <c>PositionArticleExtended</c> schema.
+/// <see href="https://docs.bexio.com/#tag/Article-positions" />
 /// </summary>
 public sealed record PositionArticle : Position
 {

@@ -28,16 +28,16 @@ using BexioApiNet.Abstractions.Models.Accounting.Currencies.Views;
 namespace BexioApiNet.E2eTests.Tests.Accounting.Currencies;
 
 /// <summary>
-///     E2E coverage for the full create / patch / delete cycle of <c>CurrencyService</c>
-///     against the live Bexio API. The test cleans up after itself by deleting the
-///     currency it created so it can be re-run safely.
+/// E2E coverage for the full create / patch / delete cycle of <c>CurrencyService</c>
+/// against the live Bexio API. The test cleans up after itself by deleting the
+/// currency it created so it can be re-run safely.
 /// </summary>
 public class TestCreatePatchAndDelete : BexioE2eTestBase
 {
     /// <summary>
-    ///     Creates a unique throwaway currency code (<c>X??</c>), patches its round factor and
-    ///     finally deletes it. Each step asserts a successful response and the test
-    ///     guarantees the created currency is removed even when the assertion order changes.
+    /// Creates a unique throwaway currency code (<c>X??</c>), patches its round factor and
+    /// finally deletes it. Each step asserts a successful response and the test
+    /// guarantees the created currency is removed even when the assertion order changes.
     /// </summary>
     [Test]
     public async Task CreatePatchAndDelete()

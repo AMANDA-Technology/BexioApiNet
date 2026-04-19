@@ -39,12 +39,12 @@ namespace BexioApiNet.Services.Connectors.Accounting;
 public sealed class CurrencyService : ConnectorService, ICurrencyService
 {
     /// <summary>
-    ///     The api endpoint version
+    /// The api endpoint version
     /// </summary>
     private const string ApiVersion = CurrencyConfiguration.ApiVersion;
 
     /// <summary>
-    ///     The api request path
+    /// The api request path
     /// </summary>
     private const string EndpointRoot = CurrencyConfiguration.EndpointRoot;
 

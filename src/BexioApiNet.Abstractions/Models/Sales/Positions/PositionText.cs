@@ -26,10 +26,10 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Positions;
 
 /// <summary>
-///     Free-text position used to inject a paragraph of text into a document without any
-///     pricing or quantity. Corresponds to the Bexio <c>KbPositionText</c> /
-///     <c>PositionTextExtended</c> schema.
-///     <see href="https://docs.bexio.com/#tag/Text-positions" />
+/// Free-text position used to inject a paragraph of text into a document without any
+/// pricing or quantity. Corresponds to the Bexio <c>KbPositionText</c> /
+/// <c>PositionTextExtended</c> schema.
+/// <see href="https://docs.bexio.com/#tag/Text-positions" />
 /// </summary>
 public sealed record PositionText : Position
 {

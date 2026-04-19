@@ -26,8 +26,8 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Orders;
 
 /// <summary>
-///     Yearly repetition schedule — fires every <see cref="OrderRepetitionSchedule.Interval" />
-///     years. Corresponds to the Bexio <c>OrderRepetitionYearly</c> schema (<c>type = "yearly"</c>).
+/// Yearly repetition schedule — fires every <see cref="OrderRepetitionSchedule.Interval" />
+/// years. Corresponds to the Bexio <c>OrderRepetitionYearly</c> schema (<c>type = "yearly"</c>).
 /// </summary>
 public sealed record OrderRepetitionYearly : OrderRepetitionSchedule
 {

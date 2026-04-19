@@ -26,11 +26,11 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Positions;
 
 /// <summary>
-///     Document-level discount position applied after the subtotal, either as a fixed amount or
-///     a percentage of the running total.
-///     Corresponds to the Bexio <c>KbPositionDiscount</c> / <c>PositionDiscountExtended</c> schema.
-///     Unlike other variants, discount positions do not carry a <see cref="Position.ParentId" />.
-///     <see href="https://docs.bexio.com/#tag/Discount-positions" />
+/// Document-level discount position applied after the subtotal, either as a fixed amount or
+/// a percentage of the running total.
+/// Corresponds to the Bexio <c>KbPositionDiscount</c> / <c>PositionDiscountExtended</c> schema.
+/// Unlike other variants, discount positions do not carry a <see cref="Position.ParentId" />.
+/// <see href="https://docs.bexio.com/#tag/Discount-positions" />
 /// </summary>
 public sealed record PositionDiscount : Position
 {
@@ -42,8 +42,8 @@ public sealed record PositionDiscount : Position
     public string? Text { get; init; }
 
     /// <summary>
-    ///     When <see langword="true" />, <see cref="Value" /> is interpreted as a percentage;
-    ///     otherwise as a fixed amount in the document currency.
+    /// When <see langword="true" />, <see cref="Value" /> is interpreted as a percentage;
+    /// otherwise as a fixed amount in the document currency.
     /// </summary>
     [JsonPropertyName("is_percentual")]
     public bool? IsPercentual { get; init; }

@@ -29,16 +29,16 @@ using BexioApiNet.Abstractions.Models.Sales.Orders;
 namespace BexioApiNet.UnitTests.Sales.Orders;
 
 /// <summary>
-///     Round-trip tests for the polymorphic <see cref="OrderRepetitionSchedule" /> union. Each of
-///     the four concrete schedules must serialize with the lowercase <c>type</c> discriminator the
-///     Bexio API expects and must deserialize back into the same subtype when read from a response.
+/// Round-trip tests for the polymorphic <see cref="OrderRepetitionSchedule" /> union. Each of
+/// the four concrete schedules must serialize with the lowercase <c>type</c> discriminator the
+/// Bexio API expects and must deserialize back into the same subtype when read from a response.
 /// </summary>
 [TestFixture]
 public sealed class OrderRepetitionScheduleJsonConverterTests
 {
     /// <summary>
-    ///     An <see cref="OrderRepetitionDaily" /> round-trips through <see cref="JsonSerializer" />
-    ///     carrying the <c>daily</c> discriminator and the <see cref="OrderRepetitionSchedule.Interval" />.
+    /// An <see cref="OrderRepetitionDaily" /> round-trips through <see cref="JsonSerializer" />
+    /// carrying the <c>daily</c> discriminator and the <see cref="OrderRepetitionSchedule.Interval" />.
     /// </summary>
     [Test]
     public void OrderRepetitionDaily_RoundTrips_PreservesFields()
@@ -58,8 +58,8 @@ public sealed class OrderRepetitionScheduleJsonConverterTests
     }
 
     /// <summary>
-    ///     An <see cref="OrderRepetitionWeekly" /> round-trips carrying the <c>weekly</c>
-    ///     discriminator, the interval and the weekday list.
+    /// An <see cref="OrderRepetitionWeekly" /> round-trips carrying the <c>weekly</c>
+    /// discriminator, the interval and the weekday list.
     /// </summary>
     [Test]
     public void OrderRepetitionWeekly_RoundTrips_PreservesFields()
@@ -90,8 +90,8 @@ public sealed class OrderRepetitionScheduleJsonConverterTests
     }
 
     /// <summary>
-    ///     An <see cref="OrderRepetitionMonthly" /> round-trips carrying the <c>monthly</c>
-    ///     discriminator, the interval and the day-of-month selector.
+    /// An <see cref="OrderRepetitionMonthly" /> round-trips carrying the <c>monthly</c>
+    /// discriminator, the interval and the day-of-month selector.
     /// </summary>
     [Test]
     public void OrderRepetitionMonthly_RoundTrips_PreservesFields()
@@ -116,8 +116,8 @@ public sealed class OrderRepetitionScheduleJsonConverterTests
     }
 
     /// <summary>
-    ///     An <see cref="OrderRepetitionYearly" /> round-trips carrying the <c>yearly</c>
-    ///     discriminator and the interval.
+    /// An <see cref="OrderRepetitionYearly" /> round-trips carrying the <c>yearly</c>
+    /// discriminator and the interval.
     /// </summary>
     [Test]
     public void OrderRepetitionYearly_RoundTrips_PreservesFields()
@@ -137,9 +137,9 @@ public sealed class OrderRepetitionScheduleJsonConverterTests
     }
 
     /// <summary>
-    ///     Deserializing an order repetition payload whose <c>type</c> discriminator is unknown to
-    ///     the converter must surface a <see cref="JsonException" /> — a payload the Bexio API should
-    ///     never emit, but worth failing fast on.
+    /// Deserializing an order repetition payload whose <c>type</c> discriminator is unknown to
+    /// the converter must surface a <see cref="JsonException" /> — a payload the Bexio API should
+    /// never emit, but worth failing fast on.
     /// </summary>
     [Test]
     public void UnknownDiscriminator_ThrowsJsonException()
@@ -150,8 +150,8 @@ public sealed class OrderRepetitionScheduleJsonConverterTests
     }
 
     /// <summary>
-    ///     Deserializing an order repetition payload missing the <c>type</c> discriminator altogether
-    ///     must surface a <see cref="JsonException" />.
+    /// Deserializing an order repetition payload missing the <c>type</c> discriminator altogether
+    /// must surface a <see cref="JsonException" />.
     /// </summary>
     [Test]
     public void MissingDiscriminator_ThrowsJsonException()
