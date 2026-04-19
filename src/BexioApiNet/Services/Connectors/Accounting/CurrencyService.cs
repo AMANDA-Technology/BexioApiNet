@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -26,6 +26,7 @@ SOFTWARE.
 using System.Runtime.InteropServices;
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Accounting.Currencies;
+using BexioApiNet.Abstractions.Models.Accounting.Currencies.Views;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
@@ -34,18 +35,16 @@ using BexioApiNet.Services.Connectors.Base;
 
 namespace BexioApiNet.Services.Connectors.Accounting;
 
-
 /// <inheritdoc cref="BexioApiNet.Interfaces.Connectors.Accounting.ICurrencyService" />
-
 public sealed class CurrencyService : ConnectorService, ICurrencyService
 {
     /// <summary>
-    /// The api endpoint version
+    ///     The api endpoint version
     /// </summary>
     private const string ApiVersion = CurrencyConfiguration.ApiVersion;
 
     /// <summary>
-    /// The api request path
+    ///     The api request path
     /// </summary>
     private const string EndpointRoot = CurrencyConfiguration.EndpointRoot;
 
@@ -55,11 +54,14 @@ public sealed class CurrencyService : ConnectorService, ICurrencyService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<List<Currency>>> Get([Optional] QueryParameterCurrency? queryParameterCurrency, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<List<Currency>>> Get([Optional] QueryParameterCurrency? queryParameterCurrency,
+        [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
     {
-        var res = await ConnectionHandler.GetAsync<List<Currency>>($"{ApiVersion}/{EndpointRoot}", queryParameterCurrency?.QueryParameter, cancellationToken);
+        var res = await ConnectionHandler.GetAsync<List<Currency>>($"{ApiVersion}/{EndpointRoot}",
+            queryParameterCurrency?.QueryParameter, cancellationToken);
 
-        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
+        if (!autoPage || !res.IsSuccess || res.Data is null ||
+            res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
             return res;
 
         res.Data.AddRange(await ConnectionHandler.FetchAll<Currency>(
@@ -70,5 +72,49 @@ public sealed class CurrencyService : ConnectorService, ICurrencyService
             cancellationToken));
 
         return res;
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<List<string>>> GetCodes([Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.GetAsync<List<string>>($"{ApiVersion}/{EndpointRoot}/codes", null,
+            cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<Currency>> GetById(int id, [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.GetAsync<Currency>($"{ApiVersion}/{EndpointRoot}/{id}", null, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<List<ExchangeRate>>> GetExchangeRates(int id,
+        [Optional] QueryParameterExchangeRate? queryParameterExchangeRate,
+        [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.GetAsync<List<ExchangeRate>>($"{ApiVersion}/{EndpointRoot}/{id}/exchange_rates",
+            queryParameterExchangeRate?.QueryParameter, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<Currency>> Create(CurrencyCreate currency,
+        [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.PostAsync<Currency, CurrencyCreate>(currency, $"{ApiVersion}/{EndpointRoot}",
+            cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<Currency>> Patch(int id, CurrencyPatch currency,
+        [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.PatchAsync<Currency, CurrencyPatch>(currency,
+            $"{ApiVersion}/{EndpointRoot}/{id}", cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<object>> Delete(int id, [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.Delete($"{ApiVersion}/{EndpointRoot}/{id}", cancellationToken);
     }
 }

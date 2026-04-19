@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Services.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Banking;
+using BexioApiNet.Services.Connectors.Contacts;
 
 namespace BexioApiNet.E2eTests;
 
@@ -76,7 +77,20 @@ public abstract class BexioE2eTestBase
             new AccountService(connectionHandler),
             new CurrencyService(connectionHandler),
             new ManualEntryService(connectionHandler),
-            new TaxService(connectionHandler));
+            new TaxService(connectionHandler),
+            new AccountGroupService(connectionHandler),
+            new BusinessYearService(connectionHandler),
+            new CalendarYearService(connectionHandler),
+            new VatPeriodService(connectionHandler),
+            new ReportService(connectionHandler),
+            new PaymentTypeService(connectionHandler),
+            new PaymentService(connectionHandler),
+            new OutgoingPaymentService(connectionHandler),
+            new ContactService(connectionHandler),
+            new ContactGroupService(connectionHandler),
+            new ContactRelationService(connectionHandler),
+            new ContactSectorService(connectionHandler),
+            new AdditionalAddressService(connectionHandler));
     }
 
     /// <summary>

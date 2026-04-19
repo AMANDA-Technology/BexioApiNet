@@ -43,4 +43,12 @@ public interface IBankAccountService
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns></returns>
     public Task<ApiResult<List<BankAccountGet>>> Get([Optional] QueryParameterBankAccount queryParameterBankAccount, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken);
+
+    /// <summary>
+    /// Fetch a single bank account by its identifier. <see href="https://docs.bexio.com/#tag/Bank-Accounts/operation/ShowBankAccount">Show Bank Account</see>
+    /// </summary>
+    /// <param name="id">ID of the bank account to return</param>
+    /// <param name="cancellationToken">Cancellation token</param>
+    /// <returns></returns>
+    public Task<ApiResult<BankAccountGet>> GetById(int id, [Optional] CancellationToken cancellationToken);
 }

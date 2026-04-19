@@ -22,4 +22,10 @@
       <ProjectReference Include="..\BexioApiNet.Abstractions\BexioApiNet.Abstractions.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <InternalsVisibleTo Include="BexioApiNet.UnitTests" />
+      <InternalsVisibleTo Include="BexioApiNet.IntegrationTests" />
+      <InternalsVisibleTo Include="BexioApiNet.E2eTests" />
+    </ItemGroup>
+
 </Project>

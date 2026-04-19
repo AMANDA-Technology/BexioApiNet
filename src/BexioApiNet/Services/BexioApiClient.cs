@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
+using BexioApiNet.Interfaces.Connectors.Contacts;
 
 namespace BexioApiNet.Services;
 
@@ -52,6 +53,45 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public ITaxService Taxes { get; set; }
 
+    /// <inheritdoc />
+    public IAccountGroupService AccountGroups { get; set; }
+
+    /// <inheritdoc />
+    public IBusinessYearService AccountingBusinessYears { get; set; }
+
+    /// <inheritdoc />
+    public ICalendarYearService AccountingCalendarYears { get; set; }
+
+    /// <inheritdoc />
+    public IVatPeriodService AccountingVatPeriods { get; set; }
+
+    /// <inheritdoc />
+    public IReportService AccountingReports { get; set; }
+
+    /// <inheritdoc />
+    public IPaymentTypeService PaymentTypes { get; set; }
+
+    /// <inheritdoc />
+    public IPaymentService BankingPayments { get; set; }
+
+    /// <inheritdoc />
+    public IOutgoingPaymentService PurchaseOutgoingPayments { get; set; }
+
+    /// <inheritdoc />
+    public IContactService Contacts { get; set; }
+
+    /// <inheritdoc />
+    public IContactGroupService ContactGroups { get; set; }
+
+    /// <inheritdoc />
+    public IContactRelationService ContactRelations { get; set; }
+
+    /// <inheritdoc />
+    public IContactSectorService ContactSectors { get; set; }
+
+    /// <inheritdoc />
+    public IAdditionalAddressService ContactAdditionalAddresses { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -61,7 +101,20 @@ public sealed class BexioApiClient : IBexioApiClient
         IAccountService accountingAccounts,
         ICurrencyService currencies,
         IManualEntryService accountingManualEntries,
-        ITaxService taxes)
+        ITaxService taxes,
+        IAccountGroupService accountGroups,
+        IBusinessYearService accountingBusinessYears,
+        ICalendarYearService accountingCalendarYears,
+        IVatPeriodService accountingVatPeriods,
+        IReportService accountingReports,
+        IPaymentTypeService paymentTypes,
+        IPaymentService bankingPayments,
+        IOutgoingPaymentService purchaseOutgoingPayments,
+        IContactService contacts,
+        IContactGroupService contactGroups,
+        IContactRelationService contactRelations,
+        IContactSectorService contactSectors,
+        IAdditionalAddressService contactAdditionalAddresses)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -69,6 +122,19 @@ public sealed class BexioApiClient : IBexioApiClient
         Currencies = currencies;
         AccountingManualEntries = accountingManualEntries;
         Taxes = taxes;
+        AccountGroups = accountGroups;
+        AccountingBusinessYears = accountingBusinessYears;
+        AccountingCalendarYears = accountingCalendarYears;
+        AccountingVatPeriods = accountingVatPeriods;
+        AccountingReports = accountingReports;
+        PaymentTypes = paymentTypes;
+        BankingPayments = bankingPayments;
+        PurchaseOutgoingPayments = purchaseOutgoingPayments;
+        Contacts = contacts;
+        ContactGroups = contactGroups;
+        ContactRelations = contactRelations;
+        ContactSectors = contactSectors;
+        ContactAdditionalAddresses = contactAdditionalAddresses;
     }
 
     /// <inheritdoc />

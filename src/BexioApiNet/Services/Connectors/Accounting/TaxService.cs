@@ -34,9 +34,7 @@ using BexioApiNet.Services.Connectors.Base;
 
 namespace BexioApiNet.Services.Connectors.Accounting;
 
-
-/// <inheritdoc cref="BexioApiNet.Interfaces.Connectors.Accounting.ICurrencyService" />
-
+/// <inheritdoc cref="BexioApiNet.Interfaces.Connectors.Accounting.ITaxService" />
 public sealed class TaxService : ConnectorService, ITaxService
 {
     /// <summary>
@@ -70,5 +68,17 @@ public sealed class TaxService : ConnectorService, ITaxService
             cancellationToken));
 
         return res;
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<Tax>> GetById(int id, [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.GetAsync<Tax>($"{ApiVersion}/{EndpointRoot}/{id}", null, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<object>> Delete(int id, [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.Delete($"{ApiVersion}/{EndpointRoot}/{id}", cancellationToken);
     }
 }

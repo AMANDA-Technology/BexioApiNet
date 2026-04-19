@@ -10,8 +10,8 @@ status: tracking
 Full inventory of the Bexio REST API v3.0.0 mapped against BexioApiNet implementation status. Source of truth: vendored OpenAPI spec at `doc/openapi/bexio-v3.json`.
 
 **Total endpoint methods:** 309  
-**Implemented:** 15 (4.8%)  
-**Remaining:** 294 (95.2%)
+**Implemented:** 83 (26.9%)  
+**Remaining:** 226 (73.1%)
 
 ---
 
@@ -19,9 +19,9 @@ Full inventory of the Bexio REST API v3.0.0 mapped against BexioApiNet implement
 
 | # | Domain Group | Tags | Endpoints | Done | Remaining | Wave |
 |---|---|---|---|---|---|---|
-| 1 | Accounting (Extended) | 8 | 35 | 10 | 25 | 1 |
-| 2 | Banking & Payments | 4 | 15 | 1 | 14 | 1 |
-| 3 | Contacts & CRM | 5 | 28 | 0 | 28 | 1 |
+| 1 | Accounting (Extended) | 8 | 35 | 35 | 0 | 1 |
+| 2 | Banking & Payments | 4 | 15 | 15 | 0 | 1 |
+| 3 | Contacts & CRM | 5 | 28 | 28 | 0 | 1 |
 | 4 | Sales — Invoices | 1 | 26 | 0 | 26 | 2 |
 | 5 | Sales — Quotes | 1 | 17 | 0 | 17 | 2 |
 | 6 | Sales — Orders & Deliveries | 2 | 15 | 0 | 15 | 2 |
@@ -33,11 +33,11 @@ Full inventory of the Bexio REST API v3.0.0 mapped against BexioApiNet implement
 | 12 | Payroll | 3 | 10 | 0 | 10 | 5 |
 | 13 | Files & Documents | 3 | 11 | 0 | 11 | 6 |
 | 14 | Master Data & Settings | 9 | 42 | 0 | 42 | 6 |
-| | **TOTAL** | **56** | **309** | **15** | **294** | |
+| | **TOTAL** | **56** | **309** | **83** | **226** | |
 
 ---
 
-## Domain Group 1: Accounting (Extended) — Wave 1
+## Domain Group 1: Accounting (Extended) — Wave 1 — DONE
 
 ### Tag: Accounts (2 endpoints) — DONE
 
@@ -46,174 +46,174 @@ Full inventory of the Bexio REST API v3.0.0 mapped against BexioApiNet implement
 | GET | `/2.0/accounts` | DONE | AccountService |
 | POST | `/2.0/accounts/search` | DONE | AccountService |
 
-### Tag: Account Groups (1 endpoint)
+### Tag: Account Groups (1 endpoint) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/account_groups` | TODO | AccountGroupService |
+| GET | `/2.0/account_groups` | DONE | AccountGroupService |
 
-### Tag: Currencies (7 endpoints) — PARTIAL (1/7)
+### Tag: Currencies (7 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
 | GET | `/3.0/currencies` | DONE | CurrencyService |
-| GET | `/3.0/currencies/codes` | TODO | CurrencyService |
-| GET | `/3.0/currencies/{currency_id}` | TODO | CurrencyService |
-| GET | `/3.0/currencies/{currency_id}/exchange_rates` | TODO | CurrencyService |
-| POST | `/3.0/currencies` | TODO | CurrencyService |
-| PATCH | `/3.0/currencies/{currency_id}` | TODO | CurrencyService |
-| DELETE | `/3.0/currencies/{currency_id}` | TODO | CurrencyService |
+| GET | `/3.0/currencies/codes` | DONE | CurrencyService |
+| GET | `/3.0/currencies/{currency_id}` | DONE | CurrencyService |
+| GET | `/3.0/currencies/{currency_id}/exchange_rates` | DONE | CurrencyService |
+| POST | `/3.0/currencies` | DONE | CurrencyService |
+| PATCH | `/3.0/currencies/{currency_id}` | DONE | CurrencyService |
+| DELETE | `/3.0/currencies/{currency_id}` | DONE | CurrencyService |
 
-### Tag: Manual Entries (13 endpoints) — PARTIAL (5/13)
+### Tag: Manual Entries (13 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
 | GET | `/3.0/accounting/manual_entries` | DONE | ManualEntryService |
-| GET | `/3.0/accounting/manual_entries/next_ref_nr` | TODO | ManualEntryService |
-| GET | `/3.0/accounting/manual_entries/{id}/entries/{entry_id}/files` | TODO | ManualEntryService |
-| GET | `/3.0/accounting/manual_entries/{id}/entries/{entry_id}/files/{file_id}` | TODO | ManualEntryService |
-| GET | `/3.0/accounting/manual_entries/{id}/files` | TODO | ManualEntryService |
-| GET | `/3.0/accounting/manual_entries/{id}/files/{file_id}` | TODO | ManualEntryService |
+| GET | `/3.0/accounting/manual_entries/next_ref_nr` | DONE | ManualEntryService |
+| GET | `/3.0/accounting/manual_entries/{id}/entries/{entry_id}/files` | DONE | ManualEntryService |
+| GET | `/3.0/accounting/manual_entries/{id}/entries/{entry_id}/files/{file_id}` | DONE | ManualEntryService |
+| GET | `/3.0/accounting/manual_entries/{id}/files` | DONE | ManualEntryService |
+| GET | `/3.0/accounting/manual_entries/{id}/files/{file_id}` | DONE | ManualEntryService |
 | POST | `/3.0/accounting/manual_entries` | DONE | ManualEntryService |
 | POST | `/3.0/accounting/manual_entries/{id}/entries/{entry_id}/files` | DONE | ManualEntryService |
 | POST | `/3.0/accounting/manual_entries/{id}/files` | DONE | ManualEntryService |
-| PUT | `/3.0/accounting/manual_entries/{id}` | TODO | ManualEntryService |
+| PUT | `/3.0/accounting/manual_entries/{id}` | DONE | ManualEntryService |
 | DELETE | `/3.0/accounting/manual_entries/{id}` | DONE | ManualEntryService |
-| DELETE | `/3.0/accounting/manual_entries/{id}/entries/{entry_id}/files/{file_id}` | TODO | ManualEntryService |
-| DELETE | `/3.0/accounting/manual_entries/{id}/files/{file_id}` | TODO | ManualEntryService |
+| DELETE | `/3.0/accounting/manual_entries/{id}/entries/{entry_id}/files/{file_id}` | DONE | ManualEntryService |
+| DELETE | `/3.0/accounting/manual_entries/{id}/files/{file_id}` | DONE | ManualEntryService |
 
-### Tag: Taxes (3 endpoints) — PARTIAL (1/3)
+### Tag: Taxes (3 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
 | GET | `/3.0/taxes` | DONE | TaxService |
-| GET | `/3.0/taxes/{tax_id}` | TODO | TaxService |
-| DELETE | `/3.0/taxes/{tax_id}` | TODO | TaxService |
+| GET | `/3.0/taxes/{tax_id}` | DONE | TaxService |
+| DELETE | `/3.0/taxes/{tax_id}` | DONE | TaxService |
 
-### Tag: Business Years (2 endpoints)
-
-| Method | Path | Status | Service |
-|--------|------|--------|---------|
-| GET | `/3.0/accounting/business_years` | TODO | BusinessYearService |
-| GET | `/3.0/accounting/business_years/{id}` | TODO | BusinessYearService |
-
-### Tag: Calendar Years (4 endpoints)
+### Tag: Business Years (2 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/3.0/accounting/calendar_years` | TODO | CalendarYearService |
-| GET | `/3.0/accounting/calendar_years/{id}` | TODO | CalendarYearService |
-| POST | `/3.0/accounting/calendar_years` | TODO | CalendarYearService |
-| POST | `/3.0/accounting/calendar_years/search` | TODO | CalendarYearService |
+| GET | `/3.0/accounting/business_years` | DONE | BusinessYearService |
+| GET | `/3.0/accounting/business_years/{id}` | DONE | BusinessYearService |
 
-### Tag: Reports (1 endpoint)
+### Tag: Calendar Years (4 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/3.0/accounting/journal` | TODO | ReportService |
+| GET | `/3.0/accounting/calendar_years` | DONE | CalendarYearService |
+| GET | `/3.0/accounting/calendar_years/{id}` | DONE | CalendarYearService |
+| POST | `/3.0/accounting/calendar_years` | DONE | CalendarYearService |
+| POST | `/3.0/accounting/calendar_years/search` | DONE | CalendarYearService |
 
-### Tag: Vat Periods (2 endpoints)
+### Tag: Reports (1 endpoint) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/3.0/accounting/vat_periods` | TODO | VatPeriodService |
-| GET | `/3.0/accounting/vat_periods/{id}` | TODO | VatPeriodService |
+| GET | `/3.0/accounting/journal` | DONE | ReportService |
+
+### Tag: Vat Periods (2 endpoints) — DONE
+
+| Method | Path | Status | Service |
+|--------|------|--------|---------|
+| GET | `/3.0/accounting/vat_periods` | DONE | VatPeriodService |
+| GET | `/3.0/accounting/vat_periods/{id}` | DONE | VatPeriodService |
 
 ---
 
-## Domain Group 2: Banking & Payments — Wave 1
+## Domain Group 2: Banking & Payments — Wave 1 — DONE
 
-### Tag: Bank Accounts (2 endpoints) — PARTIAL (1/2)
+### Tag: Bank Accounts (2 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
 | GET | `/3.0/banking/accounts` | DONE | BankAccountService |
-| GET | `/3.0/banking/accounts/{bank_account_id}` | TODO | BankAccountService |
+| GET | `/3.0/banking/accounts/{bank_account_id}` | DONE | BankAccountService |
 
-### Tag: Payment Types (2 endpoints)
-
-| Method | Path | Status | Service |
-|--------|------|--------|---------|
-| GET | `/2.0/payment_type` | TODO | PaymentTypeService |
-| POST | `/2.0/payment_type/search` | TODO | PaymentTypeService |
-
-### Tag: Payments (6 endpoints)
+### Tag: Payment Types (2 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/4.0/banking/payments` | TODO | PaymentService |
-| GET | `/4.0/banking/payments/{payment_id}` | TODO | PaymentService |
-| POST | `/4.0/banking/payments` | TODO | PaymentService |
-| POST | `/4.0/banking/payments/{payment_id}/cancel` | TODO | PaymentService |
-| PUT | `/4.0/banking/payments/{payment_id}` | TODO | PaymentService |
-| DELETE | `/4.0/banking/payments/{payment_id}` | TODO | PaymentService |
+| GET | `/2.0/payment_type` | DONE | PaymentTypeService |
+| POST | `/2.0/payment_type/search` | DONE | PaymentTypeService |
 
-### Tag: Outgoing Payments (5 endpoints)
+### Tag: Payments (6 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/4.0/purchase/outgoing-payments` | TODO | OutgoingPaymentService |
-| GET | `/4.0/purchase/outgoing-payments/{id}` | TODO | OutgoingPaymentService |
-| POST | `/4.0/purchase/outgoing-payments` | TODO | OutgoingPaymentService |
-| PUT | `/4.0/purchase/outgoing-payments` | TODO | OutgoingPaymentService |
-| DELETE | `/4.0/purchase/outgoing-payments/{id}` | TODO | OutgoingPaymentService |
+| GET | `/4.0/banking/payments` | DONE | PaymentService |
+| GET | `/4.0/banking/payments/{payment_id}` | DONE | PaymentService |
+| POST | `/4.0/banking/payments` | DONE | PaymentService |
+| POST | `/4.0/banking/payments/{payment_id}/cancel` | DONE | PaymentService |
+| PUT | `/4.0/banking/payments/{payment_id}` | DONE | PaymentService |
+| DELETE | `/4.0/banking/payments/{payment_id}` | DONE | PaymentService |
+
+### Tag: Outgoing Payments (5 endpoints) — DONE
+
+| Method | Path | Status | Service |
+|--------|------|--------|---------|
+| GET | `/4.0/purchase/outgoing-payments` | DONE | OutgoingPaymentService |
+| GET | `/4.0/purchase/outgoing-payments/{id}` | DONE | OutgoingPaymentService |
+| POST | `/4.0/purchase/outgoing-payments` | DONE | OutgoingPaymentService |
+| PUT | `/4.0/purchase/outgoing-payments` | DONE | OutgoingPaymentService |
+| DELETE | `/4.0/purchase/outgoing-payments/{id}` | DONE | OutgoingPaymentService |
 
 ---
 
-## Domain Group 3: Contacts & CRM — Wave 1
+## Domain Group 3: Contacts & CRM — Wave 1 — DONE
 
-### Tag: Contacts (8 endpoints)
-
-| Method | Path | Status | Service |
-|--------|------|--------|---------|
-| GET | `/2.0/contact` | TODO | ContactService |
-| GET | `/2.0/contact/{contact_id}` | TODO | ContactService |
-| POST | `/2.0/contact` | TODO | ContactService |
-| POST | `/2.0/contact/_bulk_create` | TODO | ContactService |
-| POST | `/2.0/contact/search` | TODO | ContactService |
-| POST | `/2.0/contact/{contact_id}` | TODO | ContactService |
-| PATCH | `/2.0/contact/{contact_id}/restore` | TODO | ContactService |
-| DELETE | `/2.0/contact/{contact_id}` | TODO | ContactService |
-
-### Tag: Contact Groups (6 endpoints)
+### Tag: Contacts (8 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/contact_group` | TODO | ContactGroupService |
-| GET | `/2.0/contact_group/{id}` | TODO | ContactGroupService |
-| POST | `/2.0/contact_group` | TODO | ContactGroupService |
-| POST | `/2.0/contact_group/search` | TODO | ContactGroupService |
-| POST | `/2.0/contact_group/{id}` | TODO | ContactGroupService |
-| DELETE | `/2.0/contact_group/{id}` | TODO | ContactGroupService |
+| GET | `/2.0/contact` | DONE | ContactService |
+| GET | `/2.0/contact/{contact_id}` | DONE | ContactService |
+| POST | `/2.0/contact` | DONE | ContactService |
+| POST | `/2.0/contact/_bulk_create` | DONE | ContactService |
+| POST | `/2.0/contact/search` | DONE | ContactService |
+| POST | `/2.0/contact/{contact_id}` | DONE | ContactService |
+| PATCH | `/2.0/contact/{contact_id}/restore` | DONE | ContactService |
+| DELETE | `/2.0/contact/{contact_id}` | DONE | ContactService |
 
-### Tag: Contact Relations (6 endpoints)
-
-| Method | Path | Status | Service |
-|--------|------|--------|---------|
-| GET | `/2.0/contact_relation` | TODO | ContactRelationService |
-| GET | `/2.0/contact_relation/{id}` | TODO | ContactRelationService |
-| POST | `/2.0/contact_relation` | TODO | ContactRelationService |
-| POST | `/2.0/contact_relation/search` | TODO | ContactRelationService |
-| POST | `/2.0/contact_relation/{id}` | TODO | ContactRelationService |
-| DELETE | `/2.0/contact_relation/{id}` | TODO | ContactRelationService |
-
-### Tag: Contact Sectors (2 endpoints)
+### Tag: Contact Groups (6 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/contact_branch` | TODO | ContactSectorService |
-| POST | `/2.0/contact_branch/search` | TODO | ContactSectorService |
+| GET | `/2.0/contact_group` | DONE | ContactGroupService |
+| GET | `/2.0/contact_group/{id}` | DONE | ContactGroupService |
+| POST | `/2.0/contact_group` | DONE | ContactGroupService |
+| POST | `/2.0/contact_group/search` | DONE | ContactGroupService |
+| POST | `/2.0/contact_group/{id}` | DONE | ContactGroupService |
+| DELETE | `/2.0/contact_group/{id}` | DONE | ContactGroupService |
 
-### Tag: Additional Addresses (6 endpoints)
+### Tag: Contact Relations (6 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/contact/{contact_id}/additional_address` | TODO | AdditionalAddressService |
-| GET | `/2.0/contact/{contact_id}/additional_address/{id}` | TODO | AdditionalAddressService |
-| POST | `/2.0/contact/{contact_id}/additional_address` | TODO | AdditionalAddressService |
-| POST | `/2.0/contact/{contact_id}/additional_address/search` | TODO | AdditionalAddressService |
-| POST | `/2.0/contact/{contact_id}/additional_address/{id}` | TODO | AdditionalAddressService |
-| DELETE | `/2.0/contact/{contact_id}/additional_address/{id}` | TODO | AdditionalAddressService |
+| GET | `/2.0/contact_relation` | DONE | ContactRelationService |
+| GET | `/2.0/contact_relation/{id}` | DONE | ContactRelationService |
+| POST | `/2.0/contact_relation` | DONE | ContactRelationService |
+| POST | `/2.0/contact_relation/search` | DONE | ContactRelationService |
+| POST | `/2.0/contact_relation/{id}` | DONE | ContactRelationService |
+| DELETE | `/2.0/contact_relation/{id}` | DONE | ContactRelationService |
+
+### Tag: Contact Sectors (2 endpoints) — DONE
+
+| Method | Path | Status | Service |
+|--------|------|--------|---------|
+| GET | `/2.0/contact_branch` | DONE | ContactSectorService |
+| POST | `/2.0/contact_branch/search` | DONE | ContactSectorService |
+
+### Tag: Additional Addresses (6 endpoints) — DONE
+
+| Method | Path | Status | Service |
+|--------|------|--------|---------|
+| GET | `/2.0/contact/{contact_id}/additional_address` | DONE | AdditionalAddressService |
+| GET | `/2.0/contact/{contact_id}/additional_address/{id}` | DONE | AdditionalAddressService |
+| POST | `/2.0/contact/{contact_id}/additional_address` | DONE | AdditionalAddressService |
+| POST | `/2.0/contact/{contact_id}/additional_address/search` | DONE | AdditionalAddressService |
+| POST | `/2.0/contact/{contact_id}/additional_address/{id}` | DONE | AdditionalAddressService |
+| DELETE | `/2.0/contact/{contact_id}/additional_address/{id}` | DONE | AdditionalAddressService |
 
 ---
 

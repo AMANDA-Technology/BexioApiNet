@@ -91,9 +91,83 @@ public sealed class ManualEntryService : ConnectorService, IManualEntryService
     }
 
     /// <inheritdoc />
+    public async Task<ApiResult<ManualEntry>> Put(int manualEntryId, ManualEntryUpdate payload, [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.PutAsync<ManualEntry, ManualEntryUpdate>(payload, $"{ApiVersion}/{EndpointRoot}/{manualEntryId}", cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<ManualEntryNextRefNr>> GetNextRefNr([Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.GetAsync<ManualEntryNextRefNr>($"{ApiVersion}/{EndpointRoot}/next_ref_nr", null, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<List<ManualEntryFile>?>> GetFiles(int manualEntryId, [Optional] QueryParameterManualEntry? queryParameter, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
+    {
+        var path = $"{ApiVersion}/{EndpointRoot}/{manualEntryId}/files";
+        var res = await ConnectionHandler.GetAsync<List<ManualEntryFile>?>(path, queryParameter?.QueryParameter, cancellationToken);
+
+        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
+            return res;
+
+        res.Data.AddRange(await ConnectionHandler.FetchAll<ManualEntryFile>(
+            res.Data.Count,
+            totalResults,
+            path,
+            queryParameter?.QueryParameter,
+            cancellationToken));
+
+        return res;
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<ManualEntryFileDetail>> GetFileById(int manualEntryId, int fileId, [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.GetAsync<ManualEntryFileDetail>($"{ApiVersion}/{EndpointRoot}/{manualEntryId}/files/{fileId}", null, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<List<ManualEntryFile>?>> GetEntryFiles(int manualEntryId, int entryId, [Optional] QueryParameterManualEntry? queryParameter, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
+    {
+        var path = $"{ApiVersion}/{EndpointRoot}/{manualEntryId}/entries/{entryId}/files";
+        var res = await ConnectionHandler.GetAsync<List<ManualEntryFile>?>(path, queryParameter?.QueryParameter, cancellationToken);
+
+        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
+            return res;
+
+        res.Data.AddRange(await ConnectionHandler.FetchAll<ManualEntryFile>(
+            res.Data.Count,
+            totalResults,
+            path,
+            queryParameter?.QueryParameter,
+            cancellationToken));
+
+        return res;
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<ManualEntryFileDetail>> GetEntryFileById(int manualEntryId, int entryId, int fileId, [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.GetAsync<ManualEntryFileDetail>($"{ApiVersion}/{EndpointRoot}/{manualEntryId}/entries/{entryId}/files/{fileId}", null, cancellationToken);
+    }
+
+    /// <inheritdoc />
     public async Task<ApiResult<object>> Delete(int id, [Optional] CancellationToken cancellationToken)
     {
         var res = await ConnectionHandler.Delete($"{ApiVersion}/{EndpointRoot}/{id}", cancellationToken);
         return res;
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<object>> DeleteFile(int manualEntryId, int fileId, [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.Delete($"{ApiVersion}/{EndpointRoot}/{manualEntryId}/files/{fileId}", cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<object>> DeleteEntryFile(int manualEntryId, int entryId, int fileId, [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.Delete($"{ApiVersion}/{EndpointRoot}/{manualEntryId}/entries/{entryId}/files/{fileId}", cancellationToken);
     }
 }

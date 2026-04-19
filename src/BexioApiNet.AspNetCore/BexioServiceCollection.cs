@@ -29,9 +29,11 @@ using Microsoft.Extensions.DependencyInjection;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
+using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Services;
 using BexioApiNet.Services.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Banking;
+using BexioApiNet.Services.Connectors.Contacts;
 
 namespace BexioApiNet.AspNetCore;
 
@@ -89,6 +91,19 @@ public static class BexioServiceCollection
         services.AddScoped<ICurrencyService, CurrencyService>();
         services.AddScoped<IManualEntryService, ManualEntryService>();
         services.AddScoped<ITaxService, TaxService>();
+        services.AddScoped<IAccountGroupService, AccountGroupService>();
+        services.AddScoped<IBusinessYearService, BusinessYearService>();
+        services.AddScoped<ICalendarYearService, CalendarYearService>();
+        services.AddScoped<IVatPeriodService, VatPeriodService>();
+        services.AddScoped<IReportService, ReportService>();
+        services.AddScoped<IPaymentTypeService, PaymentTypeService>();
+        services.AddScoped<IPaymentService, PaymentService>();
+        services.AddScoped<IOutgoingPaymentService, OutgoingPaymentService>();
+        services.AddScoped<IContactService, ContactService>();
+        services.AddScoped<IContactGroupService, ContactGroupService>();
+        services.AddScoped<IContactRelationService, ContactRelationService>();
+        services.AddScoped<IContactSectorService, ContactSectorService>();
+        services.AddScoped<IAdditionalAddressService, AdditionalAddressService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;
