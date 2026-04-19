@@ -27,6 +27,7 @@ using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Services.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Banking;
 using BexioApiNet.Services.Connectors.Contacts;
+using BexioApiNet.Services.Connectors.Sales;
 
 namespace BexioApiNet.E2eTests;
 
@@ -90,7 +91,12 @@ public abstract class BexioE2eTestBase
             new ContactGroupService(connectionHandler),
             new ContactRelationService(connectionHandler),
             new ContactSectorService(connectionHandler),
-            new AdditionalAddressService(connectionHandler));
+            new AdditionalAddressService(connectionHandler),
+            new InvoiceService(connectionHandler),
+            new InvoiceReminderService(connectionHandler),
+            new QuoteService(connectionHandler),
+            new OrderService(connectionHandler),
+            new DeliveryService(connectionHandler));
     }
 
     /// <summary>

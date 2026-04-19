@@ -67,7 +67,7 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
 ### 3. Incomplete API Coverage (Known Debt)
 - **Status**: Ongoing
 - **Location**: `README.md` and `src/BexioApiNet/Interfaces/Connectors/`
-- **Why it's noted**: Many Bexio domains (Contacts, Projects, Invoices, Items, ...) are not implemented.
+- **Why it's noted**: Many Bexio domains (Items, Projects, etc.) are not implemented.
 - **Precautions**: When implementing a new domain, follow [`doc/development/feature-addition-guide.md`](./development/feature-addition-guide.md) verbatim. Ship unit tests with every new method.
 
 ## Section 4: Backlog Ideas
@@ -90,3 +90,4 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
 | Scaffold three-tier test architecture | Issue #7 — UnitTests, IntegrationTests, and E2eTests projects. |
 | Add comprehensive offline Unit and Integration coverage | Issue #7 — comprehensive Unit tests and WireMock.Net integration tests added. |
 | Vendor Bexio OpenAPI Spec | Issue #8 — `doc/openapi/bexio-v3.json` committed (OpenAPI 3.0.2, API v3.0.0, 355 paths, retrieved 2026-04-18). Refresh procedure in `doc/openapi/README.md`. |
+cedure in `doc/openapi/README.md`. |

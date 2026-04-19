@@ -18,6 +18,7 @@ C4Component
     
     Component(accountingConnectors, "Accounting Services", "ConnectorService", "Handles ManualEntries, Accounts, Currencies, Taxes.")
     Component(bankingConnectors, "Banking Services", "ConnectorService", "Handles BankAccounts.")
+    Component(salesConnectors, "Sales Services", "ConnectorService", "Handles Invoices, Quotes, Orders, Deliveries.")
     
     Component(connectionHandler, "BexioConnectionHandler", "HTTP execution", "Manages HttpClient, Bearer token injection, request building, pagination, and response deserialization.")
   }
@@ -27,9 +28,11 @@ C4Component
 
   Rel(bexioApiClient, accountingConnectors, "Delegates to")
   Rel(bexioApiClient, bankingConnectors, "Delegates to")
+  Rel(bexioApiClient, salesConnectors, "Delegates to")
   
   Rel(accountingConnectors, connectionHandler, "Uses for HTTP")
   Rel(bankingConnectors, connectionHandler, "Uses for HTTP")
+  Rel(salesConnectors, connectionHandler, "Uses for HTTP")
   
   Rel(connectionHandler, bexioApi, "Executes HTTP requests")
   Rel(connectionHandler, abstractions, "Deserializes into models")

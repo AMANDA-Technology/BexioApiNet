@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
+using BexioApiNet.Interfaces.Connectors.Sales;
 
 namespace BexioApiNet.Interfaces;
 
@@ -123,4 +124,30 @@ public interface IBexioApiClient : IDisposable
     /// Bexio additional addresses connector, nested under contacts. <see href="https://docs.bexio.com/#tag/Additional-Addresses">Additional Addresses</see>
     /// </summary>
     public IAdditionalAddressService ContactAdditionalAddresses { get; set; }
+
+    /// <summary>
+    /// Bexio invoices connector. <see href="https://docs.bexio.com/#tag/Invoices">Invoices</see>
+    /// </summary>
+    public IInvoiceService Invoices { get; set; }
+
+    /// <summary>
+    /// Bexio invoice reminders connector, nested under invoices.
+    /// <see href="https://docs.bexio.com/#tag/Invoices">Invoices</see>
+    /// </summary>
+    public IInvoiceReminderService InvoiceReminders { get; set; }
+
+    /// <summary>
+    /// Bexio quotes (offers) connector. <see href="https://docs.bexio.com/#tag/Quotes">Quotes</see>
+    /// </summary>
+    public IQuoteService Quotes { get; set; }
+
+    /// <summary>
+    /// Bexio orders (customer confirmations) connector. <see href="https://docs.bexio.com/#tag/Orders">Orders</see>
+    /// </summary>
+    public IOrderService Orders { get; set; }
+
+    /// <summary>
+    /// Bexio deliveries connector. <see href="https://docs.bexio.com/#tag/Deliveries">Deliveries</see>
+    /// </summary>
+    public IDeliveryService Deliveries { get; set; }
 }
