@@ -34,9 +34,7 @@ using BexioApiNet.Services.Connectors.Base;
 
 namespace BexioApiNet.Services.Connectors.Accounting;
 
-
-/// <inheritdoc cref="BexioApiNet.Interfaces.Connectors.Accounting.ICurrencyService" />
-
+/// <inheritdoc cref="BexioApiNet.Interfaces.Connectors.Accounting.ITaxService" />
 public sealed class TaxService : ConnectorService, ITaxService
 {
     /// <summary>

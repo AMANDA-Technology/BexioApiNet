@@ -23,8 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-
 using System.Runtime.InteropServices;
+using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Banking.PaymentTypes;
 using BexioApiNet.Interfaces;
@@ -58,8 +58,20 @@ public sealed class PaymentTypeService : ConnectorService, IPaymentTypeService
         [Optional] bool autoPage,
         [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.GetAsync<List<PaymentType>>($"{ApiVersion}/{EndpointRoot}",
+        var res = await ConnectionHandler.GetAsync<List<PaymentType>>($"{ApiVersion}/{EndpointRoot}",
             queryParameterPaymentType?.QueryParameter, cancellationToken);
+
+        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
+            return res;
+
+        res.Data.AddRange(await ConnectionHandler.FetchAll<PaymentType>(
+            res.Data.Count,
+            totalResults,
+            $"{ApiVersion}/{EndpointRoot}",
+            queryParameterPaymentType?.QueryParameter,
+            cancellationToken));
+
+        return res;
     }
 
     /// <inheritdoc />

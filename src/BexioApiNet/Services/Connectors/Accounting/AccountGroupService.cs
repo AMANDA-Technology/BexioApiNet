@@ -34,9 +34,7 @@ using BexioApiNet.Services.Connectors.Base;
 
 namespace BexioApiNet.Services.Connectors.Accounting;
 
-
 /// <inheritdoc cref="BexioApiNet.Interfaces.Connectors.Accounting.IAccountGroupService" />
-
 public sealed class AccountGroupService : ConnectorService, IAccountGroupService
 {
     /// <summary>
