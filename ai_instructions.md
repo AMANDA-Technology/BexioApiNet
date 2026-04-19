@@ -26,8 +26,8 @@ If anything here conflicts with `CLAUDE.md`, **this file wins for agent behavior
 
 | Concern | Value |
 |--------|-------|
-| Language | C# 13 |
-| Framework | .NET 9.0 (`net9.0`) |
+| Language | C# 14 |
+| Framework | .NET 10.0 (`net10.0`) |
 | JSON | `System.Text.Json` — **never** add Newtonsoft.Json |
 | DI | `Microsoft.Extensions.DependencyInjection` (+ `Microsoft.Extensions.Http` for typed clients) |
 | Tests | NUnit 4 + NUnit Analyzers + Coverlet |
