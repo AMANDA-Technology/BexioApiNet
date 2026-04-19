@@ -129,4 +129,10 @@ public interface IBexioApiClient : IDisposable
     /// Bexio invoices connector. <see href="https://docs.bexio.com/#tag/Invoices">Invoices</see>
     /// </summary>
     public IInvoiceService Invoices { get; set; }
+
+    /// <summary>
+    /// Bexio invoice reminders connector, nested under invoices.
+    /// <see href="https://docs.bexio.com/#tag/Invoices">Invoices</see>
+    /// </summary>
+    public IInvoiceReminderService InvoiceReminders { get; set; }
 }
