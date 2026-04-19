@@ -135,4 +135,9 @@ public interface IBexioApiClient : IDisposable
     /// <see href="https://docs.bexio.com/#tag/Invoices">Invoices</see>
     /// </summary>
     public IInvoiceReminderService InvoiceReminders { get; set; }
+
+    /// <summary>
+    /// Bexio quotes (offers) connector. <see href="https://docs.bexio.com/#tag/Quotes">Quotes</see>
+    /// </summary>
+    public IQuoteService Quotes { get; set; }
 }
