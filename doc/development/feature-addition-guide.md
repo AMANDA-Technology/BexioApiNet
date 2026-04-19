@@ -224,8 +224,8 @@ Every connector change ships with **two** test layers. Short version:
 
 | Layer | Required? | Runs offline? | Location |
 |-------|-----------|---------------|----------|
-| Offline Unit Test | **Mandatory** | Yes — no creds needed | `src/BexioApiNet.Tests/UnitTests/<Domain>/...` |
-| Live E2E Test | Optional but recommended | No — requires `BexioApiNet__BaseUri` + `BexioApiNet__JwtToken` | `src/BexioApiNet.Tests/Tests/<Domain>/...` |
+| Offline Unit Test | **Mandatory** | Yes — no creds needed | `tests/BexioApiNet.UnitTests/<Domain>/...` |
+| Live E2E Test | Optional but recommended | No — requires `BexioApiNet__BaseUri` + `BexioApiNet__JwtToken` | `tests/BexioApiNet.E2eTests/Tests/<Domain>/...` |
 
 **Offline unit test — minimum coverage per method:**
 - Verifies the correct HTTP verb is used.

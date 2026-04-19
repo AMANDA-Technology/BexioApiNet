@@ -86,7 +86,7 @@ using BexioApiNet.Services.Connectors.Accounting;
 using NSubstitute;
 using NUnit.Framework;
 
-namespace BexioApiNet.Tests.UnitTests.Accounting.ManualEntries;
+namespace BexioApiNet.UnitTests.Accounting;
 
 [TestFixture]
 [Category("Unit")]
