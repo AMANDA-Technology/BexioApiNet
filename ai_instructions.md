@@ -81,6 +81,7 @@ If a change would require bumping any of these, stop and escalate.
 5. Place domain models in `src/BexioApiNet.Abstractions/Models/<Domain>/<Subdomain>/`. Keep "Create" / "Edit" view models in a sibling `Views/` folder.
 6. For static / lookup collections prefer `IReadOnlyList<T>` or `ImmutableArray<T>` in public APIs.
 7. Every `public` / `protected` type and member needs an XML `<summary>`. Missing docs produce build warnings, which break the build.
+8. **Polymorphic / Discriminated Unions:** For `anyOf` or `oneOf` types in the Bexio JSON (e.g., `Position` or `OrderRepetitionSchedule`), model them as an abstract base record and sealed concrete subrecords. Use the `DiscriminatedJsonConverter<TBase>` (from `BexioApiNet.Abstractions.Json`) registered via `[JsonConverter(typeof(...))]` on the base type to dispatch based on a discriminator field (e.g., `type`). Never use raw `JsonElement`.
 
 ## 5. Testing Rules (hard limits)
 

@@ -10,6 +10,7 @@ Welcome to the architecture documentation for BexioApiNet. This project uses the
 ## Architecture Decision Records
 - [ADR-001: ApiResult Wrapper Pattern](decisions/001-apiresult-wrapper.md)
 - [ADR-002: Service Connector Partitioning](decisions/002-service-connector-pattern.md)
+- [ADR-003: Polymorphic Unions for API Types](decisions/003-polymorphic-unions.md)
 
 ## Reference
 - [Domain Glossary](glossary.md)
