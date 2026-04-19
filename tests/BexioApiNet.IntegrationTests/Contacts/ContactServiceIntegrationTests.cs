@@ -27,16 +27,16 @@ using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Contacts.Contacts.Views;
 using BexioApiNet.Services.Connectors.Contacts;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Contacts;
+namespace BexioApiNet.IntegrationTests.Contacts;
 
 /// <summary>
-/// Smoke tests covering the CRUD entry points of <see cref="ContactService"/> against
+/// Integration tests covering the CRUD entry points of <see cref="ContactService"/> against
 /// WireMock stubs. Verifies the path composed from <see cref="ContactConfiguration"/>
 /// (<c>2.0/contact</c>) reaches the handler correctly, that the expected HTTP verbs are used
 /// (including the Bexio-specific <c>POST</c> for edits and <c>PATCH</c> for restore), and that
 /// payloads are serialized with the expected snake_case field names.
 /// </summary>
-public sealed class ContactSmokeTests : IntegrationTestBase
+public sealed class ContactServiceIntegrationTests : IntegrationTestBase
 {
     private const string ContactsPath = "/2.0/contact";
 

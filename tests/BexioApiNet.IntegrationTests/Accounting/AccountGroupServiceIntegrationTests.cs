@@ -23,32 +23,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using BexioApiNet.Services.Connectors.Banking;
+using BexioApiNet.Services.Connectors.Accounting;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Banking;
+namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-/// Smoke tests covering <see cref="BankAccountService"/>. The request path is composed from
-/// <see cref="BankingConfiguration"/> (<c>3.0/banking/accounts</c>) and must reach WireMock
-/// intact when the service is driven through the real connection handler.
+///     Integration tests covering the <see cref="AccountGroupService" /> entry points against
+///     WireMock stubs. Verifies the path composed from <see cref="AccountGroupConfiguration" />
+///     (<c>2.0/account_groups</c>) reaches the handler correctly and that the expected HTTP
+///     verb is used.
 /// </summary>
-public sealed class BankAccountSmokeTests : IntegrationTestBase
+public sealed class AccountGroupServiceIntegrationTests : IntegrationTestBase
 {
-    private const string BankAccountsPath = "/3.0/banking/accounts";
+    private const string AccountGroupsPath = "/2.0/account_groups";
 
     /// <summary>
-    /// <c>BankAccountService.Get()</c> must issue a <c>GET</c> against
-    /// <c>/3.0/banking/accounts</c> and return a successful <c>ApiResult</c> when the
-    /// server responds with an empty collection.
+    ///     <c>AccountGroupService.Get()</c> must issue a <c>GET</c> request against
+    ///     <c>/2.0/account_groups</c> and return a successful <c>ApiResult</c> when the server
+    ///     returns an empty array.
     /// </summary>
     [Test]
-    public async Task BankAccountService_Get_SendsGetRequestToCorrectPath()
+    public async Task AccountGroupService_Get_SendsGetRequest()
     {
         Server
-            .Given(Request.Create().WithPath(BankAccountsPath).UsingGet())
+            .Given(Request.Create().WithPath(AccountGroupsPath).UsingGet())
             .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
 
-        var service = new BankAccountService(ConnectionHandler);
+        var service = new AccountGroupService(ConnectionHandler);
 
         var result = await service.Get(cancellationToken: TestContext.CurrentContext.CancellationToken);
 
@@ -57,10 +58,8 @@ public sealed class BankAccountSmokeTests : IntegrationTestBase
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data, Is.Empty);
             Assert.That(request.Method, Is.EqualTo("GET"));
-            Assert.That(request.AbsolutePath, Is.EqualTo(BankAccountsPath));
+            Assert.That(request.AbsolutePath, Is.EqualTo(AccountGroupsPath));
         });
     }
 }

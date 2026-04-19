@@ -25,14 +25,14 @@ SOFTWARE.
 
 using BexioApiNet.Services.Connectors.Accounting;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Accounting;
+namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-///     Smoke tests covering the <see cref="TaxService" /> entry points against WireMock stubs.
+///     Integration tests covering the <see cref="TaxService" /> entry points against WireMock stubs.
 ///     Verifies the path composed from <see cref="TaxConfiguration" /> (<c>3.0/taxes</c>)
 ///     reaches the handler correctly and that the expected HTTP verbs are used.
 /// </summary>
-public sealed class TaxSmokeTests : IntegrationTestBase
+public sealed class TaxServiceIntegrationTests : IntegrationTestBase
 {
     private const string TaxesPath = "/3.0/taxes";
 

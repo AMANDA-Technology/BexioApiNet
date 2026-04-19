@@ -26,16 +26,16 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Services.Connectors.Contacts;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Contacts;
+namespace BexioApiNet.IntegrationTests.Contacts;
 
 /// <summary>
-///     Smoke tests covering the read-only entry points of <see cref="ContactSectorService" /> against
+///     Integration tests covering the read-only entry points of <see cref="ContactSectorService" /> against
 ///     WireMock stubs. The Bexio API exposes contact sectors under the legacy path
 ///     <c>2.0/contact_branch</c> (see <see cref="ContactSectorConfiguration" />). This fixture verifies
 ///     that the URL is built correctly and that the expected HTTP verbs are used. The service only
 ///     supports <c>Get</c> and <c>Search</c> — there are no Create, Update, or Delete endpoints.
 /// </summary>
-public sealed class ContactSectorSmokeTests : IntegrationTestBase
+public sealed class ContactSectorServiceIntegrationTests : IntegrationTestBase
 {
     private const string ContactBranchPath = "/2.0/contact_branch";
 

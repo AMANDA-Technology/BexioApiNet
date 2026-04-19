@@ -26,14 +26,14 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Services.Connectors.Banking;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Banking;
+namespace BexioApiNet.IntegrationTests.Banking;
 
 /// <summary>
-///     Smoke tests covering <see cref="PaymentTypeService" />. The request path is composed from
+///     Integration tests covering <see cref="PaymentTypeService" />. The request path is composed from
 ///     <see cref="PaymentTypeConfiguration" /> (<c>2.0/payment_type</c>) and must reach WireMock
 ///     intact when the service is driven through the real connection handler.
 /// </summary>
-public sealed class PaymentTypeSmokeTests : IntegrationTestBase
+public sealed class PaymentTypeServiceIntegrationTests : IntegrationTestBase
 {
     private const string PaymentTypesPath = "/2.0/payment_type";
 

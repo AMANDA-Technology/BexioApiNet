@@ -27,15 +27,15 @@ using BexioApiNet.Abstractions.Models.Accounting.Currencies.Views;
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Accounting;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Accounting;
+namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-///     Smoke tests covering the new <see cref="CurrencyService" /> entry points against
+///     Integration tests covering the <see cref="CurrencyService" /> entry points against
 ///     WireMock stubs. Verifies the path composed from <see cref="CurrencyConfiguration" />
 ///     (<c>3.0/currencies</c>) reaches the handler correctly and that the expected HTTP
 ///     verbs and query parameters are used.
 /// </summary>
-public sealed class CurrencySmokeTests : IntegrationTestBase
+public sealed class CurrencyServiceIntegrationTests : IntegrationTestBase
 {
     private const string CurrenciesPath = "/3.0/currencies";
 

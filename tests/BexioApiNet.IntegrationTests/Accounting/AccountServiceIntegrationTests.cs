@@ -26,15 +26,15 @@ SOFTWARE.
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Accounting;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Accounting;
+namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-/// Smoke tests verifying <see cref="AccountService"/> drives the real
+/// Integration tests verifying <see cref="AccountService"/> drives the real
 /// <see cref="BexioConnectionHandler"/> with the expected HTTP verb, request path and
 /// query string. Each test arranges a WireMock stub, exercises the service and asserts
 /// on the recorded request in <see cref="WireMock.Server.WireMockServer.LogEntries"/>.
 /// </summary>
-public sealed class AccountSmokeTests : IntegrationTestBase
+public sealed class AccountServiceIntegrationTests : IntegrationTestBase
 {
     private const string AccountsPath = "/2.0/accounts";
 

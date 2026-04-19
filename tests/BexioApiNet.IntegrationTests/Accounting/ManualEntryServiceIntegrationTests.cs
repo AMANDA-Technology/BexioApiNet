@@ -27,15 +27,15 @@ using BexioApiNet.Abstractions.Models.Accounting.ManualEntries.Enums;
 using BexioApiNet.Abstractions.Models.Accounting.ManualEntries.Views;
 using BexioApiNet.Services.Connectors.Accounting;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Accounting;
+namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-/// Smoke tests covering the CRUD entry points of <see cref="ManualEntryService"/> against
+/// Integration tests covering the CRUD entry points of <see cref="ManualEntryService"/> against
 /// WireMock stubs. Verifies the path composed from <see cref="ManualEntryConfiguration"/>
 /// (<c>3.0/accounting/manual_entries</c>) reaches the handler correctly and that the expected
 /// HTTP verbs are used.
 /// </summary>
-public sealed class ManualEntrySmokeTests : IntegrationTestBase
+public sealed class ManualEntryServiceIntegrationTests : IntegrationTestBase
 {
     private const string ManualEntriesPath = "/3.0/accounting/manual_entries";
 

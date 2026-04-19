@@ -45,8 +45,8 @@ tests/
 ├── BexioApiNet.IntegrationTests/       # Offline integration tests. WireMock.Net.
 │   ├── Infrastructure/
 │   │   └── PaginationTests.cs
-│   └── Smoke/
-│       └── AccountSmokeTests.cs
+│   └── Accounting/
+│       └── AccountServiceIntegrationTests.cs
 ├── BexioApiNet.E2eTests/               # Live E2E tests. Credentials required, skipped otherwise.
 │   └── Tests/
 │       ├── Accounting/

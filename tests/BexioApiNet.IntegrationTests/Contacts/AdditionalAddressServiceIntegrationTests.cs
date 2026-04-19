@@ -27,17 +27,17 @@ using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Contacts.AdditionalAddresses.Views;
 using BexioApiNet.Services.Connectors.Contacts;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Contacts;
+namespace BexioApiNet.IntegrationTests.Contacts;
 
 /// <summary>
-///     Smoke tests covering the CRUD entry points of <see cref="AdditionalAddressService" /> against
+///     Integration tests covering the CRUD entry points of <see cref="AdditionalAddressService" /> against
 ///     WireMock stubs. Additional addresses are nested under a parent contact, so all routes follow the
 ///     pattern <c>2.0/contact/{contactId}/additional_address</c> (see
 ///     <see cref="AdditionalAddressConfiguration" />). Verifies URL construction with the parent contact
 ///     id, that the expected HTTP verbs are used (including the Bexio-specific <c>POST</c> for edits),
 ///     and that payloads are serialized with the expected snake_case field names.
 /// </summary>
-public sealed class AdditionalAddressSmokeTests : IntegrationTestBase
+public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBase
 {
     private const int TestContactId = 42;
     private const string AdditionalAddressPath = "/2.0/contact/42/additional_address";

@@ -28,16 +28,16 @@ using BexioApiNet.Abstractions.Models.Banking.OutgoingPayments.Views;
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Banking;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Banking;
+namespace BexioApiNet.IntegrationTests.Banking;
 
 /// <summary>
-///     Smoke tests covering the CRUD entry points of <see cref="OutgoingPaymentService" /> against
+///     Integration tests covering the CRUD entry points of <see cref="OutgoingPaymentService" /> against
 ///     WireMock stubs. Verifies the path composed from <see cref="OutgoingPaymentConfiguration" />
 ///     (<c>4.0/purchase/outgoing-payments</c>) reaches the handler correctly and that the expected
 ///     HTTP verbs are used for each operation (Get, GetById, Create, Update, Delete).
 ///     Note: Update uses <c>PUT</c> on the collection path (no <c>/{id}</c>) per the Bexio API spec.
 /// </summary>
-public sealed class OutgoingPaymentSmokeTests : IntegrationTestBase
+public sealed class OutgoingPaymentServiceIntegrationTests : IntegrationTestBase
 {
     private const string OutgoingPaymentsPath = "/4.0/purchase/outgoing-payments";
 

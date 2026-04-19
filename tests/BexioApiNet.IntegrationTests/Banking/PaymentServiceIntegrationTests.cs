@@ -28,15 +28,15 @@ using BexioApiNet.Abstractions.Models.Banking.Payments.Enums;
 using BexioApiNet.Abstractions.Models.Banking.Payments.Views;
 using BexioApiNet.Services.Connectors.Banking;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Banking;
+namespace BexioApiNet.IntegrationTests.Banking;
 
 /// <summary>
-///     Smoke tests covering the CRUD and Cancel entry points of <see cref="PaymentService" /> against
+///     Integration tests covering the CRUD and Cancel entry points of <see cref="PaymentService" /> against
 ///     WireMock stubs. Verifies the path composed from <see cref="PaymentConfiguration" />
 ///     (<c>4.0/banking/payments</c>) reaches the handler correctly and that the expected HTTP verbs
 ///     are used for each operation (Get, GetById, Create, Cancel, Update, Delete).
 /// </summary>
-public sealed class PaymentSmokeTests : IntegrationTestBase
+public sealed class PaymentServiceIntegrationTests : IntegrationTestBase
 {
     private const string PaymentsPath = "/4.0/banking/payments";
 

@@ -34,7 +34,7 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
     - CI-safe default (Offline only): `dotnet test --filter TestCategory!=E2E`
 - **What IS covered today**:
   - **Unit tests**: AccountService, CurrencyService, TaxService, BankAccountService, ManualEntryService, BexioConnectionHandler
-  - **Integration tests**: Cancellation, Concurrency, ErrorResponse, Pagination, ParamValidation, Smoke tests
+  - **Integration tests**: Cancellation, Concurrency, ErrorResponse, Pagination, ParamValidation, per-service integration tests (Accounting / Banking / Contacts domains)
   - **E2E tests**:
     - `Accounting/Accounts/GetAll`
     - `Accounting/Currencies/GetAll`

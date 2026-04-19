@@ -27,15 +27,15 @@ using BexioApiNet.Abstractions.Models.Accounting.CalendarYears.Views;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Services.Connectors.Accounting;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Accounting;
+namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-///     Smoke tests covering the <see cref="CalendarYearService" /> entry points against
+///     Integration tests covering the <see cref="CalendarYearService" /> entry points against
 ///     WireMock stubs. Verifies the path composed from <see cref="CalendarYearConfiguration" />
 ///     (<c>3.0/accounting/calendar_years</c>) reaches the handler correctly and that the
 ///     expected HTTP verbs are used.
 /// </summary>
-public sealed class CalendarYearSmokeTests : IntegrationTestBase
+public sealed class CalendarYearServiceIntegrationTests : IntegrationTestBase
 {
     private const string CalendarYearsPath = "/3.0/accounting/calendar_years";
 

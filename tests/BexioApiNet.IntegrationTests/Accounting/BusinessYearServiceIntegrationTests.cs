@@ -25,42 +25,41 @@ SOFTWARE.
 
 using BexioApiNet.Services.Connectors.Accounting;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Accounting;
+namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-///     Smoke tests covering the <see cref="VatPeriodService" /> entry points against WireMock
-///     stubs. Verifies the path composed from <see cref="VatPeriodConfiguration" />
-///     (<c>3.0/accounting/vat_periods</c>) reaches the handler correctly and that the expected
-///     HTTP verbs are used.
+///     Integration tests covering the <see cref="BusinessYearService" /> entry points against
+///     WireMock stubs. Verifies the path composed from <see cref="BusinessYearConfiguration" />
+///     (<c>3.0/accounting/business_years</c>) reaches the handler correctly and that the
+///     expected HTTP verbs are used.
 /// </summary>
-public sealed class VatPeriodSmokeTests : IntegrationTestBase
+public sealed class BusinessYearServiceIntegrationTests : IntegrationTestBase
 {
-    private const string VatPeriodsPath = "/3.0/accounting/vat_periods";
+    private const string BusinessYearsPath = "/3.0/accounting/business_years";
 
-    private const string VatPeriodResponse = """
-                                             {
-                                                 "id": 1,
-                                                 "start": "2024-01-01",
-                                                 "end": "2024-03-31",
-                                                 "type": "quarter",
-                                                 "status": "open",
-                                                 "closed_at": null
-                                             }
-                                             """;
+    private const string BusinessYearResponse = """
+                                                {
+                                                    "id": 1,
+                                                    "start": "2024-01-01",
+                                                    "end": "2024-12-31",
+                                                    "status": "open",
+                                                    "closed_at": null
+                                                }
+                                                """;
 
     /// <summary>
-    ///     <c>VatPeriodService.Get()</c> must issue a <c>GET</c> request against
-    ///     <c>/3.0/accounting/vat_periods</c> and return a successful <c>ApiResult</c> when the
-    ///     server returns an empty array.
+    ///     <c>BusinessYearService.Get()</c> must issue a <c>GET</c> request against
+    ///     <c>/3.0/accounting/business_years</c> and return a successful <c>ApiResult</c>
+    ///     when the server returns an empty array.
     /// </summary>
     [Test]
-    public async Task VatPeriodService_Get_SendsGetRequest()
+    public async Task BusinessYearService_Get_SendsGetRequest()
     {
         Server
-            .Given(Request.Create().WithPath(VatPeriodsPath).UsingGet())
+            .Given(Request.Create().WithPath(BusinessYearsPath).UsingGet())
             .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
 
-        var service = new VatPeriodService(ConnectionHandler);
+        var service = new BusinessYearService(ConnectionHandler);
 
         var result = await service.Get(cancellationToken: TestContext.CurrentContext.CancellationToken);
 
@@ -70,25 +69,25 @@ public sealed class VatPeriodSmokeTests : IntegrationTestBase
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
-            Assert.That(request.AbsolutePath, Is.EqualTo(VatPeriodsPath));
+            Assert.That(request.AbsolutePath, Is.EqualTo(BusinessYearsPath));
         });
     }
 
     /// <summary>
-    ///     <c>VatPeriodService.GetById</c> must issue a <c>GET</c> request that includes the
-    ///     target id in the URL path and surface the returned vat period on success.
+    ///     <c>BusinessYearService.GetById</c> must issue a <c>GET</c> request that includes the
+    ///     target id in the URL path and surface the returned business year on success.
     /// </summary>
     [Test]
-    public async Task VatPeriodService_GetById_SendsGetRequestWithIdInPath()
+    public async Task BusinessYearService_GetById_SendsGetRequestWithIdInPath()
     {
         const int id = 1;
-        var expectedPath = $"{VatPeriodsPath}/{id}";
+        var expectedPath = $"{BusinessYearsPath}/{id}";
 
         Server
             .Given(Request.Create().WithPath(expectedPath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody(VatPeriodResponse));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(BusinessYearResponse));
 
-        var service = new VatPeriodService(ConnectionHandler);
+        var service = new BusinessYearService(ConnectionHandler);
 
         var result = await service.GetById(id, TestContext.CurrentContext.CancellationToken);
 

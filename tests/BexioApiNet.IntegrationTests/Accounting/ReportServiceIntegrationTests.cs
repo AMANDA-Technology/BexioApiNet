@@ -26,15 +26,15 @@ SOFTWARE.
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Accounting;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Accounting;
+namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-///     Smoke tests covering the <see cref="ReportService" /> entry points against WireMock
+///     Integration tests covering the <see cref="ReportService" /> entry points against WireMock
 ///     stubs. Verifies the path composed from <see cref="ReportConfiguration" />
 ///     (<c>3.0/accounting/journal</c>) reaches the handler correctly and that the expected
 ///     HTTP verb and query parameters are used.
 /// </summary>
-public sealed class ReportSmokeTests : IntegrationTestBase
+public sealed class ReportServiceIntegrationTests : IntegrationTestBase
 {
     private const string JournalPath = "/3.0/accounting/journal";
 

@@ -132,7 +132,7 @@ For each service (1 PR per service):
 - [ ] Service implementation inheriting ConnectorService
 - [ ] Service wired into IBexioApiClient + BexioApiClient + BexioServiceCollection
 - [ ] Unit tests for every public method (NSubstitute)
-- [ ] Integration smoke test (WireMock.Net)
+- [ ] Integration test (WireMock.Net)
 - [ ] E2E test stub (skippable without credentials)
 - [ ] `dotnet build /warnaserror` clean
 - [ ] Coverage audit updated (TODO → DONE)
@@ -262,7 +262,7 @@ public sealed class ContactServiceTests : ServiceTestBase
 ```csharp
 [TestFixture]
 [Category("Integration")]
-public sealed class ContactSmokeTests : IntegrationTestBase
+public sealed class ContactServiceIntegrationTests : IntegrationTestBase
 {
     [Test]
     public async Task GetContacts_ReturnsDeserializedList()
@@ -414,7 +414,7 @@ Epic: 100% API Coverage (parent tracking issue)
 - [ ] Wired into IBexioApiClient + BexioApiClient + BexioServiceCollection
 - [ ] QueryParameter class (if list endpoint exists)
 - [ ] Unit tests for all {count} methods
-- [ ] Integration smoke test (WireMock)
+- [ ] Integration test (WireMock)
 - [ ] E2E test stub (graceful skip)
 - [ ] `dotnet build /warnaserror` clean
 - [ ] Coverage audit updated
@@ -489,7 +489,7 @@ The project achieves 100% when:
 
 - [ ] All 309 endpoint methods have implementations
 - [ ] All 309 methods have unit tests
-- [ ] All domains have integration smoke tests
+- [ ] All domains have integration tests
 - [ ] E2E verification groups 1-10 pass with live credentials
 - [ ] `doc/analysis/api-completeness-audit.md` shows 0 TODO items
 - [ ] `doc/analysis/api-doc-discrepancies.md` documents all observed divergences

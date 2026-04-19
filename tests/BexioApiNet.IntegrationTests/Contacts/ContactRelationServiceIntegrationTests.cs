@@ -24,42 +24,45 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Models.Api;
-using BexioApiNet.Abstractions.Models.Contacts.ContactGroups.Views;
+using BexioApiNet.Abstractions.Models.Contacts.ContactRelations.Views;
 using BexioApiNet.Services.Connectors.Contacts;
 
-namespace BexioApiNet.IntegrationTests.Smoke.Contacts;
+namespace BexioApiNet.IntegrationTests.Contacts;
 
 /// <summary>
-///     Smoke tests covering the CRUD entry points of <see cref="ContactGroupService" /> against
-///     WireMock stubs. Verifies the path composed from <see cref="ContactGroupConfiguration" />
-///     (<c>2.0/contact_group</c>) reaches the handler correctly, that the expected HTTP verbs are used
-///     (including the Bexio-specific <c>POST</c> for edits), and that payloads are serialized with the
-///     expected snake_case field names.
+///     Integration tests covering the CRUD entry points of <see cref="ContactRelationService" /> against
+///     WireMock stubs. Verifies the path composed from <see cref="ContactRelationConfiguration" />
+///     (<c>2.0/contact_relation</c>) reaches the handler correctly, that the expected HTTP verbs are
+///     used (including the Bexio-specific <c>POST</c> for edits), and that payloads are serialized with
+///     the expected snake_case field names.
 /// </summary>
-public sealed class ContactGroupSmokeTests : IntegrationTestBase
+public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
 {
-    private const string ContactGroupPath = "/2.0/contact_group";
+    private const string ContactRelationPath = "/2.0/contact_relation";
 
-    private const string ContactGroupResponse = """
-                                                {
-                                                    "id": 1,
-                                                    "name": "VIP Customers"
-                                                }
-                                                """;
+    private const string ContactRelationResponse = """
+                                                   {
+                                                       "id": 1,
+                                                       "contact_id": 10,
+                                                       "contact_sub_id": 20,
+                                                       "description": "Partner",
+                                                       "updated_at": "2024-01-01 12:00:00"
+                                                   }
+                                                   """;
 
     /// <summary>
-    ///     <c>ContactGroupService.Get()</c> must issue a <c>GET</c> request against
-    ///     <c>/2.0/contact_group</c> and return a successful <c>ApiResult</c> when the server
+    ///     <c>ContactRelationService.Get()</c> must issue a <c>GET</c> request against
+    ///     <c>/2.0/contact_relation</c> and return a successful <c>ApiResult</c> when the server
     ///     returns an empty array.
     /// </summary>
     [Test]
-    public async Task ContactGroupService_Get_SendsGetRequest()
+    public async Task ContactRelationService_Get_SendsGetRequest()
     {
         Server
-            .Given(Request.Create().WithPath(ContactGroupPath).UsingGet())
+            .Given(Request.Create().WithPath(ContactRelationPath).UsingGet())
             .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
 
-        var service = new ContactGroupService(ConnectionHandler);
+        var service = new ContactRelationService(ConnectionHandler);
 
         var result = await service.Get(cancellationToken: TestContext.CurrentContext.CancellationToken);
 
@@ -69,25 +72,25 @@ public sealed class ContactGroupSmokeTests : IntegrationTestBase
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
-            Assert.That(request.AbsolutePath, Is.EqualTo(ContactGroupPath));
+            Assert.That(request.AbsolutePath, Is.EqualTo(ContactRelationPath));
         });
     }
 
     /// <summary>
-    ///     <c>ContactGroupService.GetById</c> must issue a <c>GET</c> request that includes the target
-    ///     id in the URL path and surface the returned contact group on success.
+    ///     <c>ContactRelationService.GetById</c> must issue a <c>GET</c> request that includes the
+    ///     target id in the URL path and surface the returned contact relation on success.
     /// </summary>
     [Test]
-    public async Task ContactGroupService_GetById_SendsGetRequest()
+    public async Task ContactRelationService_GetById_SendsGetRequest()
     {
         const int id = 1;
-        var expectedPath = $"{ContactGroupPath}/{id}";
+        var expectedPath = $"{ContactRelationPath}/{id}";
 
         Server
             .Given(Request.Create().WithPath(expectedPath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody(ContactGroupResponse));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(ContactRelationResponse));
 
-        var service = new ContactGroupService(ConnectionHandler);
+        var service = new ContactRelationService(ConnectionHandler);
 
         var result = await service.GetById(id, TestContext.CurrentContext.CancellationToken);
 
@@ -104,20 +107,23 @@ public sealed class ContactGroupSmokeTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ContactGroupService.Create</c> must send a <c>POST</c> request whose body is the
-    ///     serialized <see cref="ContactGroupCreate" /> payload, and must surface the returned contact
-    ///     group on success.
+    ///     <c>ContactRelationService.Create</c> must send a <c>POST</c> request whose body is the
+    ///     serialized <see cref="ContactRelationCreate" /> payload, and must surface the returned
+    ///     contact relation on success.
     /// </summary>
     [Test]
-    public async Task ContactGroupService_Create_SendsPostRequest()
+    public async Task ContactRelationService_Create_SendsPostRequest()
     {
         Server
-            .Given(Request.Create().WithPath(ContactGroupPath).UsingPost())
-            .RespondWith(Response.Create().WithStatusCode(201).WithBody(ContactGroupResponse));
+            .Given(Request.Create().WithPath(ContactRelationPath).UsingPost())
+            .RespondWith(Response.Create().WithStatusCode(201).WithBody(ContactRelationResponse));
 
-        var service = new ContactGroupService(ConnectionHandler);
+        var service = new ContactRelationService(ConnectionHandler);
 
-        var payload = new ContactGroupCreate("VIP Customers");
+        var payload = new ContactRelationCreate(
+            10,
+            20,
+            "Partner");
 
         var result = await service.Create(payload, TestContext.CurrentContext.CancellationToken);
 
@@ -129,29 +135,31 @@ public sealed class ContactGroupSmokeTests : IntegrationTestBase
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Id, Is.EqualTo(1));
             Assert.That(request.Method, Is.EqualTo("POST"));
-            Assert.That(request.AbsolutePath, Is.EqualTo(ContactGroupPath));
-            Assert.That(request.Body, Does.Contain("\"name\":\"VIP Customers\""));
+            Assert.That(request.AbsolutePath, Is.EqualTo(ContactRelationPath));
+            Assert.That(request.Body, Does.Contain("\"contact_id\":10"));
+            Assert.That(request.Body, Does.Contain("\"contact_sub_id\":20"));
         });
     }
 
     /// <summary>
-    ///     <c>ContactGroupService.Search</c> must send a <c>POST</c> request against
-    ///     <c>/2.0/contact_group/search</c> with the <see cref="SearchCriteria" /> list as the JSON body.
+    ///     <c>ContactRelationService.Search</c> must send a <c>POST</c> request against
+    ///     <c>/2.0/contact_relation/search</c> with the <see cref="SearchCriteria" /> list as the
+    ///     JSON body.
     /// </summary>
     [Test]
-    public async Task ContactGroupService_Search_SendsPostRequest_ToSearchPath()
+    public async Task ContactRelationService_Search_SendsPostRequest_ToSearchPath()
     {
-        var expectedPath = $"{ContactGroupPath}/search";
+        var expectedPath = $"{ContactRelationPath}/search";
 
         Server
             .Given(Request.Create().WithPath(expectedPath).UsingPost())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{ContactGroupResponse}]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{ContactRelationResponse}]"));
 
-        var service = new ContactGroupService(ConnectionHandler);
+        var service = new ContactRelationService(ConnectionHandler);
 
         var criteria = new List<SearchCriteria>
         {
-            new() { Field = "name", Value = "VIP", Criteria = "like" }
+            new() { Field = "contact_id", Value = "10", Criteria = "=" }
         };
 
         var result = await service.Search(criteria, cancellationToken: TestContext.CurrentContext.CancellationToken);
@@ -163,28 +171,32 @@ public sealed class ContactGroupSmokeTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
-            Assert.That(request.Body, Does.Contain("\"field\":\"name\""));
-            Assert.That(request.Body, Does.Contain("\"criteria\":\"like\""));
+            Assert.That(request.Body, Does.Contain("\"field\":\"contact_id\""));
+            Assert.That(request.Body, Does.Contain("\"criteria\":\"=\""));
         });
     }
 
     /// <summary>
-    ///     <c>ContactGroupService.Update</c> must send a <c>POST</c> (not <c>PUT</c>) request against
-    ///     <c>/2.0/contact_group/{id}</c> — Bexio uses POST for full-replacement edits on v2.0 resources.
+    ///     <c>ContactRelationService.Update</c> must send a <c>POST</c> (not <c>PUT</c>) request
+    ///     against <c>/2.0/contact_relation/{id}</c> — Bexio uses POST for full-replacement edits on
+    ///     v2.0 resources.
     /// </summary>
     [Test]
-    public async Task ContactGroupService_Update_SendsPostRequest_WithIdInPath()
+    public async Task ContactRelationService_Update_SendsPostRequest_WithIdInPath()
     {
         const int id = 1;
-        var expectedPath = $"{ContactGroupPath}/{id}";
+        var expectedPath = $"{ContactRelationPath}/{id}";
 
         Server
             .Given(Request.Create().WithPath(expectedPath).UsingPost())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody(ContactGroupResponse));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(ContactRelationResponse));
 
-        var service = new ContactGroupService(ConnectionHandler);
+        var service = new ContactRelationService(ConnectionHandler);
 
-        var payload = new ContactGroupUpdate("VIP Customers");
+        var payload = new ContactRelationUpdate(
+            10,
+            20,
+            "Partner");
 
         var result = await service.Update(id, payload, TestContext.CurrentContext.CancellationToken);
 
@@ -201,20 +213,20 @@ public sealed class ContactGroupSmokeTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ContactGroupService.Delete</c> must issue a <c>DELETE</c> request that includes the
+    ///     <c>ContactRelationService.Delete</c> must issue a <c>DELETE</c> request that includes the
     ///     target id in the URL path.
     /// </summary>
     [Test]
-    public async Task ContactGroupService_Delete_SendsDeleteRequest()
+    public async Task ContactRelationService_Delete_SendsDeleteRequest()
     {
         const int idToDelete = 1;
-        var expectedPath = $"{ContactGroupPath}/{idToDelete}";
+        var expectedPath = $"{ContactRelationPath}/{idToDelete}";
 
         Server
             .Given(Request.Create().WithPath(expectedPath).UsingDelete())
             .RespondWith(Response.Create().WithStatusCode(200).WithBody("{\"success\":true}"));
 
-        var service = new ContactGroupService(ConnectionHandler);
+        var service = new ContactRelationService(ConnectionHandler);
 
         var result = await service.Delete(idToDelete, TestContext.CurrentContext.CancellationToken);
 
