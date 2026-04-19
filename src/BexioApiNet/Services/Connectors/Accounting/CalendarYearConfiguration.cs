@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Accounting;
 /// <summary>
 /// Calendar year endpoint configuration
 /// </summary>
-public struct CalendarYearConfiguration
+public static class CalendarYearConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Sales;
 /// <summary>
 /// Invoice endpoint configuration
 /// </summary>
-public struct InvoiceConfiguration
+public static class InvoiceConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

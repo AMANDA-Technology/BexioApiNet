@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Contacts;
 /// <summary>
 /// Contact endpoint configuration
 /// </summary>
-public struct ContactConfiguration
+public static class ContactConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

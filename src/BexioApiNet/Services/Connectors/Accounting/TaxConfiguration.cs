@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Accounting;
 /// <summary>
 /// Account endpoint configuration
 /// </summary>
-public struct TaxConfiguration
+public static class TaxConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

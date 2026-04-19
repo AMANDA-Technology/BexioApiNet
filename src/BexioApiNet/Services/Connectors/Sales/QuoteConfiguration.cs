@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Sales;
 /// <summary>
 /// Quote (offer) endpoint configuration
 /// </summary>
-public struct QuoteConfiguration
+public static class QuoteConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Sales;
 /// <summary>
 ///     Delivery endpoint configuration
 /// </summary>
-public struct DeliveryConfiguration
+public static class DeliveryConfiguration
 {
     /// <summary>
     ///     Current api version of the endpoint

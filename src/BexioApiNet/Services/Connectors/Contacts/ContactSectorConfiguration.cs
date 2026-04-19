@@ -30,7 +30,7 @@ namespace BexioApiNet.Services.Connectors.Contacts;
 /// under the legacy path segment <c>contact_branch</c> while the documented
 /// concept is "contact sector".
 /// </summary>
-public struct ContactSectorConfiguration
+public static class ContactSectorConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

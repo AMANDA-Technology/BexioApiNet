@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Banking;
 /// <summary>
 /// Outgoing payment endpoint configuration. Bexio <c>4.0/purchase/outgoing-payments</c>.
 /// </summary>
-public struct OutgoingPaymentConfiguration
+public static class OutgoingPaymentConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint.

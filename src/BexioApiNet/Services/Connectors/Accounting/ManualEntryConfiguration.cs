@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Accounting;
 /// <summary>
 /// Account endpoint configuration
 /// </summary>
-public struct ManualEntryConfiguration
+public static class ManualEntryConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

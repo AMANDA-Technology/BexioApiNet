@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Banking;
 /// <summary>
 /// Payment endpoint configuration (v4 banking payments).
 /// </summary>
-public struct PaymentConfiguration
+public static class PaymentConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

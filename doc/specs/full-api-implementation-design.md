@@ -410,7 +410,7 @@ Epic: 100% API Coverage (parent tracking issue)
 - [ ] Models in `src/BexioApiNet.Abstractions/Models/{Domain}/{Subdomain}/`
 - [ ] Interface `I{Entity}Service` in `src/BexioApiNet/Interfaces/Connectors/{Domain}/`
 - [ ] Implementation `{Entity}Service` in `src/BexioApiNet/Services/Connectors/{Domain}/`
-- [ ] Configuration class with API version + endpoint root
+- [ ] Configuration static class with API version + endpoint root
 - [ ] Wired into IBexioApiClient + BexioApiClient + BexioServiceCollection
 - [ ] QueryParameter class (if list endpoint exists)
 - [ ] Unit tests for all {count} methods

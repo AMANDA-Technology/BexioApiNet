@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Accounting;
 /// <summary>
 /// Reports endpoint configuration
 /// </summary>
-public struct ReportConfiguration
+public static class ReportConfiguration
 {
     /// <summary>
     /// Current api version of the endpoint

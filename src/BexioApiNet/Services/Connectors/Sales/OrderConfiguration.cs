@@ -28,7 +28,7 @@ namespace BexioApiNet.Services.Connectors.Sales;
 /// <summary>
 ///     Order endpoint configuration
 /// </summary>
-public struct OrderConfiguration
+public static class OrderConfiguration
 {
     /// <summary>
     ///     Current api version of the endpoint
