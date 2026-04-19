@@ -41,4 +41,6 @@ C4Container
 | **BexioApiNet.Abstractions** | `src/BexioApiNet.Abstractions/` | Defines the contract. Contains all domain models mapped to the Bexio API schema, enums (like `ApiResponseCodes`), exceptions, and connector interfaces. |
 | **BexioApiNet** | `src/BexioApiNet/` | The actual implementation. Contains the `BexioConnectionHandler` (HTTP client logic) and service implementations (e.g., `ManualEntryService`, `AccountService`). |
 | **BexioApiNet.AspNetCore** | `src/BexioApiNet.AspNetCore/` | A lightweight wrapper adding ASP.NET Core dependency injection compatibility (`AddBexioServices()`). |
-| **BexioApiNet.Tests** | `src/BexioApiNet.Tests/` | *Not deployed.* NUnit integration tests validating real API calls against Bexio. |
+| **BexioApiNet.E2eTests** | `tests/BexioApiNet.E2eTests/` | *Not deployed.* NUnit live tests validating real API calls against Bexio. |
+| **BexioApiNet.IntegrationTests** | `tests/BexioApiNet.IntegrationTests/` | *Not deployed.* NUnit offline integration tests using WireMock.Net stubs. |
+| **BexioApiNet.UnitTests** | `tests/BexioApiNet.UnitTests/` | *Not deployed.* NUnit offline unit tests using NSubstitute for mocks. |

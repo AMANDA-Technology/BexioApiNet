@@ -51,8 +51,8 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
 
 ### 1. Live Integration Testing (Resolved)
 - **Status**: **Resolved**
-- **Location**: `src/BexioApiNet.Tests/TestBase.cs`
-- **What changed**: `TestBase.Setup()` now reads `BexioApiNet__BaseUri` and `BexioApiNet__JwtToken` from env vars and calls `Assert.Ignore(...)` when either is missing. The class is marked `[Category("E2E")]`. This lets `dotnet test` run safely in CI and agent sandboxes without Bexio credentials.
+- **Location**: `tests/BexioApiNet.E2eTests/BexioE2eTestBase.cs`
+- **What changed**: `BexioE2eTestBase.Setup()` now reads `BexioApiNet__BaseUri` and `BexioApiNet__JwtToken` from env vars and calls `Assert.Ignore(...)` when either is missing. The class is marked `[Category("E2E")]`. This lets `dotnet test` run safely in CI and agent sandboxes without Bexio credentials.
 - **Remaining precaution**: Agents must still avoid running live E2E tests (`--filter TestCategory=E2E`) without explicit credentials.
 
 ### 2. HttpClient Lifecycle Management (Resolved)
