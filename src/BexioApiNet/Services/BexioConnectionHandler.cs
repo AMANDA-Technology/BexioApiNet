@@ -172,29 +172,10 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     public async Task<ApiResult<byte[]>> GetBinaryAsync(string requestPath, [Optional] CancellationToken cancellationToken)
     {
         var response = await _client.SendAsync(CreateHttpRequestMessage(HttpMethod.Get, requestPath), cancellationToken);
-        var headers = GetResponseHeaders(response);
-
-        byte[]? data = null;
-        ApiError? apiError = null;
-
-        if (response.IsSuccessStatusCode)
-        {
-            data = await response.Content.ReadAsByteArrayAsync(cancellationToken);
-        }
-        else
-        {
-            var content = await response.Content.ReadAsStringAsync(cancellationToken);
-            apiError = TryDeserialize<ApiError>(content);
-        }
-
-        return new()
-        {
-            IsSuccess = response.IsSuccessStatusCode,
-            ApiError = apiError,
-            Data = data,
-            ResponseHeaders = headers,
-            StatusCode = response.StatusCode
-        };
+        return await BuildApiResult<byte[]>(
+            response,
+            async content => await content.ReadAsByteArrayAsync(cancellationToken),
+            cancellationToken);
     }
 
     /// <inheritdoc />
@@ -282,24 +263,54 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     }
 
     /// <summary>
-    /// Get API result from response
+    /// Get API result from a JSON response.
     /// </summary>
-    /// <param name="httpResponseMessage">Received api response to process</param>
-    /// <typeparam name="T">Type to deserialized to if request was successfully</typeparam>
-    /// <returns></returns>
-    private static async Task<ApiResult<T>> GetApiResult<T>(HttpResponseMessage httpResponseMessage)
+    /// <param name="httpResponseMessage">Received api response to process.</param>
+    /// <typeparam name="T">Type to deserialize the JSON body to on success.</typeparam>
+    private static Task<ApiResult<T>> GetApiResult<T>(HttpResponseMessage httpResponseMessage)
+        => BuildApiResult<T>(
+            httpResponseMessage,
+            async content => TryDeserialize<T>(await content.ReadAsStringAsync()));
+
+    /// <summary>
+    /// Map an <see cref="HttpResponseMessage"/> to an <see cref="ApiResult{T}"/>, delegating
+    /// the success-body decoding so JSON and binary callers share identical status-code and
+    /// error handling. The error branch always reads the body as a string and attempts to
+    /// deserialize it as an <see cref="ApiError"/> — empty or non-JSON bodies (for example a
+    /// 302 redirect with no payload) yield <see cref="ApiResult.ApiError"/>=<c>null</c>.
+    /// </summary>
+    /// <param name="response">Received api response to process.</param>
+    /// <param name="readSuccessBody">Decoder applied to the response content when the status is 2xx.</param>
+    /// <param name="cancellationToken">Token used when reading the error body.</param>
+    /// <typeparam name="T">Target <see cref="ApiResult{T}.Data"/> type.</typeparam>
+    private static async Task<ApiResult<T>> BuildApiResult<T>(
+        HttpResponseMessage response,
+        Func<HttpContent, Task<T?>> readSuccessBody,
+        CancellationToken cancellationToken = default)
     {
-        var isSuccess = httpResponseMessage.IsSuccessStatusCode;
-        var headers = GetResponseHeaders(httpResponseMessage);
-        var content = await httpResponseMessage.Content.ReadAsStringAsync();
+        var isSuccess = response.IsSuccessStatusCode;
+        var headers = GetResponseHeaders(response);
+
+        T? data = default;
+        ApiError? apiError = null;
+
+        if (isSuccess)
+        {
+            data = await readSuccessBody(response.Content);
+        }
+        else
+        {
+            var content = await response.Content.ReadAsStringAsync(cancellationToken);
+            apiError = TryDeserialize<ApiError>(content);
+        }
 
         return new()
         {
             IsSuccess = isSuccess,
-            ApiError = isSuccess ? null : TryDeserialize<ApiError>(content),
-            Data = isSuccess ? TryDeserialize<T>(content) : default,
+            ApiError = apiError,
+            Data = data,
             ResponseHeaders = headers,
-            StatusCode = httpResponseMessage.StatusCode
+            StatusCode = response.StatusCode
         };
     }
 
