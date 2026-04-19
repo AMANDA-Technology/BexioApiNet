@@ -23,7 +23,6 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Net;
 using System.Net.Http.Headers;
 using System.Runtime.InteropServices;
 using System.Text.Json;
@@ -290,7 +289,7 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     /// <returns></returns>
     private static async Task<ApiResult<T>> GetApiResult<T>(HttpResponseMessage httpResponseMessage)
     {
-        var isSuccess = httpResponseMessage.IsSuccessStatusCode || httpResponseMessage.StatusCode is HttpStatusCode.Found;
+        var isSuccess = httpResponseMessage.IsSuccessStatusCode;
         var headers = GetResponseHeaders(httpResponseMessage);
         var content = await httpResponseMessage.Content.ReadAsStringAsync();
 
@@ -298,7 +297,7 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
         {
             IsSuccess = isSuccess,
             ApiError = isSuccess ? null : TryDeserialize<ApiError>(content),
-            Data = httpResponseMessage.IsSuccessStatusCode ? TryDeserialize<T>(content) : default,
+            Data = isSuccess ? TryDeserialize<T>(content) : default,
             ResponseHeaders = headers,
             StatusCode = httpResponseMessage.StatusCode
         };

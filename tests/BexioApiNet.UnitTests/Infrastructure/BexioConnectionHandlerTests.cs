@@ -361,12 +361,13 @@ public class BexioConnectionHandlerTests
     }
 
     /// <summary>
-    ///     A 302 Found response is a special case: <c>IsSuccess</c> is set to true even though the
-    ///     status code is not in the 2xx range, and <c>Data</c> remains null because no body is
-    ///     deserialized.
+    ///     A 302 Found response is non-successful: the status code is outside the 2xx range, so
+    ///     <c>IsSuccess</c> is false and <c>Data</c> is null. The redirect target (<c>Location</c>
+    ///     header) is not followed — auto-redirect is disabled on the underlying <see cref="HttpClient"/>
+    ///     to prevent the bearer token from leaking to a different host.
     /// </summary>
     [Test]
-    public async Task GetAsync_On302Found_ReturnsIsSuccessTrue_WithNullData()
+    public async Task GetAsync_On302Found_ReturnsIsSuccessFalse_WithNullData()
     {
         var (handler, httpClient, stub) = CreateHandler();
         using (handler)
@@ -382,7 +383,7 @@ public class BexioConnectionHandlerTests
             Assert.That(result, Is.Not.Null);
             Assert.Multiple(() =>
             {
-                Assert.That(result.IsSuccess, Is.True);
+                Assert.That(result.IsSuccess, Is.False);
                 Assert.That(result.StatusCode, Is.EqualTo(HttpStatusCode.Found));
                 Assert.That(result.Data, Is.Null);
                 Assert.That(result.ApiError, Is.Null);
