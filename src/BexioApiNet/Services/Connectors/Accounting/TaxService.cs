@@ -71,4 +71,16 @@ public sealed class TaxService : ConnectorService, ITaxService
 
         return res;
     }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<Tax>> GetById(int id, [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.GetAsync<Tax>($"{ApiVersion}/{EndpointRoot}/{id}", null, cancellationToken);
+    }
+
+    /// <inheritdoc />
+    public async Task<ApiResult<object>> Delete(int id, [Optional] CancellationToken cancellationToken)
+    {
+        return await ConnectionHandler.Delete($"{ApiVersion}/{EndpointRoot}/{id}", cancellationToken);
+    }
 }
