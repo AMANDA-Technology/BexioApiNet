@@ -31,18 +31,18 @@ using BexioApiNet.Models;
 namespace BexioApiNet.Interfaces.Connectors.Sales;
 
 /// <summary>
-///     Service for the Bexio delivery endpoints. <see href="https://docs.bexio.com/#tag/Deliveries">Deliveries</see>
+/// Service for the Bexio delivery endpoints. <see href="https://docs.bexio.com/#tag/Deliveries">Deliveries</see>
 /// </summary>
 public interface IDeliveryService
 {
     /// <summary>
-    ///     List all deliveries.
-    ///     <see href="https://docs.bexio.com/#tag/Deliveries/operation/v2ListDeliveries">List Deliveries</see>
+    /// List all deliveries.
+    /// <see href="https://docs.bexio.com/#tag/Deliveries/operation/v2ListDeliveries">List Deliveries</see>
     /// </summary>
     /// <param name="queryParameterDelivery">Optional query parameters (limit/offset/order_by).</param>
     /// <param name="autoPage">
-    ///     When <see langword="true" />, transparently pages through all remaining results via
-    ///     <c>X-Total-Count</c>.
+    /// When <see langword="true" />, transparently pages through all remaining results via
+    /// <c>X-Total-Count</c>.
     /// </param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}" /> with the full page (or all pages) of deliveries.</returns>
@@ -50,8 +50,8 @@ public interface IDeliveryService
         [Optional] bool autoPage, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Fetch a single delivery by id.
-    ///     <see href="https://docs.bexio.com/#tag/Deliveries/operation/v2ShowDelivery">Show Delivery</see>
+    /// Fetch a single delivery by id.
+    /// <see href="https://docs.bexio.com/#tag/Deliveries/operation/v2ShowDelivery">Show Delivery</see>
     /// </summary>
     /// <param name="id">The delivery id.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -59,8 +59,8 @@ public interface IDeliveryService
     public Task<ApiResult<Delivery>> GetById(int id, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Issue a delivery. The delivery must be in the draft status.
-    ///     <see href="https://docs.bexio.com/#tag/Deliveries/operation/v2IssueDelivery">Issue Delivery</see>
+    /// Issue a delivery. The delivery must be in the draft status.
+    /// <see href="https://docs.bexio.com/#tag/Deliveries/operation/v2IssueDelivery">Issue Delivery</see>
     /// </summary>
     /// <param name="id">The delivery id.</param>
     /// <param name="cancellationToken">Cancellation token.</param>

@@ -31,13 +31,13 @@ using BexioApiNet.Models;
 namespace BexioApiNet.Interfaces.Connectors.Banking;
 
 /// <summary>
-///     Service for accessing payment types. <see href="https://docs.bexio.com/#tag/Payment-Types">Payment Types</see>
+/// Service for accessing payment types. <see href="https://docs.bexio.com/#tag/Payment-Types">Payment Types</see>
 /// </summary>
 public interface IPaymentTypeService
 {
     /// <summary>
-    ///     Get a list of payment types.
-    ///     <see href="https://docs.bexio.com/#tag/Payment-Types/operation/v2ListPaymentTypes">List Payment Types</see>
+    /// Get a list of payment types.
+    /// <see href="https://docs.bexio.com/#tag/Payment-Types/operation/v2ListPaymentTypes">List Payment Types</see>
     /// </summary>
     /// <param name="queryParameterPaymentType">Query parameter specific for payment types</param>
     /// <param name="autoPage">Fetch all possible results</param>
@@ -47,8 +47,8 @@ public interface IPaymentTypeService
         [Optional] bool autoPage, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
-    ///     Search payment types.
-    ///     <see href="https://docs.bexio.com/#tag/Payment-Types/operation/v2SearchPaymentTypes">Search Payment Types</see>
+    /// Search payment types.
+    /// <see href="https://docs.bexio.com/#tag/Payment-Types/operation/v2SearchPaymentTypes">Search Payment Types</see>
     /// </summary>
     /// <param name="searchCriteria">The search criteria sent as JSON array body. Supported field: <c>name</c>.</param>
     /// <param name="queryParameterPaymentType">Optional query parameter specific for payment types</param>

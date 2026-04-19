@@ -34,16 +34,16 @@ using BexioApiNet.Services.Connectors.Accounting;
 namespace BexioApiNet.UnitTests.Accounting;
 
 /// <summary>
-///     Offline unit tests for <see cref="ManualEntryService" />. Each test verifies that the service
-///     forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected arguments and
-///     returns the handler's result unchanged. No network, no filesystem access.
+/// Offline unit tests for <see cref="ManualEntryService" />. Each test verifies that the service
+/// forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected arguments and
+/// returns the handler's result unchanged. No network, no filesystem access.
 /// </summary>
 [TestFixture]
 public sealed class ManualEntryServiceTests : ServiceTestBase
 {
     /// <summary>
-    ///     Creates a fresh <see cref="ManualEntryService" /> per test, bound to the
-    ///     <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
+    /// Creates a fresh <see cref="ManualEntryService" /> per test, bound to the
+    /// <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
     /// </summary>
     [SetUp]
     public void CreateSut()
@@ -56,8 +56,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     private ManualEntryService _sut = null!;
 
     /// <summary>
-    ///     Create forwards the payload and the expected endpoint path to
-    ///     <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />.
+    /// Create forwards the payload and the expected endpoint path to
+    /// <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />.
     /// </summary>
     [Test]
     public async Task Create_CallsPostAsync()
@@ -80,8 +80,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Create returns the <see cref="ApiResult{T}" /> produced by the connection handler without
-    ///     modification.
+    /// Create returns the <see cref="ApiResult{T}" /> produced by the connection handler without
+    /// modification.
     /// </summary>
     [Test]
     public async Task Create_ReturnsApiResultFromConnectionHandler()
@@ -101,8 +101,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     AddAttachment (MemoryStream overload) forwards the provided file tuples to
-    ///     <see cref="IBexioConnectionHandler.PostMultiPartFileAsync{TResult}" />.
+    /// AddAttachment (MemoryStream overload) forwards the provided file tuples to
+    /// <see cref="IBexioConnectionHandler.PostMultiPartFileAsync{TResult}" />.
     /// </summary>
     [Test]
     public async Task AddAttachment_WithStreams_CallsPostMultiPartFileAsync()
@@ -132,8 +132,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     AddAttachment builds the request path from the root manual-entries id and the nested
-    ///     manual-entry id. Both identifiers must be present in the final URL.
+    /// AddAttachment builds the request path from the root manual-entries id and the nested
+    /// manual-entry id. Both identifiers must be present in the final URL.
     /// </summary>
     [Test]
     public async Task AddAttachment_PathContainsManuelEntriesIdAndManuelEntryId()
@@ -163,8 +163,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get (no parameters) calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> once with
-    ///     the expected endpoint path and a null query parameter.
+    /// Get (no parameters) calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> once with
+    /// the expected endpoint path and a null query parameter.
     /// </summary>
     [Test]
     public async Task Get_WithNoParams_CallsGetAsync()
@@ -186,9 +186,9 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get (autoPage = true) triggers <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> when
-    ///     the <c>X-Total-Count</c> header is present and the initial response only returned a page of
-    ///     the full result set.
+    /// Get (autoPage = true) triggers <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> when
+    /// the <c>X-Total-Count</c> header is present and the initial response only returned a page of
+    /// the full result set.
     /// </summary>
     [Test]
     public async Task Get_WithAutoPage_CallsFetchAll()
@@ -230,8 +230,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get returns the <see cref="ApiResult{T}" /> produced by the connection handler when
-    ///     auto-paging is not requested (no additional FetchAll round-trip, result passes through).
+    /// Get returns the <see cref="ApiResult{T}" /> produced by the connection handler when
+    /// auto-paging is not requested (no additional FetchAll round-trip, result passes through).
     /// </summary>
     [Test]
     public async Task Get_ReturnsApiResult()
@@ -250,7 +250,7 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Delete forwards the call to <see cref="IBexioConnectionHandler.Delete" /> exactly once.
+    /// Delete forwards the call to <see cref="IBexioConnectionHandler.Delete" /> exactly once.
     /// </summary>
     [Test]
     public async Task Delete_CallsConnectionHandlerDelete()
@@ -268,7 +268,7 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Delete builds the request path with the manual-entry id appended to the endpoint root.
+    /// Delete builds the request path with the manual-entry id appended to the endpoint root.
     /// </summary>
     [Test]
     public async Task Delete_PathContainsId()
@@ -288,8 +288,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Put forwards the payload and builds the path <c>{endpoint}/{manualEntryId}</c> via
-    ///     <see cref="IBexioConnectionHandler.PutAsync{TResult,TUpdate}" />.
+    /// Put forwards the payload and builds the path <c>{endpoint}/{manualEntryId}</c> via
+    /// <see cref="IBexioConnectionHandler.PutAsync{TResult,TUpdate}" />.
     /// </summary>
     [Test]
     public async Task Put_CallsPutAsyncWithExpectedPath()
@@ -315,7 +315,7 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Put returns the <see cref="ApiResult{T}" /> produced by the connection handler unchanged.
+    /// Put returns the <see cref="ApiResult{T}" /> produced by the connection handler unchanged.
     /// </summary>
     [Test]
     public async Task Put_ReturnsApiResultFromConnectionHandler()
@@ -335,8 +335,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetNextRefNr builds <c>{endpoint}/next_ref_nr</c> and forwards to
-    ///     <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> with a null query parameter.
+    /// GetNextRefNr builds <c>{endpoint}/next_ref_nr</c> and forwards to
+    /// <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> with a null query parameter.
     /// </summary>
     [Test]
     public async Task GetNextRefNr_CallsGetAsyncWithExpectedPath()
@@ -358,8 +358,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetFiles (no auto-page) calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> once
-    ///     with the expected compound-entry file listing path and does not trigger FetchAll.
+    /// GetFiles (no auto-page) calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> once
+    /// with the expected compound-entry file listing path and does not trigger FetchAll.
     /// </summary>
     [Test]
     public async Task GetFiles_WithoutAutoPage_CallsGetAsyncWithExpectedPath()
@@ -388,9 +388,9 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetFiles (autoPage = true) triggers
-    ///     <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> when the <c>X-Total-Count</c>
-    ///     header is present and the initial response only returned a page.
+    /// GetFiles (autoPage = true) triggers
+    /// <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> when the <c>X-Total-Count</c>
+    /// header is present and the initial response only returned a page.
     /// </summary>
     [Test]
     public async Task GetFiles_WithAutoPage_CallsFetchAll()
@@ -433,8 +433,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetFileById builds <c>{endpoint}/{manualEntryId}/files/{fileId}</c> and forwards via
-    ///     <see cref="IBexioConnectionHandler.GetAsync{TResult}" />.
+    /// GetFileById builds <c>{endpoint}/{manualEntryId}/files/{fileId}</c> and forwards via
+    /// <see cref="IBexioConnectionHandler.GetAsync{TResult}" />.
     /// </summary>
     [Test]
     public async Task GetFileById_CallsGetAsyncWithExpectedPath()
@@ -458,8 +458,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetEntryFiles builds <c>{endpoint}/{manualEntryId}/entries/{entryId}/files</c> and forwards
-    ///     via <see cref="IBexioConnectionHandler.GetAsync{TResult}" />.
+    /// GetEntryFiles builds <c>{endpoint}/{manualEntryId}/entries/{entryId}/files</c> and forwards
+    /// via <see cref="IBexioConnectionHandler.GetAsync{TResult}" />.
     /// </summary>
     [Test]
     public async Task GetEntryFiles_CallsGetAsyncWithExpectedPath()
@@ -483,8 +483,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetEntryFiles (autoPage = true) triggers
-    ///     <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> on the entry-files path.
+    /// GetEntryFiles (autoPage = true) triggers
+    /// <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> on the entry-files path.
     /// </summary>
     [Test]
     public async Task GetEntryFiles_WithAutoPage_CallsFetchAllOnEntryPath()
@@ -528,8 +528,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetEntryFileById builds <c>{endpoint}/{manualEntryId}/entries/{entryId}/files/{fileId}</c>
-    ///     and forwards via <see cref="IBexioConnectionHandler.GetAsync{TResult}" />.
+    /// GetEntryFileById builds <c>{endpoint}/{manualEntryId}/entries/{entryId}/files/{fileId}</c>
+    /// and forwards via <see cref="IBexioConnectionHandler.GetAsync{TResult}" />.
     /// </summary>
     [Test]
     public async Task GetEntryFileById_CallsGetAsyncWithExpectedPath()
@@ -554,8 +554,8 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     DeleteFile builds the request path <c>{endpoint}/{manualEntryId}/files/{fileId}</c> and
-    ///     forwards to <see cref="IBexioConnectionHandler.Delete" />.
+    /// DeleteFile builds the request path <c>{endpoint}/{manualEntryId}/files/{fileId}</c> and
+    /// forwards to <see cref="IBexioConnectionHandler.Delete" />.
     /// </summary>
     [Test]
     public async Task DeleteFile_CallsDeleteWithExpectedPath()
@@ -575,9 +575,9 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     DeleteEntryFile builds the request path
-    ///     <c>{endpoint}/{manualEntryId}/entries/{entryId}/files/{fileId}</c> and forwards to
-    ///     <see cref="IBexioConnectionHandler.Delete" />.
+    /// DeleteEntryFile builds the request path
+    /// <c>{endpoint}/{manualEntryId}/entries/{entryId}/files/{fileId}</c> and forwards to
+    /// <see cref="IBexioConnectionHandler.Delete" />.
     /// </summary>
     [Test]
     public async Task DeleteEntryFile_CallsDeleteWithExpectedPath()

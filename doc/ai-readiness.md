@@ -5,7 +5,7 @@ tags: [readiness, ai, assessment]
 
 # AI Readiness Assessment
 
-_Last updated: 2026-04-18 (Issue #8 — vendor Bexio OpenAPI spec)_
+_Last updated: 2026-04-19 (Issue #59 — typed polymorphic positions and order-repetition schedules)_
 
 ## Section 1: Documentation Quality
 The documentation landscape for this project is formal and AI-aware.
@@ -70,6 +70,13 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
 - **Why it's noted**: Many Bexio domains (Items, Projects, etc.) are not implemented.
 - **Precautions**: When implementing a new domain, follow [`doc/development/feature-addition-guide.md`](./development/feature-addition-guide.md) verbatim. Ship unit tests with every new method.
 
+### 4. Typed Positions and Order Repetitions (Resolved in Issue #59)
+- **Status**: **Resolved**
+- **Location**: `src/BexioApiNet.Abstractions/Models/Sales/Positions/`, `src/BexioApiNet.Abstractions/Models/Sales/Orders/OrderRepetition*.cs`, `src/BexioApiNet.Abstractions/Json/`
+- **What changed**: The sales document DTOs (`Quote`, `QuoteCreate`, `QuoteConvertRequest`, `Order`, `OrderCreate`, `OrderConvertRequest`, `Invoice`, `InvoiceCreate`, `Delivery`) previously exposed `IReadOnlyList<JsonElement>? Positions`. They now expose `IReadOnlyList<Position>? Positions`, where `Position` is an abstract record with seven sealed subtypes (`PositionArticle`, `PositionCustom`, `PositionText`, `PositionSubposition`, `PositionSubtotal`, `PositionPagebreak`, `PositionDiscount`) discriminated on the `type` field (`KbPositionArticle`, `KbPositionCustom`, …). Similarly, `OrderRepetition.Repetition` and `OrderRepetitionCreate.Repetition` previously carried a raw `JsonElement` and now carry the `OrderRepetitionSchedule` abstract record — one of `OrderRepetitionDaily`, `OrderRepetitionWeekly`, `OrderRepetitionMonthly`, `OrderRepetitionYearly` — discriminated on the lowercase `type` field.
+- **How it works**: `BexioApiNet.Abstractions.Json.DiscriminatedJsonConverter<TBase>` is the shared converter base; `PositionJsonConverter` and `OrderRepetitionScheduleJsonConverter` subclass it and provide the type map. The converter attribute is applied to the abstract base only, so derived records serialize through the default metadata path — no recursion.
+- **Migration note (breaking change)**: Callers that previously passed `JsonElement` values must now construct the concrete subtypes, e.g. `new OrderRepetitionDaily { Interval = 1 }` instead of `JsonDocument.Parse(…).RootElement.Clone()`. Response consumers that enumerated `JsonElement` properties must pattern-match on the concrete subtype instead (`switch (position) { case PositionArticle a: …; case PositionText t: …; }`). The Update DTOs intentionally keep no `Positions` field — positions are only writable via Create and the convert endpoints.
+
 ## Section 4: Backlog Ideas
 
 | Title | Description | Complexity | Priority |
@@ -90,4 +97,4 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
 | Scaffold three-tier test architecture | Issue #7 — UnitTests, IntegrationTests, and E2eTests projects. |
 | Add comprehensive offline Unit and Integration coverage | Issue #7 — comprehensive Unit tests and WireMock.Net integration tests added. |
 | Vendor Bexio OpenAPI Spec | Issue #8 — `doc/openapi/bexio-v3.json` committed (OpenAPI 3.0.2, API v3.0.0, 355 paths, retrieved 2026-04-18). Refresh procedure in `doc/openapi/README.md`. |
-cedure in `doc/openapi/README.md`. |
+| Typed polymorphic positions and repetition schedules | Issue #59 — `IReadOnlyList<JsonElement>? Positions` replaced by `IReadOnlyList<Position>?` on 9 DTOs; `JsonElement? Repetition` replaced by `OrderRepetitionSchedule?` on 2 DTOs. Round-trip tests cover every variant. |

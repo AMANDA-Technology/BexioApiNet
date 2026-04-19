@@ -26,7 +26,7 @@ SOFTWARE.
 namespace BexioApiNet.Models;
 
 /// <summary>
-///     Optional query parameters for the <c>3.0/currencies/{id}/exchange_rates</c> endpoint.
+/// Optional query parameters for the <c>3.0/currencies/{id}/exchange_rates</c> endpoint.
 /// </summary>
 /// <param name="Date">The validity date of the exchange rate to fetch (formatted as <c>yyyy-MM-dd</c>).</param>
 public sealed record QueryParameterExchangeRate(
@@ -34,8 +34,8 @@ public sealed record QueryParameterExchangeRate(
 )
 {
     /// <summary>
-    ///     The wrapped <see cref="QueryParameter" /> built from the supplied options. Returns <see langword="null" /> when no
-    ///     optional value was provided so the connection handler can skip query string composition entirely.
+    /// The wrapped <see cref="QueryParameter" /> built from the supplied options. Returns <see langword="null" /> when no
+    /// optional value was provided so the connection handler can skip query string composition entirely.
     /// </summary>
     public QueryParameter? QueryParameter { get; } = BuildQueryParameter(Date);
 

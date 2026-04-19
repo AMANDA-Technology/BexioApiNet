@@ -29,18 +29,18 @@ using BexioApiNet.Services.Connectors.Banking;
 namespace BexioApiNet.IntegrationTests.Banking;
 
 /// <summary>
-///     Integration tests covering <see cref="PaymentTypeService" />. The request path is composed from
-///     <see cref="PaymentTypeConfiguration" /> (<c>2.0/payment_type</c>) and must reach WireMock
-///     intact when the service is driven through the real connection handler.
+/// Integration tests covering <see cref="PaymentTypeService" />. The request path is composed from
+/// <see cref="PaymentTypeConfiguration" /> (<c>2.0/payment_type</c>) and must reach WireMock
+/// intact when the service is driven through the real connection handler.
 /// </summary>
 public sealed class PaymentTypeServiceIntegrationTests : IntegrationTestBase
 {
     private const string PaymentTypesPath = "/2.0/payment_type";
 
     /// <summary>
-    ///     <c>PaymentTypeService.Get()</c> must issue a <c>GET</c> against
-    ///     <c>/2.0/payment_type</c> and return a successful <c>ApiResult</c> when the
-    ///     server responds with an empty collection.
+    /// <c>PaymentTypeService.Get()</c> must issue a <c>GET</c> against
+    /// <c>/2.0/payment_type</c> and return a successful <c>ApiResult</c> when the
+    /// server responds with an empty collection.
     /// </summary>
     [Test]
     public async Task PaymentTypeService_Get_SendsGetRequestToCorrectPath()
@@ -66,8 +66,8 @@ public sealed class PaymentTypeServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>PaymentTypeService.Search</c> must send a <c>POST</c> request against
-    ///     <c>/2.0/payment_type/search</c> with the <see cref="SearchCriteria" /> list as the JSON body.
+    /// <c>PaymentTypeService.Search</c> must send a <c>POST</c> request against
+    /// <c>/2.0/payment_type/search</c> with the <see cref="SearchCriteria" /> list as the JSON body.
     /// </summary>
     [Test]
     public async Task PaymentTypeService_Search_SendsPostRequestToSearchPath()

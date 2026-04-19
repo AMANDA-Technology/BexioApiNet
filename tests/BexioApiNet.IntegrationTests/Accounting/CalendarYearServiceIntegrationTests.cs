@@ -30,10 +30,10 @@ using BexioApiNet.Services.Connectors.Accounting;
 namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-///     Integration tests covering the <see cref="CalendarYearService" /> entry points against
-///     WireMock stubs. Verifies the path composed from <see cref="CalendarYearConfiguration" />
-///     (<c>3.0/accounting/calendar_years</c>) reaches the handler correctly and that the
-///     expected HTTP verbs are used.
+/// Integration tests covering the <see cref="CalendarYearService" /> entry points against
+/// WireMock stubs. Verifies the path composed from <see cref="CalendarYearConfiguration" />
+/// (<c>3.0/accounting/calendar_years</c>) reaches the handler correctly and that the
+/// expected HTTP verbs are used.
 /// </summary>
 public sealed class CalendarYearServiceIntegrationTests : IntegrationTestBase
 {
@@ -54,9 +54,9 @@ public sealed class CalendarYearServiceIntegrationTests : IntegrationTestBase
                                                 """;
 
     /// <summary>
-    ///     <c>CalendarYearService.Get()</c> must issue a <c>GET</c> request against
-    ///     <c>/3.0/accounting/calendar_years</c> and return a successful <c>ApiResult</c>
-    ///     when the server returns an empty array.
+    /// <c>CalendarYearService.Get()</c> must issue a <c>GET</c> request against
+    /// <c>/3.0/accounting/calendar_years</c> and return a successful <c>ApiResult</c>
+    /// when the server returns an empty array.
     /// </summary>
     [Test]
     public async Task CalendarYearService_Get_SendsGetRequest()
@@ -80,8 +80,8 @@ public sealed class CalendarYearServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>CalendarYearService.GetById</c> must issue a <c>GET</c> request that includes the
-    ///     target id in the URL path and surface the returned calendar year on success.
+    /// <c>CalendarYearService.GetById</c> must issue a <c>GET</c> request that includes the
+    /// target id in the URL path and surface the returned calendar year on success.
     /// </summary>
     [Test]
     public async Task CalendarYearService_GetById_SendsGetRequestWithIdInPath()
@@ -110,8 +110,8 @@ public sealed class CalendarYearServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>CalendarYearService.Create</c> must issue a <c>POST</c> request whose body is the
-    ///     serialized <see cref="CalendarYearCreate" /> payload.
+    /// <c>CalendarYearService.Create</c> must issue a <c>POST</c> request whose body is the
+    /// serialized <see cref="CalendarYearCreate" /> payload.
     /// </summary>
     [Test]
     public async Task CalendarYearService_Create_SendsPostRequest()
@@ -140,8 +140,8 @@ public sealed class CalendarYearServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>CalendarYearService.Search</c> must issue a <c>POST</c> request against
-    ///     <c>/3.0/accounting/calendar_years/search</c> with the search criteria as the JSON body.
+    /// <c>CalendarYearService.Search</c> must issue a <c>POST</c> request against
+    /// <c>/3.0/accounting/calendar_years/search</c> with the search criteria as the JSON body.
     /// </summary>
     [Test]
     public async Task CalendarYearService_Search_SendsPostRequestToSearchPath()

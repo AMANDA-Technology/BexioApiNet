@@ -33,10 +33,10 @@ using BexioApiNet.Services.Connectors.Banking;
 namespace BexioApiNet.UnitTests.Banking;
 
 /// <summary>
-///     Offline unit tests for <see cref="PaymentTypeService" />. The service is a
-///     thin pass-through over <see cref="IBexioConnectionHandler.GetAsync{T}" /> and
-///     <see cref="IBexioConnectionHandler.PostSearchAsync{T}" />, so verification
-///     focuses on path, verb, body, query parameter, and pass-through semantics.
+/// Offline unit tests for <see cref="PaymentTypeService" />. The service is a
+/// thin pass-through over <see cref="IBexioConnectionHandler.GetAsync{T}" /> and
+/// <see cref="IBexioConnectionHandler.PostSearchAsync{T}" />, so verification
+/// focuses on path, verb, body, query parameter, and pass-through semantics.
 /// </summary>
 [TestFixture]
 public sealed class PaymentTypeServiceTests : ServiceTestBase
@@ -45,9 +45,9 @@ public sealed class PaymentTypeServiceTests : ServiceTestBase
     private const string ExpectedSearchPath = "2.0/payment_type/search";
 
     /// <summary>
-    ///     With no parameters the service hits <c>2.0/payment_type</c> exactly once
-    ///     with a <see langword="null" /> query parameter and returns the connection
-    ///     handler's <see cref="ApiResult{T}" /> as-is.
+    /// With no parameters the service hits <c>2.0/payment_type</c> exactly once
+    /// with a <see langword="null" /> query parameter and returns the connection
+    /// handler's <see cref="ApiResult{T}" /> as-is.
     /// </summary>
     [Test]
     public async Task Get_WithNoParams_CallsGetAsyncOnceWithExpectedPath()
@@ -73,9 +73,9 @@ public sealed class PaymentTypeServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     When a <see cref="QueryParameterPaymentType" /> is supplied, its inner
-    ///     <see cref="QueryParameter" /> instance is forwarded to the connection
-    ///     handler verbatim — the service must not rewrap or substitute it.
+    /// When a <see cref="QueryParameterPaymentType" /> is supplied, its inner
+    /// <see cref="QueryParameter" /> instance is forwarded to the connection
+    /// handler verbatim — the service must not rewrap or substitute it.
     /// </summary>
     [Test]
     public async Task Get_WithQueryParameter_PassesQueryParameterToConnectionHandler()
@@ -96,10 +96,10 @@ public sealed class PaymentTypeServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     When <c>autoPage</c> is on and the first response advertises a
-    ///     <c>X-Total-Count</c> header, the service must call <c>FetchAll</c> with
-    ///     the count of already-fetched items, the total, the same path, and the
-    ///     same query parameter.
+    /// When <c>autoPage</c> is on and the first response advertises a
+    /// <c>X-Total-Count</c> header, the service must call <c>FetchAll</c> with
+    /// the count of already-fetched items, the total, the same path, and the
+    /// same query parameter.
     /// </summary>
     [Test]
     public async Task Get_WithAutoPage_WhenTotalResultsHeaderPresent_CallsFetchAll()
@@ -137,9 +137,9 @@ public sealed class PaymentTypeServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     When <c>autoPage</c> is requested but the response carries no
-    ///     <c>X-Total-Count</c> header, the service must not invoke <c>FetchAll</c>
-    ///     — there is nothing more to fetch.
+    /// When <c>autoPage</c> is requested but the response carries no
+    /// <c>X-Total-Count</c> header, the service must not invoke <c>FetchAll</c>
+    /// — there is nothing more to fetch.
     /// </summary>
     [Test]
     public async Task Get_WithAutoPage_WhenTotalResultsHeaderMissing_DoesNotCallFetchAll()
@@ -168,8 +168,8 @@ public sealed class PaymentTypeServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     The cancellation token supplied by the caller must be forwarded to the
-    ///     connection handler so cooperative cancellation flows end-to-end.
+    /// The cancellation token supplied by the caller must be forwarded to the
+    /// connection handler so cooperative cancellation flows end-to-end.
     /// </summary>
     [Test]
     public async Task Get_ForwardsCancellationTokenToConnectionHandler()
@@ -190,8 +190,8 @@ public sealed class PaymentTypeServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     A failing <see cref="ApiResult{T}" /> from the connection handler must
-    ///     surface to the caller untouched — the service may not swallow errors.
+    /// A failing <see cref="ApiResult{T}" /> from the connection handler must
+    /// surface to the caller untouched — the service may not swallow errors.
     /// </summary>
     [Test]
     public async Task Get_ReturnsApiResultFromConnectionHandlerUnchanged()
@@ -216,10 +216,10 @@ public sealed class PaymentTypeServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     With a search body and no query parameter, the service POSTs the criteria
-    ///     list to <c>2.0/payment_type/search</c> with a <see langword="null" /> query
-    ///     parameter and returns the connection handler's <see cref="ApiResult{T}" />
-    ///     unchanged.
+    /// With a search body and no query parameter, the service POSTs the criteria
+    /// list to <c>2.0/payment_type/search</c> with a <see langword="null" /> query
+    /// parameter and returns the connection handler's <see cref="ApiResult{T}" />
+    /// unchanged.
     /// </summary>
     [Test]
     public async Task Search_WithCriteria_CallsPostSearchAsyncWithExpectedPath()
@@ -251,10 +251,10 @@ public sealed class PaymentTypeServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     When a <see cref="QueryParameterPaymentType" /> is supplied to
-    ///     <see cref="PaymentTypeService.Search" />, its inner <see cref="QueryParameter" />
-    ///     must flow to the connection handler verbatim so pagination and sort flags
-    ///     are preserved on the wire.
+    /// When a <see cref="QueryParameterPaymentType" /> is supplied to
+    /// <see cref="PaymentTypeService.Search" />, its inner <see cref="QueryParameter" />
+    /// must flow to the connection handler verbatim so pagination and sort flags
+    /// are preserved on the wire.
     /// </summary>
     [Test]
     public async Task Search_WithQueryParameter_PassesQueryParameterToConnectionHandler()
@@ -281,8 +281,8 @@ public sealed class PaymentTypeServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     The cancellation token supplied by the caller to <see cref="PaymentTypeService.Search" />
-    ///     must be forwarded to the connection handler unchanged.
+    /// The cancellation token supplied by the caller to <see cref="PaymentTypeService.Search" />
+    /// must be forwarded to the connection handler unchanged.
     /// </summary>
     [Test]
     public async Task Search_ForwardsCancellationTokenToConnectionHandler()
@@ -309,9 +309,9 @@ public sealed class PaymentTypeServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     A failing <see cref="ApiResult{T}" /> from the connection handler must
-    ///     surface to the caller untouched — <see cref="PaymentTypeService.Search" />
-    ///     may not swallow or remap errors.
+    /// A failing <see cref="ApiResult{T}" /> from the connection handler must
+    /// surface to the caller untouched — <see cref="PaymentTypeService.Search" />
+    /// may not swallow or remap errors.
     /// </summary>
     [Test]
     public async Task Search_ReturnsApiResultFromConnectionHandlerUnchanged()

@@ -30,10 +30,10 @@ using BexioApiNet.Services.Connectors.Accounting;
 namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-///     Integration tests covering the <see cref="CurrencyService" /> entry points against
-///     WireMock stubs. Verifies the path composed from <see cref="CurrencyConfiguration" />
-///     (<c>3.0/currencies</c>) reaches the handler correctly and that the expected HTTP
-///     verbs and query parameters are used.
+/// Integration tests covering the <see cref="CurrencyService" /> entry points against
+/// WireMock stubs. Verifies the path composed from <see cref="CurrencyConfiguration" />
+/// (<c>3.0/currencies</c>) reaches the handler correctly and that the expected HTTP
+/// verbs and query parameters are used.
 /// </summary>
 public sealed class CurrencyServiceIntegrationTests : IntegrationTestBase
 {
@@ -48,8 +48,8 @@ public sealed class CurrencyServiceIntegrationTests : IntegrationTestBase
                                             """;
 
     /// <summary>
-    ///     <c>CurrencyService.GetCodes</c> must issue a <c>GET</c> request to
-    ///     <c>/3.0/currencies/codes</c> and surface the array of currency codes.
+    /// <c>CurrencyService.GetCodes</c> must issue a <c>GET</c> request to
+    /// <c>/3.0/currencies/codes</c> and surface the array of currency codes.
     /// </summary>
     [Test]
     public async Task CurrencyService_GetCodes_SendsGetRequestToCodesPath()
@@ -75,8 +75,8 @@ public sealed class CurrencyServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>CurrencyService.GetById</c> must issue a <c>GET</c> request that includes the
-    ///     currency id in the URL path.
+    /// <c>CurrencyService.GetById</c> must issue a <c>GET</c> request that includes the
+    /// currency id in the URL path.
     /// </summary>
     [Test]
     public async Task CurrencyService_GetById_SendsGetRequestWithIdInPath()
@@ -105,9 +105,9 @@ public sealed class CurrencyServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>CurrencyService.GetExchangeRates</c> must issue a <c>GET</c> request to the nested
-    ///     <c>/3.0/currencies/{id}/exchange_rates</c> path and forward an optional <c>date</c>
-    ///     query parameter when supplied.
+    /// <c>CurrencyService.GetExchangeRates</c> must issue a <c>GET</c> request to the nested
+    /// <c>/3.0/currencies/{id}/exchange_rates</c> path and forward an optional <c>date</c>
+    /// query parameter when supplied.
     /// </summary>
     [Test]
     public async Task CurrencyService_GetExchangeRates_WithDate_AppendsDateQuery()
@@ -138,8 +138,8 @@ public sealed class CurrencyServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>CurrencyService.Create</c> must issue a <c>POST</c> request whose body is the
-    ///     serialized <see cref="CurrencyCreate" /> payload.
+    /// <c>CurrencyService.Create</c> must issue a <c>POST</c> request whose body is the
+    /// serialized <see cref="CurrencyCreate" /> payload.
     /// </summary>
     [Test]
     public async Task CurrencyService_Create_SendsPostRequest()
@@ -168,8 +168,8 @@ public sealed class CurrencyServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>CurrencyService.Patch</c> must issue a <c>PATCH</c> request that includes the id in
-    ///     the URL path and serializes the payload as the body.
+    /// <c>CurrencyService.Patch</c> must issue a <c>PATCH</c> request that includes the id in
+    /// the URL path and serializes the payload as the body.
     /// </summary>
     [Test]
     public async Task CurrencyService_Patch_SendsPatchRequestWithIdInPath()
@@ -201,8 +201,8 @@ public sealed class CurrencyServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>CurrencyService.Delete</c> must issue a <c>DELETE</c> request that includes the
-    ///     target id in the URL path and surface a successful <c>ApiResult</c>.
+    /// <c>CurrencyService.Delete</c> must issue a <c>DELETE</c> request that includes the
+    /// target id in the URL path and surface a successful <c>ApiResult</c>.
     /// </summary>
     [Test]
     public async Task CurrencyService_Delete_SendsDeleteRequest()

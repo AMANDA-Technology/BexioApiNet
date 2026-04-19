@@ -29,10 +29,10 @@ using BexioApiNet.Services.Connectors.Accounting;
 namespace BexioApiNet.E2eTests.Tests.Accounting.BusinessYears;
 
 /// <summary>
-///     Live end-to-end smoke tests for <see cref="BusinessYearService" />. Constructs the
-///     service directly because the <c>BexioApiClient</c> aggregate wiring for business
-///     years is tracked by a separate issue. Tests are automatically skipped when
-///     <c>BexioApiNet__BaseUri</c> and <c>BexioApiNet__JwtToken</c> are not set.
+/// Live end-to-end smoke tests for <see cref="BusinessYearService" />. Constructs the
+/// service directly because the <c>BexioApiClient</c> aggregate wiring for business
+/// years is tracked by a separate issue. Tests are automatically skipped when
+/// <c>BexioApiNet__BaseUri</c> and <c>BexioApiNet__JwtToken</c> are not set.
 /// </summary>
 [Category("E2E")]
 public sealed class BusinessYearServiceE2eTests
@@ -41,9 +41,9 @@ public sealed class BusinessYearServiceE2eTests
     private BusinessYearService? _service;
 
     /// <summary>
-    ///     Reads <c>BexioApiNet__BaseUri</c> and <c>BexioApiNet__JwtToken</c> from
-    ///     environment variables. Calls <see cref="Assert.Ignore(string)" /> if either
-    ///     is missing so the test suite does not fail CI runs that lack live credentials.
+    /// Reads <c>BexioApiNet__BaseUri</c> and <c>BexioApiNet__JwtToken</c> from
+    /// environment variables. Calls <see cref="Assert.Ignore(string)" /> if either
+    /// is missing so the test suite does not fail CI runs that lack live credentials.
     /// </summary>
     [SetUp]
     public void Setup()
@@ -68,7 +68,7 @@ public sealed class BusinessYearServiceE2eTests
     }
 
     /// <summary>
-    ///     Disposes the connection handler if one was created.
+    /// Disposes the connection handler if one was created.
     /// </summary>
     [TearDown]
     public void Teardown()
@@ -77,8 +77,8 @@ public sealed class BusinessYearServiceE2eTests
     }
 
     /// <summary>
-    ///     Fetches the full list of business years from the live tenant and asserts
-    ///     at least one entry is returned with a valid id.
+    /// Fetches the full list of business years from the live tenant and asserts
+    /// at least one entry is returned with a valid id.
     /// </summary>
     [Test]
     public async Task GetAll()
@@ -97,8 +97,8 @@ public sealed class BusinessYearServiceE2eTests
     }
 
     /// <summary>
-    ///     Fetches a single business year by id (using the first one returned by the
-    ///     list endpoint) and asserts round-trip equality on the id.
+    /// Fetches a single business year by id (using the first one returned by the
+    /// list endpoint) and asserts round-trip equality on the id.
     /// </summary>
     [Test]
     public async Task GetById()

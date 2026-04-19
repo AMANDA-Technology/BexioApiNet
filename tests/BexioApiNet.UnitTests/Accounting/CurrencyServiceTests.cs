@@ -33,16 +33,16 @@ using BexioApiNet.Services.Connectors.Accounting;
 namespace BexioApiNet.UnitTests.Accounting;
 
 /// <summary>
-///     Offline unit tests for <see cref="CurrencyService" />. Each test verifies that the service
-///     forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected arguments and
-///     returns the handler's <see cref="ApiResult{T}" /> unchanged. No network, no filesystem access.
+/// Offline unit tests for <see cref="CurrencyService" />. Each test verifies that the service
+/// forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected arguments and
+/// returns the handler's <see cref="ApiResult{T}" /> unchanged. No network, no filesystem access.
 /// </summary>
 [TestFixture]
 public sealed class CurrencyServiceTests : ServiceTestBase
 {
     /// <summary>
-    ///     Creates a fresh <see cref="CurrencyService" /> per test, bound to the
-    ///     <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
+    /// Creates a fresh <see cref="CurrencyService" /> per test, bound to the
+    /// <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
     /// </summary>
     [SetUp]
     public void CreateSut()
@@ -55,9 +55,9 @@ public sealed class CurrencyServiceTests : ServiceTestBase
     private CurrencyService _sut = null!;
 
     /// <summary>
-    ///     With no parameters the service hits <c>3.0/currencies</c> exactly once
-    ///     with a <see langword="null" /> query parameter and returns the connection
-    ///     handler's <see cref="ApiResult{T}" /> as-is.
+    /// With no parameters the service hits <c>3.0/currencies</c> exactly once
+    /// with a <see langword="null" /> query parameter and returns the connection
+    /// handler's <see cref="ApiResult{T}" /> as-is.
     /// </summary>
     [Test]
     public async Task Get_WithNoParams_CallsGetAsyncOnceWithExpectedPath()
@@ -81,8 +81,8 @@ public sealed class CurrencyServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     The cancellation token supplied by the caller must be forwarded to the
-    ///     connection handler so cooperative cancellation flows end-to-end.
+    /// The cancellation token supplied by the caller must be forwarded to the
+    /// connection handler so cooperative cancellation flows end-to-end.
     /// </summary>
     [Test]
     public async Task Get_ForwardsCancellationTokenToConnectionHandler()
@@ -101,8 +101,8 @@ public sealed class CurrencyServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     A failing <see cref="ApiResult{T}" /> from the connection handler must
-    ///     surface to the caller untouched — the service may not swallow errors.
+    /// A failing <see cref="ApiResult{T}" /> from the connection handler must
+    /// surface to the caller untouched — the service may not swallow errors.
     /// </summary>
     [Test]
     public async Task Get_ReturnsApiResultFromConnectionHandlerUnchanged()
@@ -125,8 +125,8 @@ public sealed class CurrencyServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     <c>GetCodes</c> must hit <c>3.0/currencies/codes</c> exactly once
-    ///     with a <see langword="null" /> query parameter.
+    /// <c>GetCodes</c> must hit <c>3.0/currencies/codes</c> exactly once
+    /// with a <see langword="null" /> query parameter.
     /// </summary>
     [Test]
     public async Task GetCodes_CallsGetAsyncWithCodesPath()
@@ -150,7 +150,7 @@ public sealed class CurrencyServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     <c>GetCodes</c> forwards the supplied cancellation token to the connection handler.
+    /// <c>GetCodes</c> forwards the supplied cancellation token to the connection handler.
     /// </summary>
     [Test]
     public async Task GetCodes_ForwardsCancellationTokenToConnectionHandler()
@@ -169,8 +169,8 @@ public sealed class CurrencyServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     <c>GetById</c> must build the request path with the currency id appended to the endpoint
-    ///     root and hit the handler exactly once.
+    /// <c>GetById</c> must build the request path with the currency id appended to the endpoint
+    /// root and hit the handler exactly once.
     /// </summary>
     [Test]
     public async Task GetById_CallsGetAsyncWithIdInPath()
@@ -195,9 +195,9 @@ public sealed class CurrencyServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     <c>GetExchangeRates</c> calls the handler with the nested
-    ///     <c>3.0/currencies/{id}/exchange_rates</c> path and a <see langword="null" /> query parameter
-    ///     when no date filter is supplied.
+    /// <c>GetExchangeRates</c> calls the handler with the nested
+    /// <c>3.0/currencies/{id}/exchange_rates</c> path and a <see langword="null" /> query parameter
+    /// when no date filter is supplied.
     /// </summary>
     [Test]
     public async Task GetExchangeRates_WithNoQueryParameter_CallsGetAsyncWithExpectedPath()
@@ -222,9 +222,9 @@ public sealed class CurrencyServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     When a <see cref="QueryParameterExchangeRate" /> is supplied with a date, the wrapped
-    ///     <see cref="QueryParameter" /> must be passed through to the connection handler so the
-    ///     <c>date</c> filter reaches the API.
+    /// When a <see cref="QueryParameterExchangeRate" /> is supplied with a date, the wrapped
+    /// <see cref="QueryParameter" /> must be passed through to the connection handler so the
+    /// <c>date</c> filter reaches the API.
     /// </summary>
     [Test]
     public async Task GetExchangeRates_WithDateQueryParameter_PassesQueryParameterToHandler()
@@ -249,8 +249,8 @@ public sealed class CurrencyServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     <c>Create</c> forwards the payload and the <c>3.0/currencies</c> endpoint path to
-    ///     <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />.
+    /// <c>Create</c> forwards the payload and the <c>3.0/currencies</c> endpoint path to
+    /// <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />.
     /// </summary>
     [Test]
     public async Task Create_CallsPostAsyncWithExpectedPath()
@@ -278,8 +278,8 @@ public sealed class CurrencyServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     <c>Patch</c> forwards the patch payload and the <c>3.0/currencies/{id}</c> endpoint path
-    ///     to <see cref="IBexioConnectionHandler.PatchAsync{TResult,TPatch}" />.
+    /// <c>Patch</c> forwards the patch payload and the <c>3.0/currencies/{id}</c> endpoint path
+    /// to <see cref="IBexioConnectionHandler.PatchAsync{TResult,TPatch}" />.
     /// </summary>
     [Test]
     public async Task Patch_CallsPatchAsyncWithIdInPath()
@@ -308,8 +308,8 @@ public sealed class CurrencyServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     <c>Delete</c> forwards the call to <see cref="IBexioConnectionHandler.Delete" /> exactly
-    ///     once, building the path with the currency id.
+    /// <c>Delete</c> forwards the call to <see cref="IBexioConnectionHandler.Delete" /> exactly
+    /// once, building the path with the currency id.
     /// </summary>
     [Test]
     public async Task Delete_CallsConnectionHandlerDeleteWithIdInPath()

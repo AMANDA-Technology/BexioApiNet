@@ -28,10 +28,10 @@ using BexioApiNet.Services.Connectors.Accounting;
 namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-///     Integration tests covering the <see cref="VatPeriodService" /> entry points against WireMock
-///     stubs. Verifies the path composed from <see cref="VatPeriodConfiguration" />
-///     (<c>3.0/accounting/vat_periods</c>) reaches the handler correctly and that the expected
-///     HTTP verbs are used.
+/// Integration tests covering the <see cref="VatPeriodService" /> entry points against WireMock
+/// stubs. Verifies the path composed from <see cref="VatPeriodConfiguration" />
+/// (<c>3.0/accounting/vat_periods</c>) reaches the handler correctly and that the expected
+/// HTTP verbs are used.
 /// </summary>
 public sealed class VatPeriodServiceIntegrationTests : IntegrationTestBase
 {
@@ -49,9 +49,9 @@ public sealed class VatPeriodServiceIntegrationTests : IntegrationTestBase
                                              """;
 
     /// <summary>
-    ///     <c>VatPeriodService.Get()</c> must issue a <c>GET</c> request against
-    ///     <c>/3.0/accounting/vat_periods</c> and return a successful <c>ApiResult</c> when the
-    ///     server returns an empty array.
+    /// <c>VatPeriodService.Get()</c> must issue a <c>GET</c> request against
+    /// <c>/3.0/accounting/vat_periods</c> and return a successful <c>ApiResult</c> when the
+    /// server returns an empty array.
     /// </summary>
     [Test]
     public async Task VatPeriodService_Get_SendsGetRequest()
@@ -75,8 +75,8 @@ public sealed class VatPeriodServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>VatPeriodService.GetById</c> must issue a <c>GET</c> request that includes the
-    ///     target id in the URL path and surface the returned vat period on success.
+    /// <c>VatPeriodService.GetById</c> must issue a <c>GET</c> request that includes the
+    /// target id in the URL path and surface the returned vat period on success.
     /// </summary>
     [Test]
     public async Task VatPeriodService_GetById_SendsGetRequestWithIdInPath()

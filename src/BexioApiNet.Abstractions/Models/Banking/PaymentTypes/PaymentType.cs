@@ -26,7 +26,7 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Banking.PaymentTypes;
 
 /// <summary>
-///     Bexio payment type. <see href="https://docs.bexio.com/#tag/Payment-Types/operation/v2ListPaymentTypes" />
+/// Bexio payment type. <see href="https://docs.bexio.com/#tag/Payment-Types/operation/v2ListPaymentTypes" />
 /// </summary>
 /// <param name="Id">Unique payment type identifier (read-only).</param>
 /// <param name="Name">Human-readable payment type name (e.g. <c>Cash</c>, <c>Bank</c>).</param>

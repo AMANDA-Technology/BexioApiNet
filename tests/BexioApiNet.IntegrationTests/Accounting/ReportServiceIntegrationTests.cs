@@ -29,19 +29,19 @@ using BexioApiNet.Services.Connectors.Accounting;
 namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-///     Integration tests covering the <see cref="ReportService" /> entry points against WireMock
-///     stubs. Verifies the path composed from <see cref="ReportConfiguration" />
-///     (<c>3.0/accounting/journal</c>) reaches the handler correctly and that the expected
-///     HTTP verb and query parameters are used.
+/// Integration tests covering the <see cref="ReportService" /> entry points against WireMock
+/// stubs. Verifies the path composed from <see cref="ReportConfiguration" />
+/// (<c>3.0/accounting/journal</c>) reaches the handler correctly and that the expected
+/// HTTP verb and query parameters are used.
 /// </summary>
 public sealed class ReportServiceIntegrationTests : IntegrationTestBase
 {
     private const string JournalPath = "/3.0/accounting/journal";
 
     /// <summary>
-    ///     <c>ReportService.GetJournal()</c> must issue a <c>GET</c> request against
-    ///     <c>/3.0/accounting/journal</c> and return a successful <c>ApiResult</c> when the
-    ///     server returns an empty array.
+    /// <c>ReportService.GetJournal()</c> must issue a <c>GET</c> request against
+    /// <c>/3.0/accounting/journal</c> and return a successful <c>ApiResult</c> when the
+    /// server returns an empty array.
     /// </summary>
     [Test]
     public async Task ReportService_GetJournal_SendsGetRequest()
@@ -65,8 +65,8 @@ public sealed class ReportServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ReportService.GetJournal</c> with a <see cref="QueryParameterJournal" /> must
-    ///     forward the <c>from</c> and <c>to</c> query parameters onto the URL.
+    /// <c>ReportService.GetJournal</c> with a <see cref="QueryParameterJournal" /> must
+    /// forward the <c>from</c> and <c>to</c> query parameters onto the URL.
     /// </summary>
     [Test]
     public async Task ReportService_GetJournal_WithDateRange_AppendsQueryParameters()

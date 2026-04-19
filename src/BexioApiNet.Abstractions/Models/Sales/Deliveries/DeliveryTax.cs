@@ -26,8 +26,8 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Sales.Deliveries;
 
 /// <summary>
-///     Read-only tax summary line aggregated onto a <see cref="Delivery" /> by the Bexio API.
-///     Exposed as the items of <see cref="Delivery.Taxs" />.
+/// Read-only tax summary line aggregated onto a <see cref="Delivery" /> by the Bexio API.
+/// Exposed as the items of <see cref="Delivery.Taxs" />.
 /// </summary>
 /// <param name="Percentage">Tax percentage as a formatted decimal string (e.g. <c>"7.70"</c>).</param>
 /// <param name="Value">Amount of tax applied at the given percentage as a formatted decimal string.</param>

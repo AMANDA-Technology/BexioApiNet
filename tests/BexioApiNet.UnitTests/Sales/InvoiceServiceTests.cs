@@ -33,16 +33,16 @@ using BexioApiNet.Services.Connectors.Sales;
 namespace BexioApiNet.UnitTests.Sales;
 
 /// <summary>
-///     Offline unit tests for <see cref="InvoiceService" />. Each test verifies that the service
-///     forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected arguments and
-///     returns the handler's result unchanged. No network, no filesystem access.
+/// Offline unit tests for <see cref="InvoiceService" />. Each test verifies that the service
+/// forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected arguments and
+/// returns the handler's result unchanged. No network, no filesystem access.
 /// </summary>
 [TestFixture]
 public sealed class InvoiceServiceTests : ServiceTestBase
 {
     /// <summary>
-    ///     Creates a fresh <see cref="InvoiceService" /> per test, bound to the
-    ///     <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
+    /// Creates a fresh <see cref="InvoiceService" /> per test, bound to the
+    /// <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
     /// </summary>
     [SetUp]
     public void CreateSut()
@@ -55,8 +55,8 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     private InvoiceService _sut = null!;
 
     /// <summary>
-    ///     Get (no parameters) calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> once with
-    ///     the expected endpoint path and a null query parameter.
+    /// Get (no parameters) calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> once with
+    /// the expected endpoint path and a null query parameter.
     /// </summary>
     [Test]
     public async Task Get_WithNoParams_CallsGetAsync()
@@ -78,8 +78,8 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get forwards the <see cref="QueryParameterInvoice" />'s underlying <see cref="QueryParameter" />
-    ///     to the connection handler so the caller's filters (limit/offset/order_by) reach the API.
+    /// Get forwards the <see cref="QueryParameterInvoice" />'s underlying <see cref="QueryParameter" />
+    /// to the connection handler so the caller's filters (limit/offset/order_by) reach the API.
     /// </summary>
     [Test]
     public async Task Get_WithQueryParameter_PassesQueryParameterToConnectionHandler()
@@ -102,9 +102,9 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get (autoPage = true) triggers <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> when
-    ///     the <c>X-Total-Count</c> header is present and the initial response only returned a page of
-    ///     the full result set.
+    /// Get (autoPage = true) triggers <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> when
+    /// the <c>X-Total-Count</c> header is present and the initial response only returned a page of
+    /// the full result set.
     /// </summary>
     [Test]
     public async Task Get_WithAutoPage_CallsFetchAll()
@@ -146,8 +146,8 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get returns the <see cref="ApiResult{T}" /> produced by the connection handler when
-    ///     auto-paging is not requested.
+    /// Get returns the <see cref="ApiResult{T}" /> produced by the connection handler when
+    /// auto-paging is not requested.
     /// </summary>
     [Test]
     public async Task Get_ReturnsApiResult()
@@ -166,8 +166,8 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetById calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> with the expected
-    ///     endpoint path including the invoice id.
+    /// GetById calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> with the expected
+    /// endpoint path including the invoice id.
     /// </summary>
     [Test]
     public async Task GetById_CallsGetAsync_WithIdInPath()
@@ -188,8 +188,8 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetPdf calls <see cref="IBexioConnectionHandler.GetBinaryAsync" /> against the
-    ///     <c>/{id}/pdf</c> sub-resource.
+    /// GetPdf calls <see cref="IBexioConnectionHandler.GetBinaryAsync" /> against the
+    /// <c>/{id}/pdf</c> sub-resource.
     /// </summary>
     [Test]
     public async Task GetPdf_CallsGetBinaryAsync_WithIdInPath()
@@ -209,8 +209,8 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Create forwards the payload and the expected endpoint path to
-    ///     <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />.
+    /// Create forwards the payload and the expected endpoint path to
+    /// <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />.
     /// </summary>
     [Test]
     public async Task Create_CallsPostAsync()
@@ -233,8 +233,8 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Update calls <see cref="IBexioConnectionHandler.PostAsync{TResult,TUpdate}" /> (not PUT) at
-    ///     <c>/2.0/kb_invoice/{id}</c> — Bexio edits invoices via POST on this resource.
+    /// Update calls <see cref="IBexioConnectionHandler.PostAsync{TResult,TUpdate}" /> (not PUT) at
+    /// <c>/2.0/kb_invoice/{id}</c> — Bexio edits invoices via POST on this resource.
     /// </summary>
     [Test]
     public async Task Update_CallsPostAsync_WithIdInPath()
@@ -256,8 +256,8 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Delete forwards the call to <see cref="IBexioConnectionHandler.Delete" /> with the invoice id
-    ///     appended to the endpoint root.
+    /// Delete forwards the call to <see cref="IBexioConnectionHandler.Delete" /> with the invoice id
+    /// appended to the endpoint root.
     /// </summary>
     [Test]
     public async Task Delete_CallsConnectionHandlerDelete_WithIdInPath()
@@ -277,8 +277,8 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Search forwards the criteria, the <c>/search</c> path and the optional query parameter to
-    ///     <see cref="IBexioConnectionHandler.PostSearchAsync{TResult}" />.
+    /// Search forwards the criteria, the <c>/search</c> path and the optional query parameter to
+    /// <see cref="IBexioConnectionHandler.PostSearchAsync{TResult}" />.
     /// </summary>
     [Test]
     public async Task Search_CallsPostSearchAsync()
@@ -307,7 +307,7 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Issue posts to the <c>/{id}/issue</c> action endpoint with no request body.
+    /// Issue posts to the <c>/{id}/issue</c> action endpoint with no request body.
     /// </summary>
     [Test]
     public async Task Issue_CallsPostActionAsync_WithIssuePath()
@@ -327,7 +327,7 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     RevertIssue posts to the <c>/{id}/revert_issue</c> action endpoint with no request body.
+    /// RevertIssue posts to the <c>/{id}/revert_issue</c> action endpoint with no request body.
     /// </summary>
     [Test]
     public async Task RevertIssue_CallsPostActionAsync_WithRevertIssuePath()
@@ -347,7 +347,7 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Cancel posts to the <c>/{id}/cancel</c> action endpoint with no request body.
+    /// Cancel posts to the <c>/{id}/cancel</c> action endpoint with no request body.
     /// </summary>
     [Test]
     public async Task Cancel_CallsPostActionAsync_WithCancelPath()
@@ -367,7 +367,7 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     MarkAsSent posts to the <c>/{id}/mark_as_sent</c> action endpoint with no request body.
+    /// MarkAsSent posts to the <c>/{id}/mark_as_sent</c> action endpoint with no request body.
     /// </summary>
     [Test]
     public async Task MarkAsSent_CallsPostActionAsync_WithMarkAsSentPath()
@@ -387,7 +387,7 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Copy posts the <see cref="InvoiceCopyRequest"/> body to the <c>/{id}/copy</c> endpoint.
+    /// Copy posts the <see cref="InvoiceCopyRequest"/> body to the <c>/{id}/copy</c> endpoint.
     /// </summary>
     [Test]
     public async Task Copy_CallsPostAsync_WithCopyPath()
@@ -413,7 +413,7 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Send posts the <see cref="InvoiceSendRequest"/> body to the <c>/{id}/send</c> endpoint.
+    /// Send posts the <see cref="InvoiceSendRequest"/> body to the <c>/{id}/send</c> endpoint.
     /// </summary>
     [Test]
     public async Task Send_CallsPostAsync_WithSendPath()
@@ -438,8 +438,8 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetPayments calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> against
-    ///     <c>/{invoiceId}/payment</c>.
+    /// GetPayments calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> against
+    /// <c>/{invoiceId}/payment</c>.
     /// </summary>
     [Test]
     public async Task GetPayments_CallsGetAsync_WithPaymentPath()
@@ -460,8 +460,8 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetPaymentById calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> against
-    ///     <c>/{invoiceId}/payment/{paymentId}</c>.
+    /// GetPaymentById calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> against
+    /// <c>/{invoiceId}/payment/{paymentId}</c>.
     /// </summary>
     [Test]
     public async Task GetPaymentById_CallsGetAsync_WithPaymentIdInPath()
@@ -483,8 +483,8 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     CreatePayment posts the <see cref="InvoicePaymentCreate"/> body to the <c>/{invoiceId}/payment</c>
-    ///     endpoint.
+    /// CreatePayment posts the <see cref="InvoicePaymentCreate"/> body to the <c>/{invoiceId}/payment</c>
+    /// endpoint.
     /// </summary>
     [Test]
     public async Task CreatePayment_CallsPostAsync_WithPaymentPath()
@@ -510,8 +510,8 @@ public sealed class InvoiceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     DeletePayment forwards the call to <see cref="IBexioConnectionHandler.Delete" /> with the
-    ///     nested <c>/payment/{paymentId}</c> path.
+    /// DeletePayment forwards the call to <see cref="IBexioConnectionHandler.Delete" /> with the
+    /// nested <c>/payment/{paymentId}</c> path.
     /// </summary>
     [Test]
     public async Task DeletePayment_CallsConnectionHandlerDelete_WithPaymentPath()

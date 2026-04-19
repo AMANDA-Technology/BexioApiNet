@@ -28,7 +28,7 @@ using BexioApiNet.Abstractions.Models.Accounting.BusinessYears.Enums;
 namespace BexioApiNet.Abstractions.Models.Accounting.BusinessYears;
 
 /// <summary>
-///     Business year object. <see href="https://docs.bexio.com/#tag/Business-Years" />
+/// Business year object. <see href="https://docs.bexio.com/#tag/Business-Years" />
 /// </summary>
 /// <param name="Id"></param>
 /// <param name="Start"></param>

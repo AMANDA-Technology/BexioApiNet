@@ -23,19 +23,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Text.Json;
+using BexioApiNet.Abstractions.Models.Sales.Positions;
 
 namespace BexioApiNet.Abstractions.Models.Sales.Quotes.Views;
 
 /// <summary>
 /// Body for <c>POST /2.0/kb_offer/{quote_id}/invoice</c> and <c>POST /2.0/kb_offer/{quote_id}/order</c>.
 /// When <see cref="Positions"/> is <see langword="null"/>, Bexio copies every position from the source
-/// quote; otherwise the supplied subset is used. Positions are a polymorphic union of Bexio's
-/// <c>KbPosition*</c> types, so they are accepted as raw <see cref="JsonElement"/> values.
+/// quote; otherwise the supplied subset is used. Positions are typed as the polymorphic
+/// <see cref="Position"/> union so callers can build the desired subtype strongly.
 /// <see href="https://docs.bexio.com/#tag/Quotes/operation/v2CreateInvoiceFromQuote"/>
 /// <see href="https://docs.bexio.com/#tag/Quotes/operation/v2CreateOrderFromQuote"/>
 /// </summary>
 /// <param name="Positions">Optional subset of positions to carry over to the new document. Omit to copy all.</param>
 public sealed record QuoteConvertRequest(
-    [property: JsonPropertyName("positions")] IReadOnlyList<JsonElement>? Positions = null
+    [property: JsonPropertyName("positions")] IReadOnlyList<Position>? Positions = null
 );

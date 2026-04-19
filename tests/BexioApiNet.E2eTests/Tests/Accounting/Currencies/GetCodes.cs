@@ -26,13 +26,13 @@ SOFTWARE.
 namespace BexioApiNet.E2eTests.Tests.Accounting.Currencies;
 
 /// <summary>
-///     E2E coverage for <c>CurrencyService.GetCodes</c> against the live Bexio API.
+/// E2E coverage for <c>CurrencyService.GetCodes</c> against the live Bexio API.
 /// </summary>
 public class TestGetCodes : BexioE2eTestBase
 {
     /// <summary>
-    ///     Lists the configured ISO 4217 currency codes for the tenant. Asserts a successful
-    ///     response containing at least one code (typically <c>CHF</c>, <c>EUR</c> are present).
+    /// Lists the configured ISO 4217 currency codes for the tenant. Asserts a successful
+    /// response containing at least one code (typically <c>CHF</c>, <c>EUR</c> are present).
     /// </summary>
     [Test]
     public async Task GetCodes()

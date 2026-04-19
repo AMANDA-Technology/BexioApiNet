@@ -28,10 +28,10 @@ using BexioApiNet.Services.Connectors.Accounting;
 namespace BexioApiNet.IntegrationTests.Accounting;
 
 /// <summary>
-///     Integration tests covering the <see cref="BusinessYearService" /> entry points against
-///     WireMock stubs. Verifies the path composed from <see cref="BusinessYearConfiguration" />
-///     (<c>3.0/accounting/business_years</c>) reaches the handler correctly and that the
-///     expected HTTP verbs are used.
+/// Integration tests covering the <see cref="BusinessYearService" /> entry points against
+/// WireMock stubs. Verifies the path composed from <see cref="BusinessYearConfiguration" />
+/// (<c>3.0/accounting/business_years</c>) reaches the handler correctly and that the
+/// expected HTTP verbs are used.
 /// </summary>
 public sealed class BusinessYearServiceIntegrationTests : IntegrationTestBase
 {
@@ -48,9 +48,9 @@ public sealed class BusinessYearServiceIntegrationTests : IntegrationTestBase
                                                 """;
 
     /// <summary>
-    ///     <c>BusinessYearService.Get()</c> must issue a <c>GET</c> request against
-    ///     <c>/3.0/accounting/business_years</c> and return a successful <c>ApiResult</c>
-    ///     when the server returns an empty array.
+    /// <c>BusinessYearService.Get()</c> must issue a <c>GET</c> request against
+    /// <c>/3.0/accounting/business_years</c> and return a successful <c>ApiResult</c>
+    /// when the server returns an empty array.
     /// </summary>
     [Test]
     public async Task BusinessYearService_Get_SendsGetRequest()
@@ -74,8 +74,8 @@ public sealed class BusinessYearServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>BusinessYearService.GetById</c> must issue a <c>GET</c> request that includes the
-    ///     target id in the URL path and surface the returned business year on success.
+    /// <c>BusinessYearService.GetById</c> must issue a <c>GET</c> request that includes the
+    /// target id in the URL path and surface the returned business year on success.
     /// </summary>
     [Test]
     public async Task BusinessYearService_GetById_SendsGetRequestWithIdInPath()

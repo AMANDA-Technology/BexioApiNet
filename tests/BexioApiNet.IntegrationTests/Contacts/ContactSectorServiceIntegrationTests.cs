@@ -29,11 +29,11 @@ using BexioApiNet.Services.Connectors.Contacts;
 namespace BexioApiNet.IntegrationTests.Contacts;
 
 /// <summary>
-///     Integration tests covering the read-only entry points of <see cref="ContactSectorService" /> against
-///     WireMock stubs. The Bexio API exposes contact sectors under the legacy path
-///     <c>2.0/contact_branch</c> (see <see cref="ContactSectorConfiguration" />). This fixture verifies
-///     that the URL is built correctly and that the expected HTTP verbs are used. The service only
-///     supports <c>Get</c> and <c>Search</c> — there are no Create, Update, or Delete endpoints.
+/// Integration tests covering the read-only entry points of <see cref="ContactSectorService" /> against
+/// WireMock stubs. The Bexio API exposes contact sectors under the legacy path
+/// <c>2.0/contact_branch</c> (see <see cref="ContactSectorConfiguration" />). This fixture verifies
+/// that the URL is built correctly and that the expected HTTP verbs are used. The service only
+/// supports <c>Get</c> and <c>Search</c> — there are no Create, Update, or Delete endpoints.
 /// </summary>
 public sealed class ContactSectorServiceIntegrationTests : IntegrationTestBase
 {
@@ -47,9 +47,9 @@ public sealed class ContactSectorServiceIntegrationTests : IntegrationTestBase
                                                  """;
 
     /// <summary>
-    ///     <c>ContactSectorService.Get()</c> must issue a <c>GET</c> request against
-    ///     <c>/2.0/contact_branch</c> and return a successful <c>ApiResult</c> when the server
-    ///     returns an empty array.
+    /// <c>ContactSectorService.Get()</c> must issue a <c>GET</c> request against
+    /// <c>/2.0/contact_branch</c> and return a successful <c>ApiResult</c> when the server
+    /// returns an empty array.
     /// </summary>
     [Test]
     public async Task ContactSectorService_Get_SendsGetRequest()
@@ -73,9 +73,9 @@ public sealed class ContactSectorServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ContactSectorService.Search</c> must send a <c>POST</c> request against
-    ///     <c>/2.0/contact_branch/search</c> with the <see cref="SearchCriteria" /> list as the JSON
-    ///     body.
+    /// <c>ContactSectorService.Search</c> must send a <c>POST</c> request against
+    /// <c>/2.0/contact_branch/search</c> with the <see cref="SearchCriteria" /> list as the JSON
+    /// body.
     /// </summary>
     [Test]
     public async Task ContactSectorService_Search_SendsPostRequest_ToSearchPath()

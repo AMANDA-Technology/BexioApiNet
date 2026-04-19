@@ -26,7 +26,7 @@ SOFTWARE.
 namespace BexioApiNet.Models;
 
 /// <summary>
-///     Dictionary for optional query parameters
+/// Dictionary for optional query parameters
 /// </summary>
 public sealed record QueryParameterPaymentType(
     int Limit,

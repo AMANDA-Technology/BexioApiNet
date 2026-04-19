@@ -38,12 +38,12 @@ namespace BexioApiNet.Services.Connectors.Accounting;
 public sealed class BusinessYearService : ConnectorService, IBusinessYearService
 {
     /// <summary>
-    ///     The api endpoint version
+    /// The api endpoint version
     /// </summary>
     private const string ApiVersion = BusinessYearConfiguration.ApiVersion;
 
     /// <summary>
-    ///     The api request path
+    /// The api request path
     /// </summary>
     private const string EndpointRoot = BusinessYearConfiguration.EndpointRoot;
 

@@ -26,12 +26,12 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Accounting.Currencies.Views;
 
 /// <summary>
-///     Patch view for a currency.
-///     <see href="https://docs.bexio.com/#tag/Currencies/operation/UpdateCurrency">Update Currency</see>
+/// Patch view for a currency.
+/// <see href="https://docs.bexio.com/#tag/Currencies/operation/UpdateCurrency">Update Currency</see>
 /// </summary>
 /// <param name="RoundFactor">
-///     The round factor of the currency. E.g.: In order to round CHF to 5 Rp. the round_factor must
-///     be set to 0.05.
+/// The round factor of the currency. E.g.: In order to round CHF to 5 Rp. the round_factor must
+/// be set to 0.05.
 /// </param>
 public sealed record CurrencyPatch(
     [property: JsonPropertyName("round_factor")]

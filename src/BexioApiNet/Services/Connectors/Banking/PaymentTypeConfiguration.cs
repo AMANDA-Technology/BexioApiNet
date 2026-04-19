@@ -26,17 +26,17 @@ SOFTWARE.
 namespace BexioApiNet.Services.Connectors.Banking;
 
 /// <summary>
-///     Payment type endpoint configuration
+/// Payment type endpoint configuration
 /// </summary>
 public static class PaymentTypeConfiguration
 {
     /// <summary>
-    ///     Current api version of the endpoint
+    /// Current api version of the endpoint
     /// </summary>
     public const string ApiVersion = "2.0";
 
     /// <summary>
-    ///     The request path
+    /// The request path
     /// </summary>
     public const string EndpointRoot = "payment_type";
 }

@@ -33,9 +33,9 @@ using BexioApiNet.Services.Connectors.Accounting;
 namespace BexioApiNet.UnitTests.Accounting;
 
 /// <summary>
-///     Offline unit tests for <see cref="BusinessYearService" />. Verifies the connector
-///     builds the right request path, forwards cancellation tokens, and surfaces the
-///     connection handler's <see cref="ApiResult{T}" /> back to the caller unchanged.
+/// Offline unit tests for <see cref="BusinessYearService" />. Verifies the connector
+/// builds the right request path, forwards cancellation tokens, and surfaces the
+/// connection handler's <see cref="ApiResult{T}" /> back to the caller unchanged.
 /// </summary>
 [TestFixture]
 public sealed class BusinessYearServiceTests : ServiceTestBase
@@ -43,9 +43,9 @@ public sealed class BusinessYearServiceTests : ServiceTestBase
     private const string ExpectedListPath = "3.0/accounting/business_years";
 
     /// <summary>
-    ///     With no parameters the service hits <c>3.0/accounting/business_years</c>
-    ///     exactly once with a <see langword="null" /> query parameter and returns the
-    ///     connection handler's <see cref="ApiResult{T}" /> as-is.
+    /// With no parameters the service hits <c>3.0/accounting/business_years</c>
+    /// exactly once with a <see langword="null" /> query parameter and returns the
+    /// connection handler's <see cref="ApiResult{T}" /> as-is.
     /// </summary>
     [Test]
     public async Task Get_WithNoParams_CallsGetAsyncOnceWithExpectedPath()
@@ -71,8 +71,8 @@ public sealed class BusinessYearServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     When a <see cref="QueryParameterBusinessYear" /> is passed, its serialized
-    ///     <see cref="QueryParameter" /> is forwarded to the connection handler.
+    /// When a <see cref="QueryParameterBusinessYear" /> is passed, its serialized
+    /// <see cref="QueryParameter" /> is forwarded to the connection handler.
     /// </summary>
     [Test]
     public async Task Get_WithQueryParameter_ForwardsQueryParameterToConnectionHandler()
@@ -93,8 +93,8 @@ public sealed class BusinessYearServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     The cancellation token supplied by the caller must be forwarded to the
-    ///     connection handler so cooperative cancellation flows end-to-end.
+    /// The cancellation token supplied by the caller must be forwarded to the
+    /// connection handler so cooperative cancellation flows end-to-end.
     /// </summary>
     [Test]
     public async Task Get_ForwardsCancellationTokenToConnectionHandler()
@@ -115,8 +115,8 @@ public sealed class BusinessYearServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     A failing <see cref="ApiResult{T}" /> from the connection handler must
-    ///     surface to the caller untouched — the service may not swallow errors.
+    /// A failing <see cref="ApiResult{T}" /> from the connection handler must
+    /// surface to the caller untouched — the service may not swallow errors.
     /// </summary>
     [Test]
     public async Task Get_ReturnsApiResultFromConnectionHandlerUnchanged()
@@ -141,8 +141,8 @@ public sealed class BusinessYearServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     <see cref="BusinessYearService.GetById" /> must substitute the id into the
-    ///     path and call <c>GetAsync</c> with a null query parameter.
+    /// <see cref="BusinessYearService.GetById" /> must substitute the id into the
+    /// path and call <c>GetAsync</c> with a null query parameter.
     /// </summary>
     [Test]
     public async Task GetById_CallsGetAsyncWithIdInPath()
@@ -169,8 +169,8 @@ public sealed class BusinessYearServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     <see cref="BusinessYearService.GetById" /> forwards the caller's cancellation
-    ///     token to the connection handler.
+    /// <see cref="BusinessYearService.GetById" /> forwards the caller's cancellation
+    /// token to the connection handler.
     /// </summary>
     [Test]
     public async Task GetById_ForwardsCancellationTokenToConnectionHandler()

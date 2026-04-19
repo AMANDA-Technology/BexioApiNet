@@ -32,17 +32,17 @@ using BexioApiNet.Services.Connectors.Sales;
 namespace BexioApiNet.UnitTests.Sales;
 
 /// <summary>
-///     Offline unit tests for <see cref="InvoiceReminderService" />. Each test verifies that the
-///     service forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected
-///     arguments (including the owning invoice id in every path) and returns the handler's result
-///     unchanged. No network, no filesystem access.
+/// Offline unit tests for <see cref="InvoiceReminderService" />. Each test verifies that the
+/// service forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected
+/// arguments (including the owning invoice id in every path) and returns the handler's result
+/// unchanged. No network, no filesystem access.
 /// </summary>
 [TestFixture]
 public sealed class InvoiceReminderServiceTests : ServiceTestBase
 {
     /// <summary>
-    ///     Creates a fresh <see cref="InvoiceReminderService" /> per test, bound to the
-    ///     <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
+    /// Creates a fresh <see cref="InvoiceReminderService" /> per test, bound to the
+    /// <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
     /// </summary>
     [SetUp]
     public void CreateSut()
@@ -57,8 +57,8 @@ public sealed class InvoiceReminderServiceTests : ServiceTestBase
     private InvoiceReminderService _sut = null!;
 
     /// <summary>
-    ///     Get forwards the call to <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> with the
-    ///     nested <c>/{invoiceId}/kb_reminder</c> path.
+    /// Get forwards the call to <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> with the
+    /// nested <c>/{invoiceId}/kb_reminder</c> path.
     /// </summary>
     [Test]
     public async Task Get_CallsGetAsync_WithInvoiceIdInPath()
@@ -78,8 +78,8 @@ public sealed class InvoiceReminderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetById calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> against
-    ///     <c>/{invoiceId}/kb_reminder/{reminderId}</c>.
+    /// GetById calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> against
+    /// <c>/{invoiceId}/kb_reminder/{reminderId}</c>.
     /// </summary>
     [Test]
     public async Task GetById_CallsGetAsync_WithReminderIdInPath()
@@ -100,8 +100,8 @@ public sealed class InvoiceReminderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetPdf calls <see cref="IBexioConnectionHandler.GetBinaryAsync" /> against the
-    ///     <c>/{reminderId}/pdf</c> sub-resource.
+    /// GetPdf calls <see cref="IBexioConnectionHandler.GetBinaryAsync" /> against the
+    /// <c>/{reminderId}/pdf</c> sub-resource.
     /// </summary>
     [Test]
     public async Task GetPdf_CallsGetBinaryAsync_WithPdfPath()
@@ -121,8 +121,8 @@ public sealed class InvoiceReminderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Create forwards the payload and the nested endpoint path to
-    ///     <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />.
+    /// Create forwards the payload and the nested endpoint path to
+    /// <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />.
     /// </summary>
     [Test]
     public async Task Create_CallsPostAsync_WithReminderPath()
@@ -145,8 +145,8 @@ public sealed class InvoiceReminderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Search forwards the criteria, the <c>/search</c> path and the optional query parameter to
-    ///     <see cref="IBexioConnectionHandler.PostSearchAsync{TResult}" />.
+    /// Search forwards the criteria, the <c>/search</c> path and the optional query parameter to
+    /// <see cref="IBexioConnectionHandler.PostSearchAsync{TResult}" />.
     /// </summary>
     [Test]
     public async Task Search_CallsPostSearchAsync()
@@ -175,8 +175,8 @@ public sealed class InvoiceReminderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Send posts the <see cref="InvoiceReminderSendRequest"/> body to the <c>/{reminderId}/send</c>
-    ///     endpoint.
+    /// Send posts the <see cref="InvoiceReminderSendRequest"/> body to the <c>/{reminderId}/send</c>
+    /// endpoint.
     /// </summary>
     [Test]
     public async Task Send_CallsPostAsync_WithSendPath()
@@ -201,7 +201,7 @@ public sealed class InvoiceReminderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     MarkAsSent posts to the <c>/{reminderId}/mark_as_sent</c> action endpoint with no request body.
+    /// MarkAsSent posts to the <c>/{reminderId}/mark_as_sent</c> action endpoint with no request body.
     /// </summary>
     [Test]
     public async Task MarkAsSent_CallsPostActionAsync_WithMarkAsSentPath()
@@ -221,7 +221,7 @@ public sealed class InvoiceReminderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     MarkAsUnsent posts to the <c>/{reminderId}/mark_as_unsent</c> action endpoint with no request body.
+    /// MarkAsUnsent posts to the <c>/{reminderId}/mark_as_unsent</c> action endpoint with no request body.
     /// </summary>
     [Test]
     public async Task MarkAsUnsent_CallsPostActionAsync_WithMarkAsUnsentPath()
@@ -241,8 +241,8 @@ public sealed class InvoiceReminderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Delete forwards the call to <see cref="IBexioConnectionHandler.Delete" /> with the nested
-    ///     <c>/{invoiceId}/kb_reminder/{reminderId}</c> path.
+    /// Delete forwards the call to <see cref="IBexioConnectionHandler.Delete" /> with the nested
+    /// <c>/{invoiceId}/kb_reminder/{reminderId}</c> path.
     /// </summary>
     [Test]
     public async Task Delete_CallsConnectionHandlerDelete_WithReminderIdInPath()

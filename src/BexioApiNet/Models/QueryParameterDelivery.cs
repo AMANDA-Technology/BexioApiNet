@@ -26,16 +26,16 @@ SOFTWARE.
 namespace BexioApiNet.Models;
 
 /// <summary>
-///     Typed query parameter wrapper for the Bexio delivery list endpoint
-///     (<c>GET /2.0/kb_delivery</c>). Each constructor argument is optional so callers can supply
-///     only the parameters they need; <see langword="null" /> values are skipped and not
-///     serialized onto the URL.
+/// Typed query parameter wrapper for the Bexio delivery list endpoint
+/// (<c>GET /2.0/kb_delivery</c>). Each constructor argument is optional so callers can supply
+/// only the parameters they need; <see langword="null" /> values are skipped and not
+/// serialized onto the URL.
 /// </summary>
 /// <param name="Limit">Maximum number of results to return (Bexio default <c>500</c>, maximum <c>2000</c>).</param>
 /// <param name="Offset">Number of results to skip for pagination.</param>
 /// <param name="OrderBy">
-///     Sort clause — one of <c>id</c>, <c>total</c>, <c>total_net</c>, <c>total_gross</c>,
-///     <c>updated_at</c>, optionally with <c>_asc</c>/<c>_desc</c> suffixes.
+/// Sort clause — one of <c>id</c>, <c>total</c>, <c>total_net</c>, <c>total_gross</c>,
+/// <c>updated_at</c>, optionally with <c>_asc</c>/<c>_desc</c> suffixes.
 /// </param>
 public sealed record QueryParameterDelivery(
     int? Limit = null,
@@ -44,8 +44,8 @@ public sealed record QueryParameterDelivery(
 )
 {
     /// <summary>
-    ///     The underlying <see cref="Models.QueryParameter" /> passed to <see cref="Interfaces.IBexioConnectionHandler" />.
-    ///     <see langword="null" /> when every input is <see langword="null" /> so the handler appends no query string.
+    /// The underlying <see cref="Models.QueryParameter" /> passed to <see cref="Interfaces.IBexioConnectionHandler" />.
+    /// <see langword="null" /> when every input is <see langword="null" /> so the handler appends no query string.
     /// </summary>
     public QueryParameter? QueryParameter { get; } = BuildQueryParameter(Limit, Offset, OrderBy);
 

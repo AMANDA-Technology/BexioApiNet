@@ -26,14 +26,14 @@ SOFTWARE.
 namespace BexioApiNet.E2eTests.Tests.Accounting.Currencies;
 
 /// <summary>
-///     E2E coverage for <c>CurrencyService.GetById</c> against the live Bexio API.
+/// E2E coverage for <c>CurrencyService.GetById</c> against the live Bexio API.
 /// </summary>
 public class TestGetById : BexioE2eTestBase
 {
     /// <summary>
-    ///     Fetches the first currency returned by <c>Get()</c> and asserts that
-    ///     <c>GetById</c> returns the same record. Using a discovered id keeps the
-    ///     test stable across tenants.
+    /// Fetches the first currency returned by <c>Get()</c> and asserts that
+    /// <c>GetById</c> returns the same record. Using a discovered id keeps the
+    /// test stable across tenants.
     /// </summary>
     [Test]
     public async Task GetById()

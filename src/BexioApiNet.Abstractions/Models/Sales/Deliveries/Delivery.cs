@@ -23,15 +23,15 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Text.Json;
+using BexioApiNet.Abstractions.Models.Sales.Positions;
 
 namespace BexioApiNet.Abstractions.Models.Sales.Deliveries;
 
 /// <summary>
-///     Delivery as returned by the Bexio <c>/2.0/kb_delivery</c> endpoint. Covers both the plain
-///     <c>Delivery</c> schema returned by list and the <c>DeliveryWithDetails</c> variant returned by
-///     show (which additionally populates <see cref="Positions" />).
-///     <see href="https://docs.bexio.com/#tag/Deliveries/operation/v2ListDeliveries" />
+/// Delivery as returned by the Bexio <c>/2.0/kb_delivery</c> endpoint. Covers both the plain
+/// <c>Delivery</c> schema returned by list and the <c>DeliveryWithDetails</c> variant returned by
+/// show (which additionally populates <see cref="Positions" />).
+/// <see href="https://docs.bexio.com/#tag/Deliveries/operation/v2ListDeliveries" />
 /// </summary>
 /// <param name="Id">Unique delivery identifier (read-only).</param>
 /// <param name="DocumentNr">Delivery number (read-only, e.g. <c>LS-00001</c>).</param>
@@ -52,14 +52,14 @@ namespace BexioApiNet.Abstractions.Models.Sales.Deliveries;
 /// <param name="TotalRoundingDifference">Rounding difference applied to the total (read-only).</param>
 /// <param name="MwstType">VAT/MwSt. handling flag: <c>0</c> including taxes, <c>1</c> excluding taxes, <c>2</c> exempt.</param>
 /// <param name="MwstIsNet">
-///     When <see langword="true" /> and <see cref="MwstType" /> is <c>0</c>, totals are interpreted as
-///     net.
+/// When <see langword="true" /> and <see cref="MwstType" /> is <c>0</c>, totals are interpreted as
+/// net.
 /// </param>
 /// <param name="IsValidFrom">Delivery validity start in Bexio's <c>yyyy-MM-dd</c> format.</param>
 /// <param name="ContactAddress">Composed contact address string (read-only).</param>
 /// <param name="DeliveryAddressType">
-///     Delivery address selector: <c>0</c> use invoice address, <c>1</c> use custom delivery
-///     address.
+/// Delivery address selector: <c>0</c> use invoice address, <c>1</c> use custom delivery
+/// address.
 /// </param>
 /// <param name="DeliveryAddress">Composed delivery address string (read-only).</param>
 /// <param name="KbItemStatusId">Read-only delivery status id (10 Draft, 18 Done, 20 Canceled).</param>
@@ -68,8 +68,8 @@ namespace BexioApiNet.Abstractions.Models.Sales.Deliveries;
 /// <param name="UpdatedAt">Timestamp of the last update in Bexio's <c>yyyy-MM-dd HH:mm:ss</c> format (read-only).</param>
 /// <param name="Taxs">Read-only aggregated tax summary lines.</param>
 /// <param name="Positions">
-///     Optional polymorphic positions array populated on show responses. Kept as raw
-///     <see cref="JsonElement" /> values since Bexio returns a union of several position types.
+/// Optional polymorphic positions array populated on show responses. Each element is
+/// deserialized into the concrete <see cref="Position" /> subtype identified by its <c>type</c> discriminator.
 /// </param>
 public sealed record Delivery(
     [property: JsonPropertyName("id")] int Id,
@@ -123,5 +123,5 @@ public sealed record Delivery(
     string? UpdatedAt,
     [property: JsonPropertyName("taxs")] IReadOnlyList<DeliveryTax>? Taxs,
     [property: JsonPropertyName("positions")]
-    IReadOnlyList<JsonElement>? Positions
+    IReadOnlyList<Position>? Positions
 );

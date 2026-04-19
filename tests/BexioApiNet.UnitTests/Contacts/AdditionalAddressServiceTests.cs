@@ -33,10 +33,10 @@ using BexioApiNet.Services.Connectors.Contacts;
 namespace BexioApiNet.UnitTests.Contacts;
 
 /// <summary>
-///     Offline unit tests for <see cref="AdditionalAddressService" />. Each test verifies that the
-///     service forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected
-///     arguments (including the nested <c>contact_id</c> segment) and returns the handler's
-///     result unchanged. No network, no filesystem access.
+/// Offline unit tests for <see cref="AdditionalAddressService" />. Each test verifies that the
+/// service forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected
+/// arguments (including the nested <c>contact_id</c> segment) and returns the handler's
+/// result unchanged. No network, no filesystem access.
 /// </summary>
 [TestFixture]
 public sealed class AdditionalAddressServiceTests : ServiceTestBase
@@ -48,8 +48,8 @@ public sealed class AdditionalAddressServiceTests : ServiceTestBase
     private AdditionalAddressService _sut = null!;
 
     /// <summary>
-    ///     Creates a fresh <see cref="AdditionalAddressService" /> per test, bound to the
-    ///     <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
+    /// Creates a fresh <see cref="AdditionalAddressService" /> per test, bound to the
+    /// <see cref="ServiceTestBase.ConnectionHandler" /> substitute provided by the base fixture.
     /// </summary>
     [SetUp]
     public void CreateSut()
@@ -58,8 +58,8 @@ public sealed class AdditionalAddressServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get forwards the expected nested path to <see cref="IBexioConnectionHandler.GetAsync{T}" />
-    ///     and returns the handler's <see cref="ApiResult{T}" /> unchanged.
+    /// Get forwards the expected nested path to <see cref="IBexioConnectionHandler.GetAsync{T}" />
+    /// and returns the handler's <see cref="ApiResult{T}" /> unchanged.
     /// </summary>
     [Test]
     public async Task Get_CallsGetAsyncWithExpectedPath()
@@ -79,7 +79,7 @@ public sealed class AdditionalAddressServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get forwards the inner <see cref="QueryParameter" /> from the typed wrapper verbatim.
+    /// Get forwards the inner <see cref="QueryParameter" /> from the typed wrapper verbatim.
     /// </summary>
     [Test]
     public async Task Get_WithQueryParameter_ForwardsInnerQueryParameter()
@@ -98,8 +98,8 @@ public sealed class AdditionalAddressServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Get with <c>autoPage=true</c> triggers <see cref="IBexioConnectionHandler.FetchAll{T}" />
-    ///     when the response carries a non-null <c>X-Total-Count</c> header.
+    /// Get with <c>autoPage=true</c> triggers <see cref="IBexioConnectionHandler.FetchAll{T}" />
+    /// when the response carries a non-null <c>X-Total-Count</c> header.
     /// </summary>
     [Test]
     public async Task Get_WithAutoPage_CallsFetchAll()
@@ -133,7 +133,7 @@ public sealed class AdditionalAddressServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     GetById hits the single-resource path with both the contact id and the address id.
+    /// GetById hits the single-resource path with both the contact id and the address id.
     /// </summary>
     [Test]
     public async Task GetById_CallsGetAsyncWithExpectedPath()
@@ -154,8 +154,8 @@ public sealed class AdditionalAddressServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Create forwards the payload to <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />
-    ///     against the collection path.
+    /// Create forwards the payload to <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />
+    /// against the collection path.
     /// </summary>
     [Test]
     public async Task Create_CallsPostAsyncWithExpectedPathAndPayload()
@@ -179,8 +179,8 @@ public sealed class AdditionalAddressServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Search hits the nested <c>/search</c> path via
-    ///     <see cref="IBexioConnectionHandler.PostSearchAsync{TResult}" /> with the provided criteria.
+    /// Search hits the nested <c>/search</c> path via
+    /// <see cref="IBexioConnectionHandler.PostSearchAsync{TResult}" /> with the provided criteria.
     /// </summary>
     [Test]
     public async Task Search_CallsPostSearchAsyncWithExpectedPathAndCriteria()
@@ -209,7 +209,7 @@ public sealed class AdditionalAddressServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Search forwards the optional typed query parameter to the handler (for limit/offset).
+    /// Search forwards the optional typed query parameter to the handler (for limit/offset).
     /// </summary>
     [Test]
     public async Task Search_WithQueryParameter_ForwardsInnerQueryParameter()
@@ -237,8 +237,8 @@ public sealed class AdditionalAddressServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Update forwards the payload to the single-resource path via the connection handler's
-    ///     update hook. The Bexio edit endpoint uses HTTP <c>POST</c> rather than <c>PUT</c>.
+    /// Update forwards the payload to the single-resource path via the connection handler's
+    /// update hook. The Bexio edit endpoint uses HTTP <c>POST</c> rather than <c>PUT</c>.
     /// </summary>
     [Test]
     public async Task Update_CallsUpdateWithExpectedPathAndPayload()
@@ -264,8 +264,8 @@ public sealed class AdditionalAddressServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Delete forwards the call to <see cref="IBexioConnectionHandler.Delete" /> with both
-    ///     the parent contact id and the address id in the path.
+    /// Delete forwards the call to <see cref="IBexioConnectionHandler.Delete" /> with both
+    /// the parent contact id and the address id in the path.
     /// </summary>
     [Test]
     public async Task Delete_CallsConnectionHandlerDelete()

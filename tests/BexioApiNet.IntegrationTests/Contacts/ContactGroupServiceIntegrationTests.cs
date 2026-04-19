@@ -30,11 +30,11 @@ using BexioApiNet.Services.Connectors.Contacts;
 namespace BexioApiNet.IntegrationTests.Contacts;
 
 /// <summary>
-///     Integration tests covering the CRUD entry points of <see cref="ContactGroupService" /> against
-///     WireMock stubs. Verifies the path composed from <see cref="ContactGroupConfiguration" />
-///     (<c>2.0/contact_group</c>) reaches the handler correctly, that the expected HTTP verbs are used
-///     (including the Bexio-specific <c>POST</c> for edits), and that payloads are serialized with the
-///     expected snake_case field names.
+/// Integration tests covering the CRUD entry points of <see cref="ContactGroupService" /> against
+/// WireMock stubs. Verifies the path composed from <see cref="ContactGroupConfiguration" />
+/// (<c>2.0/contact_group</c>) reaches the handler correctly, that the expected HTTP verbs are used
+/// (including the Bexio-specific <c>POST</c> for edits), and that payloads are serialized with the
+/// expected snake_case field names.
 /// </summary>
 public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
 {
@@ -48,9 +48,9 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
                                                 """;
 
     /// <summary>
-    ///     <c>ContactGroupService.Get()</c> must issue a <c>GET</c> request against
-    ///     <c>/2.0/contact_group</c> and return a successful <c>ApiResult</c> when the server
-    ///     returns an empty array.
+    /// <c>ContactGroupService.Get()</c> must issue a <c>GET</c> request against
+    /// <c>/2.0/contact_group</c> and return a successful <c>ApiResult</c> when the server
+    /// returns an empty array.
     /// </summary>
     [Test]
     public async Task ContactGroupService_Get_SendsGetRequest()
@@ -74,8 +74,8 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ContactGroupService.GetById</c> must issue a <c>GET</c> request that includes the target
-    ///     id in the URL path and surface the returned contact group on success.
+    /// <c>ContactGroupService.GetById</c> must issue a <c>GET</c> request that includes the target
+    /// id in the URL path and surface the returned contact group on success.
     /// </summary>
     [Test]
     public async Task ContactGroupService_GetById_SendsGetRequest()
@@ -104,9 +104,9 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ContactGroupService.Create</c> must send a <c>POST</c> request whose body is the
-    ///     serialized <see cref="ContactGroupCreate" /> payload, and must surface the returned contact
-    ///     group on success.
+    /// <c>ContactGroupService.Create</c> must send a <c>POST</c> request whose body is the
+    /// serialized <see cref="ContactGroupCreate" /> payload, and must surface the returned contact
+    /// group on success.
     /// </summary>
     [Test]
     public async Task ContactGroupService_Create_SendsPostRequest()
@@ -135,8 +135,8 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ContactGroupService.Search</c> must send a <c>POST</c> request against
-    ///     <c>/2.0/contact_group/search</c> with the <see cref="SearchCriteria" /> list as the JSON body.
+    /// <c>ContactGroupService.Search</c> must send a <c>POST</c> request against
+    /// <c>/2.0/contact_group/search</c> with the <see cref="SearchCriteria" /> list as the JSON body.
     /// </summary>
     [Test]
     public async Task ContactGroupService_Search_SendsPostRequest_ToSearchPath()
@@ -169,8 +169,8 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ContactGroupService.Update</c> must send a <c>POST</c> (not <c>PUT</c>) request against
-    ///     <c>/2.0/contact_group/{id}</c> — Bexio uses POST for full-replacement edits on v2.0 resources.
+    /// <c>ContactGroupService.Update</c> must send a <c>POST</c> (not <c>PUT</c>) request against
+    /// <c>/2.0/contact_group/{id}</c> — Bexio uses POST for full-replacement edits on v2.0 resources.
     /// </summary>
     [Test]
     public async Task ContactGroupService_Update_SendsPostRequest_WithIdInPath()
@@ -201,8 +201,8 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>ContactGroupService.Delete</c> must issue a <c>DELETE</c> request that includes the
-    ///     target id in the URL path.
+    /// <c>ContactGroupService.Delete</c> must issue a <c>DELETE</c> request that includes the
+    /// target id in the URL path.
     /// </summary>
     [Test]
     public async Task ContactGroupService_Delete_SendsDeleteRequest()

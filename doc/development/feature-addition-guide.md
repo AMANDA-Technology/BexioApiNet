@@ -43,6 +43,7 @@ Adjust names for your actual endpoint — do not copy these literally.
 - Match Bexio's types exactly: `int` for numeric IDs, `decimal` for money, `DateOnly`/`DateTime` for dates, `string?` for nullable strings.
 - XML `<summary>` on the record and every property (required — doc generation fails otherwise).
 - If the response contains nested objects, model them as separate records in the same folder.
+- If a field represents a polymorphic union (`anyOf` / `oneOf`), use an abstract base record + sealed subtypes, backed by `DiscriminatedJsonConverter<TBase>` (see `Position` or `OrderRepetitionSchedule`). Never use `JsonElement`.
 
 **Worked example:**
 

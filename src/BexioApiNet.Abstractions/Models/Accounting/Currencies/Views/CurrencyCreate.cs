@@ -26,13 +26,13 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Accounting.Currencies.Views;
 
 /// <summary>
-///     Create view for a currency.
-///     <see href="https://docs.bexio.com/#tag/Currencies/operation/CreateCurrency">Create Currency</see>
+/// Create view for a currency.
+/// <see href="https://docs.bexio.com/#tag/Currencies/operation/CreateCurrency">Create Currency</see>
 /// </summary>
 /// <param name="Name">A name of the currency. Must be in the format "ISO 4217" and must be unique. Maximum 80 characters.</param>
 /// <param name="RoundFactor">
-///     The round factor of the currency. E.g.: In order to round CHF to 5 Rp. the round_factor must
-///     be set to 0.05.
+/// The round factor of the currency. E.g.: In order to round CHF to 5 Rp. the round_factor must
+/// be set to 0.05.
 /// </param>
 public sealed record CurrencyCreate(
     [property: JsonPropertyName("name")] string Name,
