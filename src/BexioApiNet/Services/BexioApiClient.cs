@@ -27,6 +27,7 @@ using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
+using BexioApiNet.Interfaces.Connectors.Sales;
 
 namespace BexioApiNet.Services;
 
@@ -92,6 +93,9 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IAdditionalAddressService ContactAdditionalAddresses { get; set; }
 
+    /// <inheritdoc />
+    public IInvoiceService Invoices { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -114,7 +118,8 @@ public sealed class BexioApiClient : IBexioApiClient
         IContactGroupService contactGroups,
         IContactRelationService contactRelations,
         IContactSectorService contactSectors,
-        IAdditionalAddressService contactAdditionalAddresses)
+        IAdditionalAddressService contactAdditionalAddresses,
+        IInvoiceService invoices)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -135,6 +140,7 @@ public sealed class BexioApiClient : IBexioApiClient
         ContactRelations = contactRelations;
         ContactSectors = contactSectors;
         ContactAdditionalAddresses = contactAdditionalAddresses;
+        Invoices = invoices;
     }
 
     /// <inheritdoc />

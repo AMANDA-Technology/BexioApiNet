@@ -30,10 +30,12 @@ using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
+using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Services;
 using BexioApiNet.Services.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Banking;
 using BexioApiNet.Services.Connectors.Contacts;
+using BexioApiNet.Services.Connectors.Sales;
 
 namespace BexioApiNet.AspNetCore;
 
@@ -104,6 +106,7 @@ public static class BexioServiceCollection
         services.AddScoped<IContactRelationService, ContactRelationService>();
         services.AddScoped<IContactSectorService, ContactSectorService>();
         services.AddScoped<IAdditionalAddressService, AdditionalAddressService>();
+        services.AddScoped<IInvoiceService, InvoiceService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;

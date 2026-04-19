@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
+using BexioApiNet.Interfaces.Connectors.Sales;
 
 namespace BexioApiNet.Interfaces;
 
@@ -123,4 +124,9 @@ public interface IBexioApiClient : IDisposable
     /// Bexio additional addresses connector, nested under contacts. <see href="https://docs.bexio.com/#tag/Additional-Addresses">Additional Addresses</see>
     /// </summary>
     public IAdditionalAddressService ContactAdditionalAddresses { get; set; }
+
+    /// <summary>
+    /// Bexio invoices connector. <see href="https://docs.bexio.com/#tag/Invoices">Invoices</see>
+    /// </summary>
+    public IInvoiceService Invoices { get; set; }
 }
