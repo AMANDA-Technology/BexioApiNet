@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
+using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
 
 namespace BexioApiNet.UnitTests;
@@ -73,7 +74,9 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IInvoiceReminderService>(),
             Substitute.For<IQuoteService>(),
             Substitute.For<IOrderService>(),
-            Substitute.For<IDeliveryService>());
+            Substitute.For<IDeliveryService>(),
+            Substitute.For<IStockLocationService>(),
+            Substitute.For<IStockAreaService>());
 
         Assert.Multiple(() =>
         {
@@ -100,6 +103,8 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.Quotes, Is.Not.Null);
             Assert.That(client.Orders, Is.Not.Null);
             Assert.That(client.Deliveries, Is.Not.Null);
+            Assert.That(client.ItemsStockLocations, Is.Not.Null);
+            Assert.That(client.ItemsStockAreas, Is.Not.Null);
         });
     }
 }

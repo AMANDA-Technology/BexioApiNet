@@ -27,6 +27,7 @@ using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
+using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
 
 namespace BexioApiNet.Services;
@@ -108,6 +109,12 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IDeliveryService Deliveries { get; set; }
 
+    /// <inheritdoc />
+    public IStockLocationService ItemsStockLocations { get; set; }
+
+    /// <inheritdoc />
+    public IStockAreaService ItemsStockAreas { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -135,7 +142,9 @@ public sealed class BexioApiClient : IBexioApiClient
         IInvoiceReminderService invoiceReminders,
         IQuoteService quotes,
         IOrderService orders,
-        IDeliveryService deliveries)
+        IDeliveryService deliveries,
+        IStockLocationService itemsStockLocations,
+        IStockAreaService itemsStockAreas)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -161,6 +170,8 @@ public sealed class BexioApiClient : IBexioApiClient
         Quotes = quotes;
         Orders = orders;
         Deliveries = deliveries;
+        ItemsStockLocations = itemsStockLocations;
+        ItemsStockAreas = itemsStockAreas;
     }
 
     /// <inheritdoc />

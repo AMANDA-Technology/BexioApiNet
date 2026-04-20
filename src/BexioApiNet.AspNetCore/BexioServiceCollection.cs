@@ -30,11 +30,13 @@ using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
+using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Services;
 using BexioApiNet.Services.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Banking;
 using BexioApiNet.Services.Connectors.Contacts;
+using BexioApiNet.Services.Connectors.Items;
 using BexioApiNet.Services.Connectors.Sales;
 
 namespace BexioApiNet.AspNetCore;
@@ -111,6 +113,8 @@ public static class BexioServiceCollection
         services.AddScoped<IQuoteService, QuoteService>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IDeliveryService, DeliveryService>();
+        services.AddScoped<IStockLocationService, StockLocationService>();
+        services.AddScoped<IStockAreaService, StockAreaService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;
