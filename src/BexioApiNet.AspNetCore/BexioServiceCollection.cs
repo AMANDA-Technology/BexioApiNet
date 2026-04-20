@@ -25,34 +25,40 @@ SOFTWARE.
 
 using System.Net.Http.Headers;
 using BexioApiNet.Abstractions.Enums.Api;
-using Microsoft.Extensions.DependencyInjection;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Sales;
+using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 using BexioApiNet.Services;
 using BexioApiNet.Services.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Banking;
 using BexioApiNet.Services.Connectors.Contacts;
 using BexioApiNet.Services.Connectors.Sales;
+using BexioApiNet.Services.Connectors.Sales.Positions;
+using Microsoft.Extensions.DependencyInjection;
 
 namespace BexioApiNet.AspNetCore;
 
 /// <summary>
-/// Bexio service collection extension for dependency injection.
+///     Bexio service collection extension for dependency injection.
 /// </summary>
 public static class BexioServiceCollection
 {
     /// <summary>
-    /// Adds the configuration, handler and rest service to the services.
+    ///     Adds the configuration, handler and rest service to the services.
     /// </summary>
     /// <param name="services">Service collection to register Bexio services into.</param>
-    /// <param name="baseUri">Bexio API base URI (see <see href="https://docs.bexio.com/#section/API-basics/API-routes"/>).</param>
-    /// <param name="jwtToken">JWT token used for authentication (see <see href="https://docs.bexio.com/#section/Authentication/JWT-(JSON-Web-Tokens)"/>).</param>
-    /// <param name="acceptHeaderFormat">Accept header format. Defaults to <see cref="ApiAcceptHeaders.JsonFormatted"/>.</param>
+    /// <param name="baseUri">Bexio API base URI (see <see href="https://docs.bexio.com/#section/API-basics/API-routes" />).</param>
+    /// <param name="jwtToken">
+    ///     JWT token used for authentication (see
+    ///     <see href="https://docs.bexio.com/#section/Authentication/JWT-(JSON-Web-Tokens)" />).
+    /// </param>
+    /// <param name="acceptHeaderFormat">Accept header format. Defaults to <see cref="ApiAcceptHeaders.JsonFormatted" />.</param>
     /// <returns>The same service collection, to allow chaining.</returns>
-    public static IServiceCollection AddBexioServices(this IServiceCollection services, string baseUri, string jwtToken, string acceptHeaderFormat = ApiAcceptHeaders.JsonFormatted)
+    public static IServiceCollection AddBexioServices(this IServiceCollection services, string baseUri, string jwtToken,
+        string acceptHeaderFormat = ApiAcceptHeaders.JsonFormatted)
     {
         return services.AddBexioServices(new BexioConfiguration
         {
@@ -63,15 +69,16 @@ public static class BexioServiceCollection
     }
 
     /// <summary>
-    /// Adds the configuration, handler and rest service to the services. The <see cref="IBexioConnectionHandler"/>
-    /// is registered as a typed <see cref="HttpClient"/> backed by <see cref="IHttpClientFactory"/> to avoid
-    /// socket exhaustion under load.
+    ///     Adds the configuration, handler and rest service to the services. The <see cref="IBexioConnectionHandler" />
+    ///     is registered as a typed <see cref="HttpClient" /> backed by <see cref="IHttpClientFactory" /> to avoid
+    ///     socket exhaustion under load.
     /// </summary>
     /// <param name="services">Service collection to register Bexio services into.</param>
     /// <param name="bexioConfiguration">Bexio configuration (base URI, JWT token, accept header format).</param>
     /// <returns>The same service collection, to allow chaining.</returns>
     // ReSharper disable once MemberCanBePrivate.Global
-    public static IServiceCollection AddBexioServices(this IServiceCollection services, IBexioConfiguration bexioConfiguration)
+    public static IServiceCollection AddBexioServices(this IServiceCollection services,
+        IBexioConfiguration bexioConfiguration)
     {
         services.AddSingleton(bexioConfiguration);
 
@@ -83,8 +90,10 @@ public static class BexioServiceCollection
                     configuration.BaseUri += '/';
 
                 client.BaseAddress = new Uri(configuration.BaseUri);
-                client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue(configuration.AcceptHeaderFormat));
-                client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", configuration.JwtToken);
+                client.DefaultRequestHeaders.Accept.Add(
+                    new MediaTypeWithQualityHeaderValue(configuration.AcceptHeaderFormat));
+                client.DefaultRequestHeaders.Authorization =
+                    new AuthenticationHeaderValue("Bearer", configuration.JwtToken);
             })
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 
@@ -111,6 +120,9 @@ public static class BexioServiceCollection
         services.AddScoped<IQuoteService, QuoteService>();
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IDeliveryService, DeliveryService>();
+        services.AddScoped<IDiscountPositionService, DiscountPositionService>();
+        services.AddScoped<ITextPositionService, TextPositionService>();
+        services.AddScoped<ISubtotalPositionService, SubtotalPositionService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;

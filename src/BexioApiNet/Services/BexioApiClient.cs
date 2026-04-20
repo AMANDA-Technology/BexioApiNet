@@ -28,6 +28,7 @@ using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Sales;
+using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 
 namespace BexioApiNet.Services;
 
@@ -35,9 +36,70 @@ namespace BexioApiNet.Services;
 public sealed class BexioApiClient : IBexioApiClient
 {
     /// <summary>
-    /// Instance of connection handler used for all services
+    ///     Instance of connection handler used for all services
     /// </summary>
     private readonly IBexioConnectionHandler _bexioConnectionHandler;
+
+    /// <summary>
+    ///     Initializes a new instance of the <see cref="BexioApiClient" /> class.
+    /// </summary>
+    public BexioApiClient(
+        IBexioConnectionHandler bexioConnectionHandler,
+        IBankAccountService bankingBankAccounts,
+        IAccountService accountingAccounts,
+        ICurrencyService currencies,
+        IManualEntryService accountingManualEntries,
+        ITaxService taxes,
+        IAccountGroupService accountGroups,
+        IBusinessYearService accountingBusinessYears,
+        ICalendarYearService accountingCalendarYears,
+        IVatPeriodService accountingVatPeriods,
+        IReportService accountingReports,
+        IPaymentTypeService paymentTypes,
+        IPaymentService bankingPayments,
+        IOutgoingPaymentService purchaseOutgoingPayments,
+        IContactService contacts,
+        IContactGroupService contactGroups,
+        IContactRelationService contactRelations,
+        IContactSectorService contactSectors,
+        IAdditionalAddressService contactAdditionalAddresses,
+        IInvoiceService invoices,
+        IInvoiceReminderService invoiceReminders,
+        IQuoteService quotes,
+        IOrderService orders,
+        IDeliveryService deliveries,
+        IDiscountPositionService salesDiscountPositions,
+        ITextPositionService salesTextPositions,
+        ISubtotalPositionService salesSubtotalPositions)
+    {
+        _bexioConnectionHandler = bexioConnectionHandler;
+        BankingBankAccounts = bankingBankAccounts;
+        Accounts = accountingAccounts;
+        Currencies = currencies;
+        AccountingManualEntries = accountingManualEntries;
+        Taxes = taxes;
+        AccountGroups = accountGroups;
+        AccountingBusinessYears = accountingBusinessYears;
+        AccountingCalendarYears = accountingCalendarYears;
+        AccountingVatPeriods = accountingVatPeriods;
+        AccountingReports = accountingReports;
+        PaymentTypes = paymentTypes;
+        BankingPayments = bankingPayments;
+        PurchaseOutgoingPayments = purchaseOutgoingPayments;
+        Contacts = contacts;
+        ContactGroups = contactGroups;
+        ContactRelations = contactRelations;
+        ContactSectors = contactSectors;
+        ContactAdditionalAddresses = contactAdditionalAddresses;
+        Invoices = invoices;
+        InvoiceReminders = invoiceReminders;
+        Quotes = quotes;
+        Orders = orders;
+        Deliveries = deliveries;
+        SalesDiscountPositions = salesDiscountPositions;
+        SalesTextPositions = salesTextPositions;
+        SalesSubtotalPositions = salesSubtotalPositions;
+    }
 
     /// <inheritdoc />
     public IBankAccountService BankingBankAccounts { get; set; }
@@ -108,60 +170,14 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IDeliveryService Deliveries { get; set; }
 
-    /// <summary>
-    /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
-    /// </summary>
-    public BexioApiClient(
-        IBexioConnectionHandler bexioConnectionHandler,
-        IBankAccountService bankingBankAccounts,
-        IAccountService accountingAccounts,
-        ICurrencyService currencies,
-        IManualEntryService accountingManualEntries,
-        ITaxService taxes,
-        IAccountGroupService accountGroups,
-        IBusinessYearService accountingBusinessYears,
-        ICalendarYearService accountingCalendarYears,
-        IVatPeriodService accountingVatPeriods,
-        IReportService accountingReports,
-        IPaymentTypeService paymentTypes,
-        IPaymentService bankingPayments,
-        IOutgoingPaymentService purchaseOutgoingPayments,
-        IContactService contacts,
-        IContactGroupService contactGroups,
-        IContactRelationService contactRelations,
-        IContactSectorService contactSectors,
-        IAdditionalAddressService contactAdditionalAddresses,
-        IInvoiceService invoices,
-        IInvoiceReminderService invoiceReminders,
-        IQuoteService quotes,
-        IOrderService orders,
-        IDeliveryService deliveries)
-    {
-        _bexioConnectionHandler = bexioConnectionHandler;
-        BankingBankAccounts = bankingBankAccounts;
-        Accounts = accountingAccounts;
-        Currencies = currencies;
-        AccountingManualEntries = accountingManualEntries;
-        Taxes = taxes;
-        AccountGroups = accountGroups;
-        AccountingBusinessYears = accountingBusinessYears;
-        AccountingCalendarYears = accountingCalendarYears;
-        AccountingVatPeriods = accountingVatPeriods;
-        AccountingReports = accountingReports;
-        PaymentTypes = paymentTypes;
-        BankingPayments = bankingPayments;
-        PurchaseOutgoingPayments = purchaseOutgoingPayments;
-        Contacts = contacts;
-        ContactGroups = contactGroups;
-        ContactRelations = contactRelations;
-        ContactSectors = contactSectors;
-        ContactAdditionalAddresses = contactAdditionalAddresses;
-        Invoices = invoices;
-        InvoiceReminders = invoiceReminders;
-        Quotes = quotes;
-        Orders = orders;
-        Deliveries = deliveries;
-    }
+    /// <inheritdoc />
+    public IDiscountPositionService SalesDiscountPositions { get; set; }
+
+    /// <inheritdoc />
+    public ITextPositionService SalesTextPositions { get; set; }
+
+    /// <inheritdoc />
+    public ISubtotalPositionService SalesSubtotalPositions { get; set; }
 
     /// <inheritdoc />
     public void Dispose()
