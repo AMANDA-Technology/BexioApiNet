@@ -27,6 +27,7 @@ using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Sales;
+using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 
 namespace BexioApiNet.UnitTests;
 
@@ -73,7 +74,9 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IInvoiceReminderService>(),
             Substitute.For<IQuoteService>(),
             Substitute.For<IOrderService>(),
-            Substitute.For<IDeliveryService>());
+            Substitute.For<IDeliveryService>(),
+            Substitute.For<IItemPositionService>(),
+            Substitute.For<IDefaultPositionService>());
 
         Assert.Multiple(() =>
         {
@@ -100,6 +103,8 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.Quotes, Is.Not.Null);
             Assert.That(client.Orders, Is.Not.Null);
             Assert.That(client.Deliveries, Is.Not.Null);
+            Assert.That(client.SalesItemPositions, Is.Not.Null);
+            Assert.That(client.SalesDefaultPositions, Is.Not.Null);
         });
     }
 }
