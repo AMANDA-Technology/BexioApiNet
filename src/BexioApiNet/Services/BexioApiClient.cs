@@ -41,67 +41,6 @@ public sealed class BexioApiClient : IBexioApiClient
     /// </summary>
     private readonly IBexioConnectionHandler _bexioConnectionHandler;
 
-    /// <summary>
-    ///     Initializes a new instance of the <see cref="BexioApiClient" /> class.
-    /// </summary>
-    public BexioApiClient(
-        IBexioConnectionHandler bexioConnectionHandler,
-        IBankAccountService bankingBankAccounts,
-        IAccountService accountingAccounts,
-        ICurrencyService currencies,
-        IManualEntryService accountingManualEntries,
-        ITaxService taxes,
-        IAccountGroupService accountGroups,
-        IBusinessYearService accountingBusinessYears,
-        ICalendarYearService accountingCalendarYears,
-        IVatPeriodService accountingVatPeriods,
-        IReportService accountingReports,
-        IPaymentTypeService paymentTypes,
-        IPaymentService bankingPayments,
-        IOutgoingPaymentService purchaseOutgoingPayments,
-        IContactService contacts,
-        IContactGroupService contactGroups,
-        IContactRelationService contactRelations,
-        IContactSectorService contactSectors,
-        IAdditionalAddressService contactAdditionalAddresses,
-        IInvoiceService invoices,
-        IInvoiceReminderService invoiceReminders,
-        IQuoteService quotes,
-        IOrderService orders,
-        IDeliveryService deliveries,
-        IDiscountPositionService salesDiscountPositions,
-        ITextPositionService salesTextPositions,
-        ISubtotalPositionService salesSubtotalPositions)
-    {
-        _bexioConnectionHandler = bexioConnectionHandler;
-        BankingBankAccounts = bankingBankAccounts;
-        Accounts = accountingAccounts;
-        Currencies = currencies;
-        AccountingManualEntries = accountingManualEntries;
-        Taxes = taxes;
-        AccountGroups = accountGroups;
-        AccountingBusinessYears = accountingBusinessYears;
-        AccountingCalendarYears = accountingCalendarYears;
-        AccountingVatPeriods = accountingVatPeriods;
-        AccountingReports = accountingReports;
-        PaymentTypes = paymentTypes;
-        BankingPayments = bankingPayments;
-        PurchaseOutgoingPayments = purchaseOutgoingPayments;
-        Contacts = contacts;
-        ContactGroups = contactGroups;
-        ContactRelations = contactRelations;
-        ContactSectors = contactSectors;
-        ContactAdditionalAddresses = contactAdditionalAddresses;
-        Invoices = invoices;
-        InvoiceReminders = invoiceReminders;
-        Quotes = quotes;
-        Orders = orders;
-        Deliveries = deliveries;
-        SalesDiscountPositions = salesDiscountPositions;
-        SalesTextPositions = salesTextPositions;
-        SalesSubtotalPositions = salesSubtotalPositions;
-    }
-
     /// <inheritdoc />
     public IBankAccountService BankingBankAccounts { get; set; }
 
