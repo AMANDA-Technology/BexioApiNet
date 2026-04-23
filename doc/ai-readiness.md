@@ -33,8 +33,8 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
     - Live E2E only: `dotnet test --filter TestCategory=E2E` (requires `BexioApiNet__BaseUri` + `BexioApiNet__JwtToken`)
     - CI-safe default (Offline only): `dotnet test --filter TestCategory!=E2E`
 - **What IS covered today**:
-  - **Unit tests**: AccountService, CurrencyService, TaxService, BankAccountService, ManualEntryService, BexioConnectionHandler
-  - **Integration tests**: Cancellation, Concurrency, ErrorResponse, Pagination, ParamValidation, per-service integration tests (Accounting / Banking / Contacts domains)
+  - **Unit tests**: AccountService, CurrencyService, TaxService, BankAccountService, ManualEntryService, BexioConnectionHandler, Item-related services, Position-related services
+  - **Integration tests**: Cancellation, Concurrency, ErrorResponse, Pagination, ParamValidation, per-service integration tests (Accounting / Banking / Contacts / Items / Sales domains)
   - **E2E tests**:
     - `Accounting/Accounts/GetAll`
     - `Accounting/Currencies/GetAll`
@@ -42,7 +42,7 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
     - `Accounting/Taxes/GetAll`
     - `Banking/BankAccount/GetAll`
 - **What is NOT covered**:
-  - Significant portions of the Bexio API (Contacts, Invoices, Items, Projects, etc.) are not yet implemented.
+  - Significant portions of the Bexio API (Projects, Timesheets, Payroll, etc.) are not yet implemented.
 - **Test quality assessment**:
   - Offline tests are comprehensive and fast. The E2E test suite skips gracefully, unblocking agents and CI that lack credentials. The E2E base class `BexioE2eTestBase` is categorized `[Category("E2E")]`, and offline test classes are categorized `[Category("Unit")]` or `[Category("Integration")]`.
 - **Rate**: Partial Coverage (ready to expand; infrastructure is in place)
@@ -98,3 +98,5 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
 | Add comprehensive offline Unit and Integration coverage | Issue #7 — comprehensive Unit tests and WireMock.Net integration tests added. |
 | Vendor Bexio OpenAPI Spec | Issue #8 — `doc/openapi/bexio-v3.json` committed (OpenAPI 3.0.2, API v3.0.0, 355 paths, retrieved 2026-04-18). Refresh procedure in `doc/openapi/README.md`. |
 | Typed polymorphic positions and repetition schedules | Issue #59 — `IReadOnlyList<JsonElement>? Positions` replaced by `IReadOnlyList<Position>?` on 9 DTOs; `JsonElement? Repetition` replaced by `OrderRepetitionSchedule?` on 2 DTOs. Round-trip tests cover every variant. |
+over every variant. |
+trip tests cover every variant. |

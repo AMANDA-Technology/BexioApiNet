@@ -27,7 +27,9 @@ using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Services.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Banking;
 using BexioApiNet.Services.Connectors.Contacts;
+using BexioApiNet.Services.Connectors.Items;
 using BexioApiNet.Services.Connectors.Sales;
+using BexioApiNet.Services.Connectors.Sales.Positions;
 
 namespace BexioApiNet.E2eTests;
 
@@ -96,7 +98,18 @@ public abstract class BexioE2eTestBase
             new InvoiceReminderService(connectionHandler),
             new QuoteService(connectionHandler),
             new OrderService(connectionHandler),
-            new DeliveryService(connectionHandler));
+            new DeliveryService(connectionHandler),
+            new ItemService(connectionHandler),
+            new UnitService(connectionHandler),
+            new StockLocationService(connectionHandler),
+            new StockAreaService(connectionHandler),
+            new ItemPositionService(connectionHandler),
+            new DefaultPositionService(connectionHandler),
+            new DiscountPositionService(connectionHandler),
+            new TextPositionService(connectionHandler),
+            new SubtotalPositionService(connectionHandler),
+            new SubPositionService(connectionHandler),
+            new PagebreakPositionService(connectionHandler));
     }
 
     /// <summary>

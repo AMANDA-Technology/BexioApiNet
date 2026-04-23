@@ -10,8 +10,8 @@ status: tracking
 Full inventory of the Bexio REST API v3.0.0 mapped against BexioApiNet implementation status. Source of truth: vendored OpenAPI spec at `doc/openapi/bexio-v3.json`.
 
 **Total endpoint methods:** 309  
-**Implemented:** 83 (26.9%)  
-**Remaining:** 226 (73.1%)
+**Implemented:** 192 (62.1%)  
+**Remaining:** 117 (37.9%)
 
 ---
 
@@ -25,15 +25,15 @@ Full inventory of the Bexio REST API v3.0.0 mapped against BexioApiNet implement
 | 4 | Sales — Invoices | 1 | 26 | 26 | 0 | 2 |
 | 5 | Sales — Quotes | 1 | 17 | 17 | 0 | 2 |
 | 6 | Sales — Orders & Deliveries | 2 | 15 | 15 | 0 | 2 |
-| 7 | Items & Inventory | 4 | 16 | 0 | 16 | 3 |
-| 8 | Document Positions | 7 | 35 | 0 | 35 | 3 |
+| 7 | Items & Inventory | 4 | 16 | 16 | 0 | 3 |
+| 8 | Document Positions | 7 | 35 | 35 | 0 | 3 |
 | 9 | Projects | 1 | 20 | 0 | 20 | 4 |
 | 10 | Timesheets & Tasks | 3 | 18 | 0 | 18 | 4 |
 | 11 | Purchase & Expenses | 3 | 21 | 0 | 21 | 5 |
 | 12 | Payroll | 3 | 10 | 0 | 10 | 5 |
 | 13 | Files & Documents | 3 | 11 | 0 | 11 | 6 |
 | 14 | Master Data & Settings | 9 | 42 | 0 | 42 | 6 |
-| | **TOTAL** | **56** | **309** | **141** | **168** | |
+| | **TOTAL** | **56** | **309** | **192** | **117** | |
 
 ---
 
@@ -307,47 +307,47 @@ Full inventory of the Bexio REST API v3.0.0 mapped against BexioApiNet implement
 
 ---
 
-## Domain Group 7: Items & Inventory — Wave 3
+## Domain Group 7: Items & Inventory — Wave 3 — DONE
 
 ### Tag: Items (6 endpoints)
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/article` | TODO | ItemService |
-| GET | `/2.0/article/{article_id}` | TODO | ItemService |
-| POST | `/2.0/article` | TODO | ItemService |
-| POST | `/2.0/article/search` | TODO | ItemService |
-| POST | `/2.0/article/{article_id}` | TODO | ItemService |
-| DELETE | `/2.0/article/{article_id}` | TODO | ItemService |
+| GET | `/2.0/article` | DONE | ItemService |
+| GET | `/2.0/article/{article_id}` | DONE | ItemService |
+| POST | `/2.0/article` | DONE | ItemService |
+| POST | `/2.0/article/search` | DONE | ItemService |
+| POST | `/2.0/article/{article_id}` | DONE | ItemService |
+| DELETE | `/2.0/article/{article_id}` | DONE | ItemService |
 
 ### Tag: Units (6 endpoints)
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/unit` | TODO | UnitService |
-| GET | `/2.0/unit/{unit_id}` | TODO | UnitService |
-| POST | `/2.0/unit` | TODO | UnitService |
-| POST | `/2.0/unit/search` | TODO | UnitService |
-| POST | `/2.0/unit/{unit_id}` | TODO | UnitService |
-| DELETE | `/2.0/unit/{unit_id}` | TODO | UnitService |
+| GET | `/2.0/unit` | DONE | UnitService |
+| GET | `/2.0/unit/{unit_id}` | DONE | UnitService |
+| POST | `/2.0/unit` | DONE | UnitService |
+| POST | `/2.0/unit/search` | DONE | UnitService |
+| POST | `/2.0/unit/{unit_id}` | DONE | UnitService |
+| DELETE | `/2.0/unit/{unit_id}` | DONE | UnitService |
 
 ### Tag: Stock Areas (2 endpoints)
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/stock_place` | TODO | StockAreaService |
-| POST | `/2.0/stock_place/search` | TODO | StockAreaService |
+| GET | `/2.0/stock_place` | DONE | StockAreaService |
+| POST | `/2.0/stock_place/search` | DONE | StockAreaService |
 
 ### Tag: Stock Locations (2 endpoints)
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/stock` | TODO | StockLocationService |
-| POST | `/2.0/stock/search` | TODO | StockLocationService |
+| GET | `/2.0/stock` | DONE | StockLocationService |
+| POST | `/2.0/stock/search` | DONE | StockLocationService |
 
 ---
 
-## Domain Group 8: Document Positions — Wave 3
+## Domain Group 8: Document Positions — Wave 3 — DONE
 
 All position types share the same polymorphic pattern: CRUD on `/{kb_document_type}/{document_id}/kb_position_{type}/{position_id}`.
 
@@ -355,71 +355,71 @@ All position types share the same polymorphic pattern: CRUD on `/{kb_document_ty
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_article` | TODO | ItemPositionService |
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_article/{position_id}` | TODO | ItemPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_article` | TODO | ItemPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_article/{position_id}` | TODO | ItemPositionService |
-| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_article/{position_id}` | TODO | ItemPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_article` | DONE | ItemPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_article/{position_id}` | DONE | ItemPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_article` | DONE | ItemPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_article/{position_id}` | DONE | ItemPositionService |
+| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_article/{position_id}` | DONE | ItemPositionService |
 
 ### Tag: Default Positions (5 endpoints)
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_custom` | TODO | DefaultPositionService |
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_custom/{position_id}` | TODO | DefaultPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_custom` | TODO | DefaultPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_custom/{position_id}` | TODO | DefaultPositionService |
-| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_custom/{position_id}` | TODO | DefaultPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_custom` | DONE | DefaultPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_custom/{position_id}` | DONE | DefaultPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_custom` | DONE | DefaultPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_custom/{position_id}` | DONE | DefaultPositionService |
+| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_custom/{position_id}` | DONE | DefaultPositionService |
 
 ### Tag: Discount Positions (5 endpoints)
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_discount` | TODO | DiscountPositionService |
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_discount/{position_id}` | TODO | DiscountPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_discount` | TODO | DiscountPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_discount/{position_id}` | TODO | DiscountPositionService |
-| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_discount/{position_id}` | TODO | DiscountPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_discount` | DONE | DiscountPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_discount/{position_id}` | DONE | DiscountPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_discount` | DONE | DiscountPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_discount/{position_id}` | DONE | DiscountPositionService |
+| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_discount/{position_id}` | DONE | DiscountPositionService |
 
 ### Tag: Text Positions (5 endpoints)
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_text` | TODO | TextPositionService |
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_text/{position_id}` | TODO | TextPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_text` | TODO | TextPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_text/{position_id}` | TODO | TextPositionService |
-| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_text/{position_id}` | TODO | TextPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_text` | DONE | TextPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_text/{position_id}` | DONE | TextPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_text` | DONE | TextPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_text/{position_id}` | DONE | TextPositionService |
+| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_text/{position_id}` | DONE | TextPositionService |
 
 ### Tag: Subtotal Positions (5 endpoints)
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_subtotal` | TODO | SubtotalPositionService |
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_subtotal/{position_id}` | TODO | SubtotalPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_subtotal` | TODO | SubtotalPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_subtotal/{position_id}` | TODO | SubtotalPositionService |
-| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_subtotal/{position_id}` | TODO | SubtotalPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_subtotal` | DONE | SubtotalPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_subtotal/{position_id}` | DONE | SubtotalPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_subtotal` | DONE | SubtotalPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_subtotal/{position_id}` | DONE | SubtotalPositionService |
+| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_subtotal/{position_id}` | DONE | SubtotalPositionService |
 
 ### Tag: Sub Positions (5 endpoints)
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_subposition` | TODO | SubPositionService |
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_subposition/{position_id}` | TODO | SubPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_subposition` | TODO | SubPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_subposition/{position_id}` | TODO | SubPositionService |
-| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_subposition/{position_id}` | TODO | SubPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_subposition` | DONE | SubPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_subposition/{position_id}` | DONE | SubPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_subposition` | DONE | SubPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_subposition/{position_id}` | DONE | SubPositionService |
+| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_subposition/{position_id}` | DONE | SubPositionService |
 
 ### Tag: Pagebreak Positions (5 endpoints)
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_pagebreak` | TODO | PagebreakPositionService |
-| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_pagebreak/{position_id}` | TODO | PagebreakPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_pagebreak` | TODO | PagebreakPositionService |
-| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_pagebreak/{position_id}` | TODO | PagebreakPositionService |
-| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_pagebreak/{position_id}` | TODO | PagebreakPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_pagebreak` | DONE | PagebreakPositionService |
+| GET | `/2.0/{kb_document_type}/{document_id}/kb_position_pagebreak/{position_id}` | DONE | PagebreakPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_pagebreak` | DONE | PagebreakPositionService |
+| POST | `/2.0/{kb_document_type}/{document_id}/kb_position_pagebreak/{position_id}` | DONE | PagebreakPositionService |
+| DELETE | `/2.0/{kb_document_type}/{document_id}/kb_position_pagebreak/{position_id}` | DONE | PagebreakPositionService |
 
 ---
 

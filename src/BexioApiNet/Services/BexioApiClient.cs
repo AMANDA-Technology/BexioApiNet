@@ -27,7 +27,9 @@ using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
+using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
+using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 
 namespace BexioApiNet.Services;
 
@@ -35,7 +37,7 @@ namespace BexioApiNet.Services;
 public sealed class BexioApiClient : IBexioApiClient
 {
     /// <summary>
-    /// Instance of connection handler used for all services
+    ///     Instance of connection handler used for all services
     /// </summary>
     private readonly IBexioConnectionHandler _bexioConnectionHandler;
 
@@ -108,6 +110,39 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IDeliveryService Deliveries { get; set; }
 
+    /// <inheritdoc />
+    public IItemService Items { get; set; }
+
+    /// <inheritdoc />
+    public IUnitService Units { get; set; }
+
+    /// <inheritdoc />
+    public IStockLocationService ItemsStockLocations { get; set; }
+
+    /// <inheritdoc />
+    public IStockAreaService ItemsStockAreas { get; set; }
+
+    /// <inheritdoc />
+    public IItemPositionService SalesItemPositions { get; set; }
+
+    /// <inheritdoc />
+    public IDefaultPositionService SalesDefaultPositions { get; set; }
+
+    /// <inheritdoc />
+    public IDiscountPositionService SalesDiscountPositions { get; set; }
+
+    /// <inheritdoc />
+    public ITextPositionService SalesTextPositions { get; set; }
+
+    /// <inheritdoc />
+    public ISubtotalPositionService SalesSubtotalPositions { get; set; }
+
+    /// <inheritdoc />
+    public ISubPositionService SubPositions { get; set; }
+
+    /// <inheritdoc />
+    public IPagebreakPositionService PagebreakPositions { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -135,7 +170,18 @@ public sealed class BexioApiClient : IBexioApiClient
         IInvoiceReminderService invoiceReminders,
         IQuoteService quotes,
         IOrderService orders,
-        IDeliveryService deliveries)
+        IDeliveryService deliveries,
+        IItemService items,
+        IUnitService units,
+        IStockLocationService itemsStockLocations,
+        IStockAreaService itemsStockAreas,
+        IItemPositionService salesItemPositions,
+        IDefaultPositionService salesDefaultPositions,
+        IDiscountPositionService salesDiscountPositions,
+        ITextPositionService salesTextPositions,
+        ISubtotalPositionService salesSubtotalPositions,
+        ISubPositionService subPositions,
+        IPagebreakPositionService pagebreakPositions)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -161,6 +207,17 @@ public sealed class BexioApiClient : IBexioApiClient
         Quotes = quotes;
         Orders = orders;
         Deliveries = deliveries;
+        Items = items;
+        Units = units;
+        ItemsStockLocations = itemsStockLocations;
+        ItemsStockAreas = itemsStockAreas;
+        SalesItemPositions = salesItemPositions;
+        SalesDefaultPositions = salesDefaultPositions;
+        SalesDiscountPositions = salesDiscountPositions;
+        SalesTextPositions = salesTextPositions;
+        SalesSubtotalPositions = salesSubtotalPositions;
+        SubPositions = subPositions;
+        PagebreakPositions = pagebreakPositions;
     }
 
     /// <inheritdoc />
