@@ -28,6 +28,7 @@ using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
+using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 
 namespace BexioApiNet.UnitTests;
 
@@ -78,7 +79,9 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IItemService>(),
             Substitute.For<IUnitService>(),
             Substitute.For<IStockLocationService>(),
-            Substitute.For<IStockAreaService>());
+            Substitute.For<IStockAreaService>(),
+            Substitute.For<IItemPositionService>(),
+            Substitute.For<IDefaultPositionService>());
 
         Assert.Multiple(() =>
         {
@@ -109,6 +112,8 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.Units, Is.Not.Null);
             Assert.That(client.ItemsStockLocations, Is.Not.Null);
             Assert.That(client.ItemsStockAreas, Is.Not.Null);
+            Assert.That(client.SalesItemPositions, Is.Not.Null);
+            Assert.That(client.SalesDefaultPositions, Is.Not.Null);
         });
     }
 }

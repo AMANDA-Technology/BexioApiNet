@@ -28,6 +28,7 @@ using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
+using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 
 namespace BexioApiNet.Interfaces;
 
@@ -171,4 +172,14 @@ public interface IBexioApiClient : IDisposable
     /// Bexio stock areas connector. <see href="https://docs.bexio.com/#tag/Stock-Areas">Stock Areas</see>
     /// </summary>
     public IStockAreaService ItemsStockAreas { get; set; }
+    /// Bexio article (item) position connector, shared across invoice/quote/order documents.
+    /// <see href="https://docs.bexio.com/#tag/Article-positions">Article positions</see>
+    /// </summary>
+    public IItemPositionService SalesItemPositions { get; set; }
+
+    /// <summary>
+    /// Bexio custom (default) position connector, shared across invoice/quote/order documents.
+    /// <see href="https://docs.bexio.com/#tag/Custom-positions">Custom positions</see>
+    /// </summary>
+    public IDefaultPositionService SalesDefaultPositions { get; set; }
 }

@@ -29,6 +29,7 @@ using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
+using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 
 namespace BexioApiNet.Services;
 
@@ -114,10 +115,18 @@ public sealed class BexioApiClient : IBexioApiClient
 
     /// <inheritdoc />
     public IUnitService Units { get; set; }
+
+    /// <inheritdoc />
     public IStockLocationService ItemsStockLocations { get; set; }
 
     /// <inheritdoc />
     public IStockAreaService ItemsStockAreas { get; set; }
+
+    /// <inheritdoc />
+    public IItemPositionService SalesItemPositions { get; set; }
+
+    /// <inheritdoc />
+    public IDefaultPositionService SalesDefaultPositions { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
@@ -150,7 +159,9 @@ public sealed class BexioApiClient : IBexioApiClient
         IItemService items,
         IUnitService units,
         IStockLocationService itemsStockLocations,
-        IStockAreaService itemsStockAreas)
+        IStockAreaService itemsStockAreas,
+        IItemPositionService salesItemPositions,
+        IDefaultPositionService salesDefaultPositions)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -180,6 +191,8 @@ public sealed class BexioApiClient : IBexioApiClient
         Units = units;
         ItemsStockLocations = itemsStockLocations;
         ItemsStockAreas = itemsStockAreas;
+        SalesItemPositions = salesItemPositions;
+        SalesDefaultPositions = salesDefaultPositions;
     }
 
     /// <inheritdoc />
