@@ -98,5 +98,7 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
 | Add comprehensive offline Unit and Integration coverage | Issue #7 — comprehensive Unit tests and WireMock.Net integration tests added. |
 | Vendor Bexio OpenAPI Spec | Issue #8 — `doc/openapi/bexio-v3.json` committed (OpenAPI 3.0.2, API v3.0.0, 355 paths, retrieved 2026-04-18). Refresh procedure in `doc/openapi/README.md`. |
 | Typed polymorphic positions and repetition schedules | Issue #59 — `IReadOnlyList<JsonElement>? Positions` replaced by `IReadOnlyList<Position>?` on 9 DTOs; `JsonElement? Repetition` replaced by `OrderRepetitionSchedule?` on 2 DTOs. Round-trip tests cover every variant. |
+| API Doc Comparison & Audit | Issue #71 — Wave 3 implementation audited against OpenAPI spec. 36 connector services fully compliant. Zero discrepancies found. |
+trip tests cover every variant. |
 over every variant. |
 trip tests cover every variant. |
