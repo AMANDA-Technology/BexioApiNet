@@ -104,7 +104,10 @@ public abstract class BexioE2eTestBase
             new StockLocationService(connectionHandler),
             new StockAreaService(connectionHandler),
             new ItemPositionService(connectionHandler),
-            new DefaultPositionService(connectionHandler));
+            new DefaultPositionService(connectionHandler),
+            new DiscountPositionService(connectionHandler),
+            new TextPositionService(connectionHandler),
+            new SubtotalPositionService(connectionHandler));
     }
 
     /// <summary>

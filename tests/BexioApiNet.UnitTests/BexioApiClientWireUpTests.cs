@@ -81,7 +81,10 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IStockLocationService>(),
             Substitute.For<IStockAreaService>(),
             Substitute.For<IItemPositionService>(),
-            Substitute.For<IDefaultPositionService>());
+            Substitute.For<IDefaultPositionService>(),
+            Substitute.For<IDiscountPositionService>(),
+            Substitute.For<ITextPositionService>(),
+            Substitute.For<ISubtotalPositionService>());
 
         Assert.Multiple(() =>
         {
@@ -114,6 +117,9 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.ItemsStockAreas, Is.Not.Null);
             Assert.That(client.SalesItemPositions, Is.Not.Null);
             Assert.That(client.SalesDefaultPositions, Is.Not.Null);
+            Assert.That(client.SalesDiscountPositions, Is.Not.Null);
+            Assert.That(client.SalesTextPositions, Is.Not.Null);
+            Assert.That(client.SalesSubtotalPositions, Is.Not.Null);
         });
     }
 }
