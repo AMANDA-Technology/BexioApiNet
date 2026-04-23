@@ -131,6 +131,8 @@ public static class BexioServiceCollection
         services.AddScoped<IDiscountPositionService, DiscountPositionService>();
         services.AddScoped<ITextPositionService, TextPositionService>();
         services.AddScoped<ISubtotalPositionService, SubtotalPositionService>();
+        services.AddScoped<ISubPositionService, SubPositionService>();
+        services.AddScoped<IPagebreakPositionService, PagebreakPositionService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;

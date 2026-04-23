@@ -198,6 +198,12 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public ISubtotalPositionService SalesSubtotalPositions { get; set; }
 
+    /// <inheritdoc />
+    public ISubPositionService SubPositions { get; set; }
+
+    /// <inheritdoc />
+    public IPagebreakPositionService PagebreakPositions { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -234,7 +240,9 @@ public sealed class BexioApiClient : IBexioApiClient
         IDefaultPositionService salesDefaultPositions,
         IDiscountPositionService salesDiscountPositions,
         ITextPositionService salesTextPositions,
-        ISubtotalPositionService salesSubtotalPositions)
+        ISubtotalPositionService salesSubtotalPositions,
+        ISubPositionService subPositions,
+        IPagebreakPositionService pagebreakPositions)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -269,6 +277,8 @@ public sealed class BexioApiClient : IBexioApiClient
         SalesDiscountPositions = salesDiscountPositions;
         SalesTextPositions = salesTextPositions;
         SalesSubtotalPositions = salesSubtotalPositions;
+        SubPositions = subPositions;
+        PagebreakPositions = pagebreakPositions;
     }
 
     /// <inheritdoc />

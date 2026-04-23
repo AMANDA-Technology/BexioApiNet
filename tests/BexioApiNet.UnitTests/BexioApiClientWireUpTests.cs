@@ -84,7 +84,9 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IDefaultPositionService>(),
             Substitute.For<IDiscountPositionService>(),
             Substitute.For<ITextPositionService>(),
-            Substitute.For<ISubtotalPositionService>());
+            Substitute.For<ISubtotalPositionService>(),
+            Substitute.For<ISubPositionService>(),
+            Substitute.For<IPagebreakPositionService>());
 
         Assert.Multiple(() =>
         {
@@ -120,6 +122,8 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.SalesDiscountPositions, Is.Not.Null);
             Assert.That(client.SalesTextPositions, Is.Not.Null);
             Assert.That(client.SalesSubtotalPositions, Is.Not.Null);
+            Assert.That(client.SubPositions, Is.Not.Null);
+            Assert.That(client.PagebreakPositions, Is.Not.Null);
         });
     }
 }

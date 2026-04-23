@@ -207,4 +207,12 @@ public interface IBexioApiClient : IDisposable
     ///     <see href="https://docs.bexio.com/#tag/Subtotal-positions">Subtotal Positions</see>
     /// </summary>
     public ISubtotalPositionService SalesSubtotalPositions { get; set; }
+    /// Bexio document sub-positions connector. <see href="https://docs.bexio.com/#tag/Sub-positions">Sub-positions</see>
+    /// </summary>
+    public ISubPositionService SubPositions { get; set; }
+
+    /// <summary>
+    /// Bexio document pagebreak-positions connector. <see href="https://docs.bexio.com/#tag/Pagebreak-positions">Pagebreak-positions</see>
+    /// </summary>
+    public IPagebreakPositionService PagebreakPositions { get; set; }
 }

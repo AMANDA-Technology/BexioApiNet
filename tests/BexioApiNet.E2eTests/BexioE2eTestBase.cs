@@ -107,7 +107,9 @@ public abstract class BexioE2eTestBase
             new DefaultPositionService(connectionHandler),
             new DiscountPositionService(connectionHandler),
             new TextPositionService(connectionHandler),
-            new SubtotalPositionService(connectionHandler));
+            new SubtotalPositionService(connectionHandler),
+            new SubPositionService(connectionHandler),
+            new PagebreakPositionService(connectionHandler));
     }
 
     /// <summary>
