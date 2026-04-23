@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.Contacts;
+using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
 
 namespace BexioApiNet.Interfaces;
@@ -150,4 +151,9 @@ public interface IBexioApiClient : IDisposable
     /// Bexio deliveries connector. <see href="https://docs.bexio.com/#tag/Deliveries">Deliveries</see>
     /// </summary>
     public IDeliveryService Deliveries { get; set; }
+
+    /// <summary>
+    /// Bexio items connector. <see href="https://docs.bexio.com/#tag/Items">Items</see>
+    /// </summary>
+    public IItemService Items { get; set; }
 }
