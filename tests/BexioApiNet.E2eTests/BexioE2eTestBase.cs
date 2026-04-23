@@ -98,7 +98,8 @@ public abstract class BexioE2eTestBase
             new QuoteService(connectionHandler),
             new OrderService(connectionHandler),
             new DeliveryService(connectionHandler),
-            new ItemService(connectionHandler));
+            new ItemService(connectionHandler),
+            new UnitService(connectionHandler));
     }
 
     /// <summary>

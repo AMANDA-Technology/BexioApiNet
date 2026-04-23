@@ -75,7 +75,8 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IQuoteService>(),
             Substitute.For<IOrderService>(),
             Substitute.For<IDeliveryService>(),
-            Substitute.For<IItemService>());
+            Substitute.For<IItemService>(),
+            Substitute.For<IUnitService>());
 
         Assert.Multiple(() =>
         {
@@ -103,6 +104,7 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.Orders, Is.Not.Null);
             Assert.That(client.Deliveries, Is.Not.Null);
             Assert.That(client.Items, Is.Not.Null);
+            Assert.That(client.Units, Is.Not.Null);
         });
     }
 }

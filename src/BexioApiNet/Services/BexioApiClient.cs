@@ -112,6 +112,9 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IItemService Items { get; set; }
 
+    /// <inheritdoc />
+    public IUnitService Units { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -140,7 +143,8 @@ public sealed class BexioApiClient : IBexioApiClient
         IQuoteService quotes,
         IOrderService orders,
         IDeliveryService deliveries,
-        IItemService items)
+        IItemService items,
+        IUnitService units)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -167,6 +171,7 @@ public sealed class BexioApiClient : IBexioApiClient
         Orders = orders;
         Deliveries = deliveries;
         Items = items;
+        Units = units;
     }
 
     /// <inheritdoc />

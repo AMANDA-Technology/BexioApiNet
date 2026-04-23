@@ -114,6 +114,7 @@ public static class BexioServiceCollection
         services.AddScoped<IOrderService, OrderService>();
         services.AddScoped<IDeliveryService, DeliveryService>();
         services.AddScoped<IItemService, ItemService>();
+        services.AddScoped<IUnitService, UnitService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;

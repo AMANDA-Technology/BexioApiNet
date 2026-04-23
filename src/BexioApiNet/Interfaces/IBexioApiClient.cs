@@ -156,4 +156,9 @@ public interface IBexioApiClient : IDisposable
     /// Bexio items connector. <see href="https://docs.bexio.com/#tag/Items">Items</see>
     /// </summary>
     public IItemService Items { get; set; }
+
+    /// <summary>
+    /// Bexio units connector. <see href="https://docs.bexio.com/#tag/Units">Units</see>
+    /// </summary>
+    public IUnitService Units { get; set; }
 }
