@@ -99,7 +99,9 @@ public abstract class BexioE2eTestBase
             new OrderService(connectionHandler),
             new DeliveryService(connectionHandler),
             new ItemService(connectionHandler),
-            new UnitService(connectionHandler));
+            new UnitService(connectionHandler),
+            new StockLocationService(connectionHandler),
+            new StockAreaService(connectionHandler));
     }
 
     /// <summary>

@@ -1,0 +1,290 @@
+/*
+MIT License
+
+Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
+Copyright (c) 2022 Manuel Gysin <manuel.gysin@amanda-technology.ch>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+using BexioApiNet.Abstractions.Enums.Api;
+using BexioApiNet.Abstractions.Models.Api;
+using BexioApiNet.Abstractions.Models.Items.StockLocations;
+using BexioApiNet.Models;
+using BexioApiNet.Services.Connectors.Items;
+
+namespace BexioApiNet.UnitTests.Items;
+
+/// <summary>
+/// Offline unit tests for <see cref="StockLocationService"/>. Each test verifies that the
+/// service forwards its calls to <see cref="IBexioConnectionHandler"/> with the expected
+/// arguments and returns the handler's result unchanged. No network access.
+/// </summary>
+[TestFixture]
+public sealed class StockLocationServiceTests : ServiceTestBase
+{
+    private const string ExpectedEndpoint = "2.0/stock";
+    private const string ExpectedSearchEndpoint = "2.0/stock/search";
+
+    private StockLocationService _sut = null!;
+
+    /// <summary>
+    /// Creates a fresh <see cref="StockLocationService"/> per test bound to the
+    /// <see cref="ServiceTestBase.ConnectionHandler"/> substitute from the base fixture.
+    /// </summary>
+    [SetUp]
+    public void CreateSut()
+    {
+        _sut = new StockLocationService(ConnectionHandler);
+    }
+
+    /// <summary>
+    /// With no parameters <c>Get</c> hits <c>2.0/stock</c> exactly once with a
+    /// <see langword="null"/> query parameter.
+    /// </summary>
+    [Test]
+    public async Task Get_WithNoParams_CallsGetAsyncOnceWithExpectedPath()
+    {
+        var response = new ApiResult<List<StockLocation>?>
+        {
+            IsSuccess = true,
+            Data = [new StockLocation(Id: 1, Name: "Stock Berlin")]
+        };
+        ConnectionHandler
+            .GetAsync<List<StockLocation>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var result = await _sut.Get();
+
+        Assert.That(result, Is.SameAs(response));
+        await ConnectionHandler.Received(1).GetAsync<List<StockLocation>?>(
+            ExpectedEndpoint,
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// When a <see cref="QueryParameterStockLocation"/> is supplied, its inner
+    /// <see cref="QueryParameter"/> instance is forwarded verbatim — the service must
+    /// not rewrap or substitute it.
+    /// </summary>
+    [Test]
+    public async Task Get_WithQueryParameter_PassesQueryParameterToConnectionHandler()
+    {
+        var queryParameter = new QueryParameterStockLocation(Limit: 50, Offset: 25);
+        ConnectionHandler
+            .GetAsync<List<StockLocation>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ApiResult<List<StockLocation>?> { IsSuccess = true, Data = [] }));
+
+        await _sut.Get(queryParameter);
+
+        await ConnectionHandler.Received(1).GetAsync<List<StockLocation>?>(
+            ExpectedEndpoint,
+            queryParameter.QueryParameter,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// <c>Get(autoPage: true)</c> triggers <see cref="IBexioConnectionHandler.FetchAll{TResult}"/>
+    /// when the <c>X-Total-Count</c> header is present and the first response only returned a page.
+    /// </summary>
+    [Test]
+    public async Task Get_WithAutoPage_CallsFetchAll()
+    {
+        const int totalResults = 8;
+        var initialData = new List<StockLocation>
+        {
+            new(Id: 1, Name: "Stock Berlin"),
+            new(Id: 2, Name: "Stock Munich")
+        };
+        var initial = new ApiResult<List<StockLocation>?>
+        {
+            IsSuccess = true,
+            Data = initialData,
+            ResponseHeaders = new Dictionary<string, int?>
+            {
+                { ApiHeaderNames.TotalResults, totalResults }
+            }
+        };
+        ConnectionHandler
+            .GetAsync<List<StockLocation>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(initial));
+        ConnectionHandler
+            .FetchAll<StockLocation>(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns([]);
+
+        await _sut.Get(autoPage: true);
+
+        await ConnectionHandler.Received(1).FetchAll<StockLocation>(
+            initialData.Count,
+            totalResults,
+            ExpectedEndpoint,
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// The cancellation token supplied by the caller of <c>Get</c> must be forwarded to the
+    /// connection handler so cooperative cancellation flows end-to-end.
+    /// </summary>
+    [Test]
+    public async Task Get_ForwardsCancellationTokenToConnectionHandler()
+    {
+        using var cts = new CancellationTokenSource();
+        ConnectionHandler
+            .GetAsync<List<StockLocation>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ApiResult<List<StockLocation>?> { IsSuccess = true, Data = [] }));
+
+        await _sut.Get(cancellationToken: cts.Token);
+
+        await ConnectionHandler.Received(1).GetAsync<List<StockLocation>?>(
+            ExpectedEndpoint,
+            null,
+            cts.Token);
+    }
+
+    /// <summary>
+    /// A failing <see cref="ApiResult{T}"/> from the connection handler must surface to the
+    /// caller untouched — the service may not swallow errors.
+    /// </summary>
+    [Test]
+    public async Task Get_ReturnsApiResultFromConnectionHandlerUnchanged()
+    {
+        var apiError = new ApiError(ErrorCode: 401, Message: "unauthorized", Errors: new object());
+        var response = new ApiResult<List<StockLocation>?>
+        {
+            IsSuccess = false,
+            ApiError = apiError,
+            StatusCode = System.Net.HttpStatusCode.Unauthorized,
+            Data = null
+        };
+        ConnectionHandler
+            .GetAsync<List<StockLocation>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var result = await _sut.Get();
+
+        Assert.That(result, Is.SameAs(response));
+    }
+
+    /// <summary>
+    /// <c>Search</c> posts the supplied <see cref="SearchCriteria"/> list to
+    /// <c>2.0/stock/search</c> via <see cref="IBexioConnectionHandler.PostSearchAsync{TResult}"/>.
+    /// </summary>
+    [Test]
+    public async Task Search_CallsPostSearchAsyncWithExpectedPathAndBody()
+    {
+        var criteria = new List<SearchCriteria>
+        {
+            new() { Field = "name", Value = "Berlin", Criteria = "like" }
+        };
+        var response = new ApiResult<List<StockLocation>>
+        {
+            IsSuccess = true,
+            Data = [new StockLocation(Id: 1, Name: "Stock Berlin")]
+        };
+        ConnectionHandler
+            .PostSearchAsync<StockLocation>(Arg.Any<List<SearchCriteria>>(), Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var result = await _sut.Search(criteria);
+
+        Assert.That(result, Is.SameAs(response));
+        await ConnectionHandler.Received(1).PostSearchAsync<StockLocation>(
+            criteria,
+            ExpectedSearchEndpoint,
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// When a <see cref="QueryParameterStockLocation"/> is supplied to <c>Search</c>, the
+    /// inner <see cref="QueryParameter"/> is forwarded to the handler so pagination /
+    /// ordering parameters reach the URI.
+    /// </summary>
+    [Test]
+    public async Task Search_WithQueryParameter_PassesQueryParameterToConnectionHandler()
+    {
+        var criteria = new List<SearchCriteria>
+        {
+            new() { Field = "name", Value = "Munich", Criteria = "=" }
+        };
+        var queryParameter = new QueryParameterStockLocation(Limit: 10, Offset: 0);
+        ConnectionHandler
+            .PostSearchAsync<StockLocation>(Arg.Any<List<SearchCriteria>>(), Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ApiResult<List<StockLocation>> { IsSuccess = true, Data = [] }));
+
+        await _sut.Search(criteria, queryParameter);
+
+        await ConnectionHandler.Received(1).PostSearchAsync<StockLocation>(
+            criteria,
+            ExpectedSearchEndpoint,
+            queryParameter.QueryParameter,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// The cancellation token supplied by the caller of <c>Search</c> must be forwarded to
+    /// the connection handler.
+    /// </summary>
+    [Test]
+    public async Task Search_ForwardsCancellationTokenToConnectionHandler()
+    {
+        using var cts = new CancellationTokenSource();
+        var criteria = new List<SearchCriteria>
+        {
+            new() { Field = "name", Value = "Foo", Criteria = "=" }
+        };
+        ConnectionHandler
+            .PostSearchAsync<StockLocation>(Arg.Any<List<SearchCriteria>>(), Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ApiResult<List<StockLocation>> { IsSuccess = true, Data = [] }));
+
+        await _sut.Search(criteria, cancellationToken: cts.Token);
+
+        await ConnectionHandler.Received(1).PostSearchAsync<StockLocation>(
+            criteria,
+            ExpectedSearchEndpoint,
+            null,
+            cts.Token);
+    }
+
+    /// <summary>
+    /// A failing <see cref="ApiResult{T}"/> returned by <see cref="IBexioConnectionHandler.PostSearchAsync{TResult}"/>
+    /// must surface to the caller of <c>Search</c> untouched.
+    /// </summary>
+    [Test]
+    public async Task Search_ReturnsApiResultFromConnectionHandlerUnchanged()
+    {
+        var apiError = new ApiError(ErrorCode: 422, Message: "invalid search", Errors: new object());
+        var response = new ApiResult<List<StockLocation>>
+        {
+            IsSuccess = false,
+            ApiError = apiError,
+            StatusCode = System.Net.HttpStatusCode.UnprocessableEntity,
+            Data = null
+        };
+        ConnectionHandler
+            .PostSearchAsync<StockLocation>(Arg.Any<List<SearchCriteria>>(), Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var result = await _sut.Search([]);
+
+        Assert.That(result, Is.SameAs(response));
+    }
+}

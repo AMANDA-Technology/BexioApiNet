@@ -161,4 +161,14 @@ public interface IBexioApiClient : IDisposable
     /// Bexio units connector. <see href="https://docs.bexio.com/#tag/Units">Units</see>
     /// </summary>
     public IUnitService Units { get; set; }
+
+    /// <summary>
+    /// Bexio stock locations connector. <see href="https://docs.bexio.com/#tag/Stock-locations">Stock locations</see>
+    /// </summary>
+    public IStockLocationService ItemsStockLocations { get; set; }
+
+    /// <summary>
+    /// Bexio stock areas connector. <see href="https://docs.bexio.com/#tag/Stock-Areas">Stock Areas</see>
+    /// </summary>
+    public IStockAreaService ItemsStockAreas { get; set; }
 }
