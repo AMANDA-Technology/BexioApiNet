@@ -29,6 +29,7 @@ using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
 using BexioApiNet.Interfaces.Connectors.Sales;
@@ -296,4 +297,9 @@ public interface IBexioApiClient : IDisposable
     ///     Bexio expenses connector. <see href="https://docs.bexio.com/#tag/Expenses">Expenses</see>
     /// </summary>
     public IExpenseService Expenses { get; set; }
+
+    /// <summary>
+    ///     Bexio payroll employees connector. <see href="https://docs.bexio.com/#tag/Employees">Employees</see>
+    /// </summary>
+    public IEmployeeService PayrollEmployees { get; set; }
 }

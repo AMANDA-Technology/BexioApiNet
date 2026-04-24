@@ -30,6 +30,7 @@ using BexioApiNet.Services.Connectors.BusinessActivities;
 using BexioApiNet.Services.Connectors.Contacts;
 using BexioApiNet.Services.Connectors.Expenses;
 using BexioApiNet.Services.Connectors.Items;
+using BexioApiNet.Services.Connectors.Payroll;
 using BexioApiNet.Services.Connectors.Projects;
 using BexioApiNet.Services.Connectors.Purchases;
 using BexioApiNet.Services.Connectors.Sales;
@@ -129,7 +130,8 @@ public abstract class BexioE2eTestBase
             new PackageService(connectionHandler),
             new BillService(connectionHandler),
             new PurchaseOrderService(connectionHandler),
-            new ExpenseService(connectionHandler));
+            new ExpenseService(connectionHandler),
+            new EmployeeService(connectionHandler));
     }
 
     /// <summary>

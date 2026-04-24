@@ -29,6 +29,7 @@ using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
 using BexioApiNet.Interfaces.Connectors.Sales;
@@ -106,7 +107,8 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IPackageService>(),
             Substitute.For<IBillService>(),
             Substitute.For<IPurchaseOrderService>(),
-            Substitute.For<IExpenseService>());
+            Substitute.For<IExpenseService>(),
+            Substitute.For<IEmployeeService>());
 
         Assert.Multiple(() =>
         {
@@ -158,6 +160,7 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.PurchaseBills, Is.Not.Null);
             Assert.That(client.PurchaseOrders, Is.Not.Null);
             Assert.That(client.Expenses, Is.Not.Null);
+            Assert.That(client.PayrollEmployees, Is.Not.Null);
         });
     }
 }
