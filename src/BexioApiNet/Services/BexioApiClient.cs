@@ -30,6 +30,7 @@ using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.MasterData;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
@@ -201,6 +202,12 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IPaystubService PayrollPaystubs { get; set; }
 
+    /// <inheritdoc />
+    public IUserService Users { get; set; }
+
+    /// <inheritdoc />
+    public IFictionalUserService FictionalUsers { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -256,7 +263,9 @@ public sealed class BexioApiClient : IBexioApiClient
         IExpenseService expenses,
         IEmployeeService payrollEmployees,
         IAbsenceService payrollAbsences,
-        IPaystubService payrollPaystubs)
+        IPaystubService payrollPaystubs,
+        IUserService users,
+        IFictionalUserService fictionalUsers)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -310,6 +319,8 @@ public sealed class BexioApiClient : IBexioApiClient
         PayrollEmployees = payrollEmployees;
         PayrollAbsences = payrollAbsences;
         PayrollPaystubs = payrollPaystubs;
+        Users = users;
+        FictionalUsers = fictionalUsers;
     }
 
     /// <inheritdoc />

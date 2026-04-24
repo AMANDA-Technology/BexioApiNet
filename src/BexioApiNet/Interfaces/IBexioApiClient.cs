@@ -29,6 +29,7 @@ using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.MasterData;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
@@ -312,4 +313,16 @@ public interface IBexioApiClient : IDisposable
     ///     Bexio payroll paystubs connector. <see href="https://docs.bexio.com/#tag/Paystubs">Paystubs</see>
     /// </summary>
     public IPaystubService PayrollPaystubs { get; set; }
+
+    /// <summary>
+    ///     Bexio users connector (read-only v3.0 user management).
+    ///     <see href="https://docs.bexio.com/#tag/User-Management">User Management</see>
+    /// </summary>
+    public IUserService Users { get; set; }
+
+    /// <summary>
+    ///     Bexio fictional users connector (v3.0 fictional user management).
+    ///     <see href="https://docs.bexio.com/#tag/Fictional-User-Management">Fictional User Management</see>
+    /// </summary>
+    public IFictionalUserService FictionalUsers { get; set; }
 }
