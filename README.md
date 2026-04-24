@@ -4,7 +4,7 @@ Unofficial .NET 10 API client library for the [Bexio v3 REST API](https://docs.b
 
 [Bexio](https://www.bexio.com/) is a Swiss cloud business platform for accounting, invoicing, and banking.
 
-> Work in progress. If you have landed here and are looking for a more comprehensive Bexio API Client Library for .Net, please contact us and we will look for a solution together! Or if you are someone from Bexio and you would like to offer a .Net library to your customers, you are welcome to contact us for a cooperation. 🙌
+> Work in progress!
 
 [![BuildNuGetAndPublish](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/main.yml/badge.svg)](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/main.yml)
 [![PR CI](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/pr.yml/badge.svg)](https://github.com/AMANDA-Technology/BexioApiNet/actions/workflows/pr.yml)
