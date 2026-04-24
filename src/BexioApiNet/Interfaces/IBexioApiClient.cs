@@ -285,4 +285,9 @@ public interface IBexioApiClient : IDisposable
     ///     Bexio purchase bills connector. <see href="https://docs.bexio.com/#tag/Bills">Bills</see>
     /// </summary>
     public IBillService PurchaseBills { get; set; }
+
+    /// <summary>
+    ///     Bexio purchase orders connector. <see href="https://docs.bexio.com/#tag/Purchase-Orders">Purchase Orders</see>
+    /// </summary>
+    public IPurchaseOrderService PurchaseOrders { get; set; }
 }

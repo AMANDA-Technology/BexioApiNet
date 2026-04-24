@@ -184,6 +184,9 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IBillService PurchaseBills { get; set; }
 
+    /// <inheritdoc />
+    public IPurchaseOrderService PurchaseOrders { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -234,7 +237,8 @@ public sealed class BexioApiClient : IBexioApiClient
         IProjectTypeService projectTypes,
         IMilestoneService milestones,
         IPackageService packages,
-        IBillService purchaseBills)
+        IBillService purchaseBills,
+        IPurchaseOrderService purchaseOrders)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -283,6 +287,7 @@ public sealed class BexioApiClient : IBexioApiClient
         Milestones = milestones;
         Packages = packages;
         PurchaseBills = purchaseBills;
+        PurchaseOrders = purchaseOrders;
     }
 
     /// <inheritdoc />

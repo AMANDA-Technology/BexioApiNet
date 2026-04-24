@@ -126,7 +126,8 @@ public abstract class BexioE2eTestBase
             new ProjectTypeService(connectionHandler),
             new MilestoneService(connectionHandler),
             new PackageService(connectionHandler),
-            new BillService(connectionHandler));
+            new BillService(connectionHandler),
+            new PurchaseOrderService(connectionHandler));
     }
 
     /// <summary>

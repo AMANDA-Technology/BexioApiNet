@@ -155,6 +155,7 @@ public static class BexioServiceCollection
         services.AddScoped<IMilestoneService, MilestoneService>();
         services.AddScoped<IPackageService, PackageService>();
         services.AddScoped<IBillService, BillService>();
+        services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;
