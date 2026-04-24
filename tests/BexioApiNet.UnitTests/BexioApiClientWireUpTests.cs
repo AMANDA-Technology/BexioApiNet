@@ -28,6 +28,7 @@ using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
+using BexioApiNet.Interfaces.Connectors.Files;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
@@ -110,7 +111,9 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IExpenseService>(),
             Substitute.For<IEmployeeService>(),
             Substitute.For<IAbsenceService>(),
-            Substitute.For<IPaystubService>());
+            Substitute.For<IPaystubService>(),
+            Substitute.For<IDocumentSettingService>(),
+            Substitute.For<IDocumentTemplateService>());
 
         Assert.Multiple(() =>
         {
@@ -165,6 +168,8 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.PayrollEmployees, Is.Not.Null);
             Assert.That(client.PayrollAbsences, Is.Not.Null);
             Assert.That(client.PayrollPaystubs, Is.Not.Null);
+            Assert.That(client.DocumentSettings, Is.Not.Null);
+            Assert.That(client.DocumentTemplates, Is.Not.Null);
         });
     }
 }

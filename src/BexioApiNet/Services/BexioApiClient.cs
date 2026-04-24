@@ -29,6 +29,7 @@ using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
+using BexioApiNet.Interfaces.Connectors.Files;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
@@ -201,6 +202,12 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IPaystubService PayrollPaystubs { get; set; }
 
+    /// <inheritdoc />
+    public IDocumentSettingService DocumentSettings { get; set; }
+
+    /// <inheritdoc />
+    public IDocumentTemplateService DocumentTemplates { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -256,7 +263,9 @@ public sealed class BexioApiClient : IBexioApiClient
         IExpenseService expenses,
         IEmployeeService payrollEmployees,
         IAbsenceService payrollAbsences,
-        IPaystubService payrollPaystubs)
+        IPaystubService payrollPaystubs,
+        IDocumentSettingService documentSettings,
+        IDocumentTemplateService documentTemplates)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -310,6 +319,8 @@ public sealed class BexioApiClient : IBexioApiClient
         PayrollEmployees = payrollEmployees;
         PayrollAbsences = payrollAbsences;
         PayrollPaystubs = payrollPaystubs;
+        DocumentSettings = documentSettings;
+        DocumentTemplates = documentTemplates;
     }
 
     /// <inheritdoc />
