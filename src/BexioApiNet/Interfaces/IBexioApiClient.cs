@@ -30,6 +30,7 @@ using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
 using BexioApiNet.Interfaces.Connectors.Files;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.MasterData;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
@@ -328,4 +329,7 @@ public interface IBexioApiClient : IDisposable
     ///     <see href="https://docs.bexio.com/#tag/Document-templates">Document templates</see>
     /// </summary>
     public IDocumentTemplateService DocumentTemplates { get; set; }
+    ///     Bexio countries connector. <see href="https://docs.bexio.com/#tag/Countries">Countries</see>
+    /// </summary>
+    public ICountryService Countries { get; set; }
 }

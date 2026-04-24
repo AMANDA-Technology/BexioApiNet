@@ -33,6 +33,7 @@ using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
 using BexioApiNet.Interfaces.Connectors.Files;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.MasterData;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
@@ -48,6 +49,7 @@ using BexioApiNet.Services.Connectors.Contacts;
 using BexioApiNet.Services.Connectors.Expenses;
 using BexioApiNet.Services.Connectors.Files;
 using BexioApiNet.Services.Connectors.Items;
+using BexioApiNet.Services.Connectors.MasterData;
 using BexioApiNet.Services.Connectors.Payroll;
 using BexioApiNet.Services.Connectors.Projects;
 using BexioApiNet.Services.Connectors.Purchases;
@@ -169,6 +171,7 @@ public static class BexioServiceCollection
         services.AddScoped<IFileService, FileService>();
         services.AddScoped<IDocumentSettingService, DocumentSettingService>();
         services.AddScoped<IDocumentTemplateService, DocumentTemplateService>();
+        services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;

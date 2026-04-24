@@ -31,6 +31,7 @@ using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
 using BexioApiNet.Interfaces.Connectors.Files;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.MasterData;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
@@ -208,6 +209,7 @@ public sealed class BexioApiClient : IBexioApiClient
 
     /// <inheritdoc />
     public IDocumentTemplateService DocumentTemplates { get; set; }
+    public ICountryService Countries { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
@@ -268,6 +270,7 @@ public sealed class BexioApiClient : IBexioApiClient
         IFileService files)
         IDocumentSettingService documentSettings,
         IDocumentTemplateService documentTemplates)
+        ICountryService countries)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -324,6 +327,7 @@ public sealed class BexioApiClient : IBexioApiClient
         Files = files;
         DocumentSettings = documentSettings;
         DocumentTemplates = documentTemplates;
+        Countries = countries;
     }
 
     /// <inheritdoc />

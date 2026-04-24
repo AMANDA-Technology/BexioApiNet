@@ -30,6 +30,7 @@ using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
 using BexioApiNet.Interfaces.Connectors.Files;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.MasterData;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
@@ -115,6 +116,7 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IFileService>());
             Substitute.For<IDocumentSettingService>(),
             Substitute.For<IDocumentTemplateService>());
+            Substitute.For<ICountryService>());
 
         Assert.Multiple(() =>
         {
@@ -172,6 +174,7 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.Files, Is.Not.Null);
             Assert.That(client.DocumentSettings, Is.Not.Null);
             Assert.That(client.DocumentTemplates, Is.Not.Null);
+            Assert.That(client.Countries, Is.Not.Null);
         });
     }
 }
