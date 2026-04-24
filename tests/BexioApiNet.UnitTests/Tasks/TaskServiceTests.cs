@@ -162,7 +162,7 @@ public sealed class TaskServiceTests : ServiceTestBase
 
         var result = await _sut.Get();
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
     }
 
     /// <summary>
@@ -184,7 +184,7 @@ public sealed class TaskServiceTests : ServiceTestBase
 
         await _sut.GetById(id);
 
-        Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{id}"));
+        capturedPath.ShouldBe($"{ExpectedEndpoint}/{id}");
     }
 
     /// <summary>
@@ -203,7 +203,7 @@ public sealed class TaskServiceTests : ServiceTestBase
 
         var result = await _sut.GetById(1);
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
     }
 
     /// <summary>
@@ -247,7 +247,7 @@ public sealed class TaskServiceTests : ServiceTestBase
 
         var result = await _sut.Create(payload);
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
     }
 
     /// <summary>
@@ -300,7 +300,7 @@ public sealed class TaskServiceTests : ServiceTestBase
 
         await _sut.Update(id, payload);
 
-        Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{id}"));
+        capturedPath.ShouldBe($"{ExpectedEndpoint}/{id}");
         await ConnectionHandler.Received(1).PostAsync<BexioTask, TaskUpdate>(
             payload,
             $"{ExpectedEndpoint}/{id}",
@@ -325,7 +325,7 @@ public sealed class TaskServiceTests : ServiceTestBase
 
         await _sut.Delete(id);
 
-        Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{id}"));
+        capturedPath.ShouldBe($"{ExpectedEndpoint}/{id}");
     }
 
     private static TaskCreate BuildCreatePayload()

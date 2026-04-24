@@ -93,6 +93,6 @@ public sealed class TaskStatusServiceTests : ServiceTestBase
 
         var result = await _sut.Get();
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
     }
 }

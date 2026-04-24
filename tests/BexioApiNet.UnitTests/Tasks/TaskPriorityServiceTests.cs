@@ -93,6 +93,6 @@ public sealed class TaskPriorityServiceTests : ServiceTestBase
 
         var result = await _sut.Get();
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
     }
 }
