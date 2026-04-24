@@ -29,7 +29,9 @@ using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
+using BexioApiNet.Interfaces.Connectors.Files;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.MasterData;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
@@ -201,6 +203,48 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IPaystubService PayrollPaystubs { get; set; }
 
+    /// <inheritdoc />
+    public IFileService Files { get; set; }
+
+    /// <inheritdoc />
+    public IDocumentSettingService DocumentSettings { get; set; }
+
+    /// <inheritdoc />
+    public IDocumentTemplateService DocumentTemplates { get; set; }
+
+    /// <inheritdoc />
+    public ICountryService Countries { get; set; }
+
+    /// <inheritdoc />
+    public ISalutationService Salutations { get; set; }
+
+    /// <inheritdoc />
+    public ITitleService Titles { get; set; }
+
+    /// <inheritdoc />
+    public ILanguageService Languages { get; set; }
+
+    /// <inheritdoc />
+    public ICommunicationTypeService CommunicationTypes { get; set; }
+
+    /// <inheritdoc />
+    public ICompanyProfileService CompanyProfiles { get; set; }
+
+    /// <inheritdoc />
+    public IPermissionService Permissions { get; set; }
+
+    /// <inheritdoc />
+    public IUserService Users { get; set; }
+
+    /// <inheritdoc />
+    public IFictionalUserService FictionalUsers { get; set; }
+
+    /// <inheritdoc />
+    public INoteService Notes { get; set; }
+
+    /// <inheritdoc />
+    public ICommentService Comments { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -256,7 +300,21 @@ public sealed class BexioApiClient : IBexioApiClient
         IExpenseService expenses,
         IEmployeeService payrollEmployees,
         IAbsenceService payrollAbsences,
-        IPaystubService payrollPaystubs)
+        IPaystubService payrollPaystubs,
+        IFileService files,
+        IDocumentSettingService documentSettings,
+        IDocumentTemplateService documentTemplates,
+        ICountryService countries,
+        ISalutationService salutations,
+        ITitleService titles,
+        ILanguageService languages,
+        ICommunicationTypeService communicationTypes,
+        ICompanyProfileService companyProfiles,
+        IPermissionService permissions,
+        IUserService users,
+        IFictionalUserService fictionalUsers,
+        INoteService notes,
+        ICommentService comments)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -310,6 +368,20 @@ public sealed class BexioApiClient : IBexioApiClient
         PayrollEmployees = payrollEmployees;
         PayrollAbsences = payrollAbsences;
         PayrollPaystubs = payrollPaystubs;
+        Files = files;
+        DocumentSettings = documentSettings;
+        DocumentTemplates = documentTemplates;
+        Countries = countries;
+        Salutations = salutations;
+        Titles = titles;
+        Languages = languages;
+        CommunicationTypes = communicationTypes;
+        CompanyProfiles = companyProfiles;
+        Permissions = permissions;
+        Users = users;
+        FictionalUsers = fictionalUsers;
+        Notes = notes;
+        Comments = comments;
     }
 
     /// <inheritdoc />
