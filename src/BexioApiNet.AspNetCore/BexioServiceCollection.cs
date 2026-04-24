@@ -167,6 +167,8 @@ public static class BexioServiceCollection
         services.AddScoped<IAbsenceService, AbsenceService>();
         services.AddScoped<IPaystubService, PaystubService>();
         services.AddScoped<IFileService, FileService>();
+        services.AddScoped<IDocumentSettingService, DocumentSettingService>();
+        services.AddScoped<IDocumentTemplateService, DocumentTemplateService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;

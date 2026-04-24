@@ -136,6 +136,8 @@ public abstract class BexioE2eTestBase
             new AbsenceService(connectionHandler),
             new PaystubService(connectionHandler),
             new FileService(connectionHandler));
+            new DocumentSettingService(connectionHandler),
+            new DocumentTemplateService(connectionHandler));
     }
 
     /// <summary>

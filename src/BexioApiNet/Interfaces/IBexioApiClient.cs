@@ -318,4 +318,14 @@ public interface IBexioApiClient : IDisposable
     ///     Bexio files connector. <see href="https://docs.bexio.com/#tag/Files">Files</see>
     /// </summary>
     public IFileService Files { get; set; }
+    ///     Bexio document settings connector (<c>kb_item_setting</c> lookup).
+    ///     <see href="https://docs.bexio.com/#tag/Document-Settings">Document Settings</see>
+    /// </summary>
+    public IDocumentSettingService DocumentSettings { get; set; }
+
+    /// <summary>
+    ///     Bexio document templates connector.
+    ///     <see href="https://docs.bexio.com/#tag/Document-templates">Document templates</see>
+    /// </summary>
+    public IDocumentTemplateService DocumentTemplates { get; set; }
 }

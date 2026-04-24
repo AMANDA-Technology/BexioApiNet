@@ -113,6 +113,8 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IAbsenceService>(),
             Substitute.For<IPaystubService>(),
             Substitute.For<IFileService>());
+            Substitute.For<IDocumentSettingService>(),
+            Substitute.For<IDocumentTemplateService>());
 
         Assert.Multiple(() =>
         {
@@ -168,6 +170,8 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.PayrollAbsences, Is.Not.Null);
             Assert.That(client.PayrollPaystubs, Is.Not.Null);
             Assert.That(client.Files, Is.Not.Null);
+            Assert.That(client.DocumentSettings, Is.Not.Null);
+            Assert.That(client.DocumentTemplates, Is.Not.Null);
         });
     }
 }

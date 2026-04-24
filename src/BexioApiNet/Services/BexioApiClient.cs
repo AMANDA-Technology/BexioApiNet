@@ -204,6 +204,10 @@ public sealed class BexioApiClient : IBexioApiClient
 
     /// <inheritdoc />
     public IFileService Files { get; set; }
+    public IDocumentSettingService DocumentSettings { get; set; }
+
+    /// <inheritdoc />
+    public IDocumentTemplateService DocumentTemplates { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
@@ -262,6 +266,8 @@ public sealed class BexioApiClient : IBexioApiClient
         IAbsenceService payrollAbsences,
         IPaystubService payrollPaystubs,
         IFileService files)
+        IDocumentSettingService documentSettings,
+        IDocumentTemplateService documentTemplates)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -316,6 +322,8 @@ public sealed class BexioApiClient : IBexioApiClient
         PayrollAbsences = payrollAbsences;
         PayrollPaystubs = payrollPaystubs;
         Files = files;
+        DocumentSettings = documentSettings;
+        DocumentTemplates = documentTemplates;
     }
 
     /// <inheritdoc />
