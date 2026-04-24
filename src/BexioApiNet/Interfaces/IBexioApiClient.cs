@@ -27,8 +27,11 @@ using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
+using BexioApiNet.Interfaces.Connectors.Expenses;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
+using BexioApiNet.Interfaces.Connectors.Purchases;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 using BexioApiNet.Interfaces.Connectors.Timesheets;
@@ -279,4 +282,34 @@ public interface IBexioApiClient : IDisposable
     /// <see href="https://docs.bexio.com/#tag/Projects">Projects</see>
     /// </summary>
     public IPackageService Packages { get; set; }
+
+    /// <summary>
+    ///     Bexio purchase bills connector. <see href="https://docs.bexio.com/#tag/Bills">Bills</see>
+    /// </summary>
+    public IBillService PurchaseBills { get; set; }
+
+    /// <summary>
+    ///     Bexio purchase orders connector. <see href="https://docs.bexio.com/#tag/Purchase-Orders">Purchase Orders</see>
+    /// </summary>
+    public IPurchaseOrderService PurchaseOrders { get; set; }
+
+    /// <summary>
+    ///     Bexio expenses connector. <see href="https://docs.bexio.com/#tag/Expenses">Expenses</see>
+    /// </summary>
+    public IExpenseService Expenses { get; set; }
+
+    /// <summary>
+    ///     Bexio payroll employees connector. <see href="https://docs.bexio.com/#tag/Employees">Employees</see>
+    /// </summary>
+    public IEmployeeService PayrollEmployees { get; set; }
+
+    /// <summary>
+    ///     Bexio payroll absences connector. <see href="https://docs.bexio.com/#tag/Absences">Absences</see>
+    /// </summary>
+    public IAbsenceService PayrollAbsences { get; set; }
+
+    /// <summary>
+    ///     Bexio payroll paystubs connector. <see href="https://docs.bexio.com/#tag/Paystubs">Paystubs</see>
+    /// </summary>
+    public IPaystubService PayrollPaystubs { get; set; }
 }

@@ -28,8 +28,11 @@ using BexioApiNet.Services.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Banking;
 using BexioApiNet.Services.Connectors.BusinessActivities;
 using BexioApiNet.Services.Connectors.Contacts;
+using BexioApiNet.Services.Connectors.Expenses;
 using BexioApiNet.Services.Connectors.Items;
+using BexioApiNet.Services.Connectors.Payroll;
 using BexioApiNet.Services.Connectors.Projects;
+using BexioApiNet.Services.Connectors.Purchases;
 using BexioApiNet.Services.Connectors.Sales;
 using BexioApiNet.Services.Connectors.Sales.Positions;
 using BexioApiNet.Services.Connectors.Timesheets;
@@ -124,7 +127,13 @@ public abstract class BexioE2eTestBase
             new ProjectStateService(connectionHandler),
             new ProjectTypeService(connectionHandler),
             new MilestoneService(connectionHandler),
-            new PackageService(connectionHandler));
+            new PackageService(connectionHandler),
+            new BillService(connectionHandler),
+            new PurchaseOrderService(connectionHandler),
+            new ExpenseService(connectionHandler),
+            new EmployeeService(connectionHandler),
+            new AbsenceService(connectionHandler),
+            new PaystubService(connectionHandler));
     }
 
     /// <summary>

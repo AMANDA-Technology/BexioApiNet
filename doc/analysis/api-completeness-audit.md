@@ -10,8 +10,8 @@ status: tracking
 Full inventory of the Bexio REST API v3.0.0 mapped against BexioApiNet implementation status. Source of truth: vendored OpenAPI spec at `doc/openapi/bexio-v3.json`.
 
 **Total endpoint methods:** 309  
-**Implemented:** 192 (62.1%)  
-**Remaining:** 117 (37.9%)
+**Implemented:** 223 (72.2%)  
+**Remaining:** 86 (27.8%)
 
 ---
 
@@ -29,11 +29,11 @@ Full inventory of the Bexio REST API v3.0.0 mapped against BexioApiNet implement
 | 8 | Document Positions | 7 | 35 | 35 | 0 | 3 |
 | 9 | Projects | 1 | 20 | 0 | 20 | 4 |
 | 10 | Timesheets & Tasks | 3 | 18 | 0 | 18 | 4 |
-| 11 | Purchase & Expenses | 3 | 21 | 0 | 21 | 5 |
-| 12 | Payroll | 3 | 10 | 0 | 10 | 5 |
+| 11 | Purchase & Expenses | 3 | 21 | 21 | 0 | 5 |
+| 12 | Payroll | 3 | 10 | 10 | 0 | 5 |
 | 13 | Files & Documents | 3 | 11 | 0 | 11 | 6 |
 | 14 | Master Data & Settings | 9 | 42 | 0 | 42 | 6 |
-| | **TOTAL** | **56** | **309** | **192** | **117** | |
+| | **TOTAL** | **56** | **309** | **223** | **86** | |
 
 ---
 
@@ -489,72 +489,72 @@ All position types share the same polymorphic pattern: CRUD on `/{kb_document_ty
 
 ---
 
-## Domain Group 11: Purchase & Expenses — Wave 5
+## Domain Group 11: Purchase & Expenses — Wave 5 — DONE
 
-### Tag: Bills (8 endpoints)
-
-| Method | Path | Status | Service |
-|--------|------|--------|---------|
-| GET | `/4.0/purchase/bills` | TODO | BillService |
-| GET | `/4.0/purchase/bills/{id}` | TODO | BillService |
-| GET | `/4.0/purchase/documentnumbers/bills` | TODO | BillService |
-| POST | `/4.0/purchase/bills` | TODO | BillService |
-| POST | `/4.0/purchase/bills/{id}/actions` | TODO | BillService |
-| PUT | `/4.0/purchase/bills/{id}` | TODO | BillService |
-| PUT | `/4.0/purchase/bills/{id}/bookings/{status}` | TODO | BillService |
-| DELETE | `/4.0/purchase/bills/{id}` | TODO | BillService |
-
-### Tag: Purchase Orders (5 endpoints)
+### Tag: Bills (8 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/3.0/purchase_orders` | TODO | PurchaseOrderService |
-| GET | `/3.0/purchase_orders/{purchase_order_id}` | TODO | PurchaseOrderService |
-| POST | `/3.0/purchase_orders` | TODO | PurchaseOrderService |
-| PUT | `/3.0/purchase_orders/{purchase_order_id}` | TODO | PurchaseOrderService |
-| DELETE | `/3.0/purchase_orders/{purchase_order_id}` | TODO | PurchaseOrderService |
+| GET | `/4.0/purchase/bills` | DONE | BillService |
+| GET | `/4.0/purchase/bills/{id}` | DONE | BillService |
+| GET | `/4.0/purchase/documentnumbers/bills` | DONE | BillService |
+| POST | `/4.0/purchase/bills` | DONE | BillService |
+| POST | `/4.0/purchase/bills/{id}/actions` | DONE | BillService |
+| PUT | `/4.0/purchase/bills/{id}` | DONE | BillService |
+| PUT | `/4.0/purchase/bills/{id}/bookings/{status}` | DONE | BillService |
+| DELETE | `/4.0/purchase/bills/{id}` | DONE | BillService |
 
-### Tag: Expenses (8 endpoints)
+### Tag: Purchase Orders (5 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/4.0/expenses` | TODO | ExpenseService |
-| GET | `/4.0/expenses/{id}` | TODO | ExpenseService |
-| GET | `/4.0/expenses/documentnumbers` | TODO | ExpenseService |
-| POST | `/4.0/expenses` | TODO | ExpenseService |
-| POST | `/4.0/expenses/{id}/actions` | TODO | ExpenseService |
-| PUT | `/4.0/expenses/{id}` | TODO | ExpenseService |
-| PUT | `/4.0/expenses/{id}/bookings/{status}` | TODO | ExpenseService |
-| DELETE | `/4.0/expenses/{id}` | TODO | ExpenseService |
+| GET | `/3.0/purchase_orders` | DONE | PurchaseOrderService |
+| GET | `/3.0/purchase_orders/{purchase_order_id}` | DONE | PurchaseOrderService |
+| POST | `/3.0/purchase_orders` | DONE | PurchaseOrderService |
+| PUT | `/3.0/purchase_orders/{purchase_order_id}` | DONE | PurchaseOrderService |
+| DELETE | `/3.0/purchase_orders/{purchase_order_id}` | DONE | PurchaseOrderService |
+
+### Tag: Expenses (8 endpoints) — DONE
+
+| Method | Path | Status | Service |
+|--------|------|--------|---------|
+| GET | `/4.0/expenses` | DONE | ExpenseService |
+| GET | `/4.0/expenses/{id}` | DONE | ExpenseService |
+| GET | `/4.0/expenses/documentnumbers` | DONE | ExpenseService |
+| POST | `/4.0/expenses` | DONE | ExpenseService |
+| POST | `/4.0/expenses/{id}/actions` | DONE | ExpenseService |
+| PUT | `/4.0/expenses/{id}` | DONE | ExpenseService |
+| PUT | `/4.0/expenses/{id}/bookings/{status}` | DONE | ExpenseService |
+| DELETE | `/4.0/expenses/{id}` | DONE | ExpenseService |
 
 ---
 
-## Domain Group 12: Payroll — Wave 5
+## Domain Group 12: Payroll — Wave 5 — DONE
 
-### Tag: Employees (4 endpoints)
-
-| Method | Path | Status | Service |
-|--------|------|--------|---------|
-| GET | `/4.0/payroll/employees` | TODO | EmployeeService |
-| GET | `/4.0/payroll/employees/{employeeId}` | TODO | EmployeeService |
-| POST | `/4.0/payroll/employees` | TODO | EmployeeService |
-| PATCH | `/4.0/payroll/employees/{employeeId}` | TODO | EmployeeService |
-
-### Tag: Absences (5 endpoints)
+### Tag: Employees (4 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/4.0/payroll/employees/{employeeId}/absences` | TODO | AbsenceService |
-| GET | `/4.0/payroll/employees/{employeeId}/absences/{absenceId}` | TODO | AbsenceService |
-| POST | `/4.0/payroll/employees/{employeeId}/absences` | TODO | AbsenceService |
-| PUT | `/4.0/payroll/employees/{employeeId}/absences/{absenceId}` | TODO | AbsenceService |
-| DELETE | `/4.0/payroll/employees/{employeeId}/absences/{absenceId}` | TODO | AbsenceService |
+| GET | `/4.0/payroll/employees` | DONE | EmployeeService |
+| GET | `/4.0/payroll/employees/{employeeId}` | DONE | EmployeeService |
+| POST | `/4.0/payroll/employees` | DONE | EmployeeService |
+| PATCH | `/4.0/payroll/employees/{employeeId}` | DONE | EmployeeService |
 
-### Tag: Documents/Paystubs (1 endpoint)
+### Tag: Absences (5 endpoints) — DONE
 
 | Method | Path | Status | Service |
 |--------|------|--------|---------|
-| GET | `/4.0/payroll/employees/{employeeId}/paystub-pdf/{year}/{month}` | TODO | PaystubService |
+| GET | `/4.0/payroll/employees/{employeeId}/absences` | DONE | AbsenceService |
+| GET | `/4.0/payroll/employees/{employeeId}/absences/{absenceId}` | DONE | AbsenceService |
+| POST | `/4.0/payroll/employees/{employeeId}/absences` | DONE | AbsenceService |
+| PUT | `/4.0/payroll/employees/{employeeId}/absences/{absenceId}` | DONE | AbsenceService |
+| DELETE | `/4.0/payroll/employees/{employeeId}/absences/{absenceId}` | DONE | AbsenceService |
+
+### Tag: Documents/Paystubs (1 endpoint) — DONE
+
+| Method | Path | Status | Service |
+|--------|------|--------|---------|
+| GET | `/4.0/payroll/employees/{employeeId}/paystub-pdf/{year}/{month}` | DONE | PaystubService |
 
 ---
 
