@@ -73,7 +73,7 @@ public sealed class BusinessActivityServiceTests : ServiceTestBase
 
         var result = await _sut.Get();
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
         await ConnectionHandler.Received(1).GetAsync<List<BusinessActivity>?>(
             ExpectedEndpoint,
             null,
@@ -181,7 +181,7 @@ public sealed class BusinessActivityServiceTests : ServiceTestBase
 
         var result = await _sut.Get();
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
     }
 
     /// <summary>
@@ -203,7 +203,7 @@ public sealed class BusinessActivityServiceTests : ServiceTestBase
 
         var result = await _sut.Create(createModel);
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
         await ConnectionHandler.Received(1).PostAsync<BusinessActivity, BusinessActivityCreate>(
             createModel,
             ExpectedEndpoint,
@@ -252,7 +252,7 @@ public sealed class BusinessActivityServiceTests : ServiceTestBase
 
         var result = await _sut.Create(new BusinessActivityCreate(Name: string.Empty, DefaultIsBillable: null, DefaultPricePerHour: null, AccountId: null));
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
     }
 
     /// <summary>
@@ -277,7 +277,7 @@ public sealed class BusinessActivityServiceTests : ServiceTestBase
 
         var result = await _sut.Search(criteria);
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
         await ConnectionHandler.Received(1).PostSearchAsync<BusinessActivity>(
             criteria,
             ExpectedSearchEndpoint,
@@ -357,6 +357,6 @@ public sealed class BusinessActivityServiceTests : ServiceTestBase
 
         var result = await _sut.Search([]);
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
     }
 }

@@ -27,5 +27,6 @@ SOFTWARE.
 
 global using NUnit.Framework;
 global using NSubstitute;
+global using Shouldly;
 global using BexioApiNet.Interfaces;
 global using BexioApiNet.Services;
