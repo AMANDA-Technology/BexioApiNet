@@ -25,6 +25,7 @@ SOFTWARE.
 
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
+using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
@@ -86,7 +87,8 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<ITextPositionService>(),
             Substitute.For<ISubtotalPositionService>(),
             Substitute.For<ISubPositionService>(),
-            Substitute.For<IPagebreakPositionService>());
+            Substitute.For<IPagebreakPositionService>(),
+            Substitute.For<IBusinessActivityService>());
 
         Assert.Multiple(() =>
         {
@@ -124,6 +126,7 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.SalesSubtotalPositions, Is.Not.Null);
             Assert.That(client.SubPositions, Is.Not.Null);
             Assert.That(client.PagebreakPositions, Is.Not.Null);
+            Assert.That(client.BusinessActivities, Is.Not.Null);
         });
     }
 }

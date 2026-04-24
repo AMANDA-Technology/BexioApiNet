@@ -28,6 +28,7 @@ using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
+using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
@@ -35,6 +36,7 @@ using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 using BexioApiNet.Services;
 using BexioApiNet.Services.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Banking;
+using BexioApiNet.Services.Connectors.BusinessActivities;
 using BexioApiNet.Services.Connectors.Contacts;
 using BexioApiNet.Services.Connectors.Items;
 using BexioApiNet.Services.Connectors.Sales;
@@ -133,6 +135,7 @@ public static class BexioServiceCollection
         services.AddScoped<ISubtotalPositionService, SubtotalPositionService>();
         services.AddScoped<ISubPositionService, SubPositionService>();
         services.AddScoped<IPagebreakPositionService, PagebreakPositionService>();
+        services.AddScoped<IBusinessActivityService, BusinessActivityService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;

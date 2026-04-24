@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
+using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
@@ -143,6 +144,9 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IPagebreakPositionService PagebreakPositions { get; set; }
 
+    /// <inheritdoc />
+    public IBusinessActivityService BusinessActivities { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -181,7 +185,8 @@ public sealed class BexioApiClient : IBexioApiClient
         ITextPositionService salesTextPositions,
         ISubtotalPositionService salesSubtotalPositions,
         ISubPositionService subPositions,
-        IPagebreakPositionService pagebreakPositions)
+        IPagebreakPositionService pagebreakPositions,
+        IBusinessActivityService businessActivities)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -218,6 +223,7 @@ public sealed class BexioApiClient : IBexioApiClient
         SalesSubtotalPositions = salesSubtotalPositions;
         SubPositions = subPositions;
         PagebreakPositions = pagebreakPositions;
+        BusinessActivities = businessActivities;
     }
 
     /// <inheritdoc />

@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Services.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Banking;
+using BexioApiNet.Services.Connectors.BusinessActivities;
 using BexioApiNet.Services.Connectors.Contacts;
 using BexioApiNet.Services.Connectors.Items;
 using BexioApiNet.Services.Connectors.Sales;
@@ -109,7 +110,8 @@ public abstract class BexioE2eTestBase
             new TextPositionService(connectionHandler),
             new SubtotalPositionService(connectionHandler),
             new SubPositionService(connectionHandler),
-            new PagebreakPositionService(connectionHandler));
+            new PagebreakPositionService(connectionHandler),
+            new BusinessActivityService(connectionHandler));
     }
 
     /// <summary>
