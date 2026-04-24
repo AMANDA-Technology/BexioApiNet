@@ -28,6 +28,7 @@ using BexioApiNet.Services.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Banking;
 using BexioApiNet.Services.Connectors.BusinessActivities;
 using BexioApiNet.Services.Connectors.Contacts;
+using BexioApiNet.Services.Connectors.Expenses;
 using BexioApiNet.Services.Connectors.Items;
 using BexioApiNet.Services.Connectors.Projects;
 using BexioApiNet.Services.Connectors.Purchases;
@@ -127,7 +128,8 @@ public abstract class BexioE2eTestBase
             new MilestoneService(connectionHandler),
             new PackageService(connectionHandler),
             new BillService(connectionHandler),
-            new PurchaseOrderService(connectionHandler));
+            new PurchaseOrderService(connectionHandler),
+            new ExpenseService(connectionHandler));
     }
 
     /// <summary>

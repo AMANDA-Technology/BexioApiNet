@@ -27,6 +27,7 @@ using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
+using BexioApiNet.Interfaces.Connectors.Expenses;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
@@ -290,4 +291,9 @@ public interface IBexioApiClient : IDisposable
     ///     Bexio purchase orders connector. <see href="https://docs.bexio.com/#tag/Purchase-Orders">Purchase Orders</see>
     /// </summary>
     public IPurchaseOrderService PurchaseOrders { get; set; }
+
+    /// <summary>
+    ///     Bexio expenses connector. <see href="https://docs.bexio.com/#tag/Expenses">Expenses</see>
+    /// </summary>
+    public IExpenseService Expenses { get; set; }
 }

@@ -28,6 +28,7 @@ using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
+using BexioApiNet.Interfaces.Connectors.Expenses;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
@@ -187,6 +188,9 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IPurchaseOrderService PurchaseOrders { get; set; }
 
+    /// <inheritdoc />
+    public IExpenseService Expenses { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -238,7 +242,8 @@ public sealed class BexioApiClient : IBexioApiClient
         IMilestoneService milestones,
         IPackageService packages,
         IBillService purchaseBills,
-        IPurchaseOrderService purchaseOrders)
+        IPurchaseOrderService purchaseOrders,
+        IExpenseService expenses)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -288,6 +293,7 @@ public sealed class BexioApiClient : IBexioApiClient
         Packages = packages;
         PurchaseBills = purchaseBills;
         PurchaseOrders = purchaseOrders;
+        Expenses = expenses;
     }
 
     /// <inheritdoc />
