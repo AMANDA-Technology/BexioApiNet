@@ -70,7 +70,7 @@ public sealed class TimesheetStatusServiceTests : ServiceTestBase
 
         var result = await _sut.Get();
 
-        Assert.That(result, Is.SameAs(expected));
+        result.ShouldBeSameAs(expected);
         await ConnectionHandler.Received(1).GetAsync<List<TimesheetStatus>>(
             ExpectedEndpoint,
             null,

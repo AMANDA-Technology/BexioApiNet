@@ -49,14 +49,11 @@ public sealed class TimesheetTrackingJsonConverterTests
         var json = JsonSerializer.Serialize<TimesheetTracking>(original);
         var roundTripped = JsonSerializer.Deserialize<TimesheetTracking>(json);
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(json, Does.Contain("\"type\":\"duration\""));
-            Assert.That(json, Does.Contain("\"date\":\"2019-05-20\""));
-            Assert.That(json, Does.Contain("\"duration\":\"01:40\""));
-            Assert.That(roundTripped, Is.InstanceOf<TimesheetDurationTracking>());
-            Assert.That(roundTripped, Is.EqualTo(original));
-        });
+        json.ShouldContain("\"type\":\"duration\"");
+        json.ShouldContain("\"date\":\"2019-05-20\"");
+        json.ShouldContain("\"duration\":\"01:40\"");
+        roundTripped.ShouldBeOfType<TimesheetDurationTracking>();
+        roundTripped.ShouldBe(original);
     }
 
     /// <summary>
@@ -71,14 +68,11 @@ public sealed class TimesheetTrackingJsonConverterTests
         var json = JsonSerializer.Serialize<TimesheetTracking>(original);
         var roundTripped = JsonSerializer.Deserialize<TimesheetTracking>(json);
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(json, Does.Contain("\"type\":\"range\""));
-            Assert.That(json, Does.Contain("\"start\":\"2019-05-20 14:22:48\""));
-            Assert.That(json, Does.Contain("\"end\":\"2019-05-20 16:13:25\""));
-            Assert.That(roundTripped, Is.InstanceOf<TimesheetRangeTracking>());
-            Assert.That(roundTripped, Is.EqualTo(original));
-        });
+        json.ShouldContain("\"type\":\"range\"");
+        json.ShouldContain("\"start\":\"2019-05-20 14:22:48\"");
+        json.ShouldContain("\"end\":\"2019-05-20 16:13:25\"");
+        roundTripped.ShouldBeOfType<TimesheetRangeTracking>();
+        roundTripped.ShouldBe(original);
     }
 
     /// <summary>
@@ -93,13 +87,10 @@ public sealed class TimesheetTrackingJsonConverterTests
         var json = JsonSerializer.Serialize<TimesheetTracking>(original);
         var roundTripped = JsonSerializer.Deserialize<TimesheetTracking>(json);
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(json, Does.Contain("\"type\":\"stopwatch\""));
-            Assert.That(json, Does.Contain("\"duration\":\"01:40\""));
-            Assert.That(roundTripped, Is.InstanceOf<TimesheetStopwatchTracking>());
-            Assert.That(roundTripped, Is.EqualTo(original));
-        });
+        json.ShouldContain("\"type\":\"stopwatch\"");
+        json.ShouldContain("\"duration\":\"01:40\"");
+        roundTripped.ShouldBeOfType<TimesheetStopwatchTracking>();
+        roundTripped.ShouldBe(original);
     }
 
     /// <summary>
@@ -112,7 +103,7 @@ public sealed class TimesheetTrackingJsonConverterTests
     {
         const string payload = """{"type":"pomodoro","duration":"00:25"}""";
 
-        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<TimesheetTracking>(payload));
+        Should.Throw<JsonException>(() => JsonSerializer.Deserialize<TimesheetTracking>(payload));
     }
 
     /// <summary>
@@ -124,6 +115,6 @@ public sealed class TimesheetTrackingJsonConverterTests
     {
         const string payload = """{"duration":"01:40"}""";
 
-        Assert.Throws<JsonException>(() => JsonSerializer.Deserialize<TimesheetTracking>(payload));
+        Should.Throw<JsonException>(() => JsonSerializer.Deserialize<TimesheetTracking>(payload));
     }
 }

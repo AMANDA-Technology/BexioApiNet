@@ -69,7 +69,7 @@ public sealed class TimesheetServiceTests : ServiceTestBase
 
         var result = await _sut.Get();
 
-        Assert.That(result, Is.SameAs(expected));
+        result.ShouldBeSameAs(expected);
         await ConnectionHandler.Received(1).GetAsync<List<Timesheet>?>(
             ExpectedEndpoint,
             null,
@@ -136,8 +136,9 @@ public sealed class TimesheetServiceTests : ServiceTestBase
             ExpectedEndpoint,
             null,
             Arg.Any<CancellationToken>());
-        Assert.That(result.Data, Has.Count.EqualTo(3));
-        Assert.That(result.Data, Is.EquivalentTo(new[] { firstTimesheet, remaining[0], remaining[1] }));
+        result.Data.ShouldNotBeNull();
+        result.Data.Count.ShouldBe(3);
+        result.Data.ShouldBe(new[] { firstTimesheet, remaining[0], remaining[1] }, ignoreOrder: true);
     }
 
     /// <summary>
@@ -159,7 +160,7 @@ public sealed class TimesheetServiceTests : ServiceTestBase
 
         var result = await _sut.Get(autoPage: true);
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
         await ConnectionHandler.DidNotReceive().FetchAll<Timesheet>(
             Arg.Any<int>(),
             Arg.Any<int>(),
@@ -187,7 +188,7 @@ public sealed class TimesheetServiceTests : ServiceTestBase
 
         var result = await _sut.GetById(id);
 
-        Assert.That(result, Is.SameAs(expected));
+        result.ShouldBeSameAs(expected);
         await ConnectionHandler.Received(1).GetAsync<Timesheet>(
             $"{ExpectedEndpoint}/{id}",
             null,
@@ -213,7 +214,7 @@ public sealed class TimesheetServiceTests : ServiceTestBase
 
         var result = await _sut.Create(payload);
 
-        Assert.That(result, Is.SameAs(expected));
+        result.ShouldBeSameAs(expected);
         await ConnectionHandler.Received(1).PostAsync<Timesheet, TimesheetCreate>(
             payload,
             ExpectedEndpoint,
@@ -248,7 +249,7 @@ public sealed class TimesheetServiceTests : ServiceTestBase
 
         var result = await _sut.Search(criteria, queryParameter);
 
-        Assert.That(result, Is.SameAs(expected));
+        result.ShouldBeSameAs(expected);
         await ConnectionHandler.Received(1).PostSearchAsync<Timesheet>(
             criteria,
             $"{ExpectedEndpoint}/search",
@@ -304,7 +305,7 @@ public sealed class TimesheetServiceTests : ServiceTestBase
 
         var result = await _sut.Update(id, payload);
 
-        Assert.That(result, Is.SameAs(expected));
+        result.ShouldBeSameAs(expected);
         await ConnectionHandler.Received(1).PutAsync<Timesheet, TimesheetUpdate>(
             payload,
             $"{ExpectedEndpoint}/{id}",
@@ -326,7 +327,7 @@ public sealed class TimesheetServiceTests : ServiceTestBase
 
         var result = await _sut.Delete(id);
 
-        Assert.That(result, Is.SameAs(expected));
+        result.ShouldBeSameAs(expected);
         await ConnectionHandler.Received(1).Delete(
             $"{ExpectedEndpoint}/{id}",
             Arg.Any<CancellationToken>());
