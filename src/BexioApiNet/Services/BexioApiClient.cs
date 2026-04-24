@@ -30,6 +30,7 @@ using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Projects;
+using BexioApiNet.Interfaces.Connectors.Purchases;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 using BexioApiNet.Interfaces.Connectors.Timesheets;
@@ -180,6 +181,9 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IPackageService Packages { get; set; }
 
+    /// <inheritdoc />
+    public IBillService PurchaseBills { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -229,7 +233,8 @@ public sealed class BexioApiClient : IBexioApiClient
         IProjectStateService projectStates,
         IProjectTypeService projectTypes,
         IMilestoneService milestones,
-        IPackageService packages)
+        IPackageService packages,
+        IBillService purchaseBills)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -277,6 +282,7 @@ public sealed class BexioApiClient : IBexioApiClient
         ProjectTypes = projectTypes;
         Milestones = milestones;
         Packages = packages;
+        PurchaseBills = purchaseBills;
     }
 
     /// <inheritdoc />

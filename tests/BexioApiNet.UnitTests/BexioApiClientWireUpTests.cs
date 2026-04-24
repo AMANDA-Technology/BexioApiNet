@@ -29,6 +29,7 @@ using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Projects;
+using BexioApiNet.Interfaces.Connectors.Purchases;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 using BexioApiNet.Interfaces.Connectors.Timesheets;
@@ -101,7 +102,8 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IProjectStateService>(),
             Substitute.For<IProjectTypeService>(),
             Substitute.For<IMilestoneService>(),
-            Substitute.For<IPackageService>());
+            Substitute.For<IPackageService>(),
+            Substitute.For<IBillService>());
 
         Assert.Multiple(() =>
         {
@@ -150,6 +152,7 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.ProjectTypes, Is.Not.Null);
             Assert.That(client.Milestones, Is.Not.Null);
             Assert.That(client.Packages, Is.Not.Null);
+            Assert.That(client.PurchaseBills, Is.Not.Null);
         });
     }
 }

@@ -29,6 +29,7 @@ using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Projects;
+using BexioApiNet.Interfaces.Connectors.Purchases;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 using BexioApiNet.Interfaces.Connectors.Timesheets;
@@ -279,4 +280,9 @@ public interface IBexioApiClient : IDisposable
     /// <see href="https://docs.bexio.com/#tag/Projects">Projects</see>
     /// </summary>
     public IPackageService Packages { get; set; }
+
+    /// <summary>
+    ///     Bexio purchase bills connector. <see href="https://docs.bexio.com/#tag/Bills">Bills</see>
+    /// </summary>
+    public IBillService PurchaseBills { get; set; }
 }
