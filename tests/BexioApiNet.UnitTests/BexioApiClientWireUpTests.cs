@@ -117,6 +117,7 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IDocumentSettingService>(),
             Substitute.For<IDocumentTemplateService>());
             Substitute.For<ICountryService>());
+            Substitute.For<ISalutationService>());
 
         Assert.Multiple(() =>
         {
@@ -175,6 +176,7 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.DocumentSettings, Is.Not.Null);
             Assert.That(client.DocumentTemplates, Is.Not.Null);
             Assert.That(client.Countries, Is.Not.Null);
+            Assert.That(client.Salutations, Is.Not.Null);
         });
     }
 }

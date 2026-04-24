@@ -210,6 +210,7 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IDocumentTemplateService DocumentTemplates { get; set; }
     public ICountryService Countries { get; set; }
+    public ISalutationService Salutations { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
@@ -271,6 +272,7 @@ public sealed class BexioApiClient : IBexioApiClient
         IDocumentSettingService documentSettings,
         IDocumentTemplateService documentTemplates)
         ICountryService countries)
+        ISalutationService salutations)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -328,6 +330,7 @@ public sealed class BexioApiClient : IBexioApiClient
         DocumentSettings = documentSettings;
         DocumentTemplates = documentTemplates;
         Countries = countries;
+        Salutations = salutations;
     }
 
     /// <inheritdoc />

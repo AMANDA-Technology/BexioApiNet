@@ -172,6 +172,7 @@ public static class BexioServiceCollection
         services.AddScoped<IDocumentSettingService, DocumentSettingService>();
         services.AddScoped<IDocumentTemplateService, DocumentTemplateService>();
         services.AddScoped<ICountryService, CountryService>();
+        services.AddScoped<ISalutationService, SalutationService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;

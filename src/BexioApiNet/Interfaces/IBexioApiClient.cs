@@ -332,4 +332,7 @@ public interface IBexioApiClient : IDisposable
     ///     Bexio countries connector. <see href="https://docs.bexio.com/#tag/Countries">Countries</see>
     /// </summary>
     public ICountryService Countries { get; set; }
+    ///     Bexio salutations connector. <see href="https://docs.bexio.com/#tag/Salutations">Salutations</see>
+    /// </summary>
+    public ISalutationService Salutations { get; set; }
 }
