@@ -162,6 +162,7 @@ public static class BexioServiceCollection
         services.AddScoped<IPurchaseOrderService, PurchaseOrderService>();
         services.AddScoped<IExpenseService, ExpenseService>();
         services.AddScoped<IEmployeeService, EmployeeService>();
+        services.AddScoped<IAbsenceService, AbsenceService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;
