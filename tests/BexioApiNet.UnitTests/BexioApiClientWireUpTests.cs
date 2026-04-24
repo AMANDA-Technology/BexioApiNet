@@ -25,6 +25,7 @@ SOFTWARE.
 
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
+using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
@@ -93,7 +94,8 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<ITimesheetStatusService>(),
             Substitute.For<ITaskService>(),
             Substitute.For<ITaskPriorityService>(),
-            Substitute.For<ITaskStatusService>());
+            Substitute.For<ITaskStatusService>(),
+            Substitute.For<IBusinessActivityService>());
 
         Assert.Multiple(() =>
         {
@@ -136,6 +138,7 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.Tasks, Is.Not.Null);
             Assert.That(client.TaskPriorities, Is.Not.Null);
             Assert.That(client.TaskStatuses, Is.Not.Null);
+            Assert.That(client.BusinessActivities, Is.Not.Null);
         });
     }
 }

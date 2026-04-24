@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
+using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
@@ -160,6 +161,9 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public ITaskStatusService TaskStatuses { get; set; }
 
+    /// <inheritdoc />
+    public IBusinessActivityService BusinessActivities { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -203,7 +207,8 @@ public sealed class BexioApiClient : IBexioApiClient
         ITimesheetStatusService timesheetStatuses,
         ITaskService tasks,
         ITaskPriorityService taskPriorities,
-        ITaskStatusService taskStatuses)
+        ITaskStatusService taskStatuses,
+        IBusinessActivityService businessActivities)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -245,6 +250,7 @@ public sealed class BexioApiClient : IBexioApiClient
         Tasks = tasks;
         TaskPriorities = taskPriorities;
         TaskStatuses = taskStatuses;
+        BusinessActivities = businessActivities;
     }
 
     /// <inheritdoc />

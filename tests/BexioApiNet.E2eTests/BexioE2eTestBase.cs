@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Services.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Banking;
+using BexioApiNet.Services.Connectors.BusinessActivities;
 using BexioApiNet.Services.Connectors.Contacts;
 using BexioApiNet.Services.Connectors.Items;
 using BexioApiNet.Services.Connectors.Sales;
@@ -116,7 +117,8 @@ public abstract class BexioE2eTestBase
             new TimesheetStatusService(connectionHandler),
             new TaskService(connectionHandler),
             new TaskPriorityService(connectionHandler),
-            new TaskStatusService(connectionHandler));
+            new TaskStatusService(connectionHandler),
+            new BusinessActivityService(connectionHandler));
     }
 
     /// <summary>

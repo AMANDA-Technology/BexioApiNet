@@ -25,6 +25,7 @@ SOFTWARE.
 
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
+using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
@@ -244,4 +245,10 @@ public interface IBexioApiClient : IDisposable
     /// Bexio task statuses connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Tasks/operation/v2ListTaskStatus">List Task Status</see>
     /// </summary>
     public ITaskStatusService TaskStatuses { get; set; }
+
+    /// <summary>
+    /// Bexio business activities connector. Exposed under the <c>/2.0/client_service</c> route.
+    /// <see href="https://docs.bexio.com/#tag/Business-Activities">Business Activities</see>
+    /// </summary>
+    public IBusinessActivityService BusinessActivities { get; set; }
 }
