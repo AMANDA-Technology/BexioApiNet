@@ -335,4 +335,8 @@ public interface IBexioApiClient : IDisposable
     ///     Bexio salutations connector. <see href="https://docs.bexio.com/#tag/Salutations">Salutations</see>
     /// </summary>
     public ISalutationService Salutations { get; set; }
+    ///     Bexio titles connector (honorifics such as "Dr." or "Prof.").
+    ///     <see href="https://docs.bexio.com/#tag/Titles">Titles</see>
+    /// </summary>
+    public ITitleService Titles { get; set; }
 }

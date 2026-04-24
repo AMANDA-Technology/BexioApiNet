@@ -141,6 +141,7 @@ public abstract class BexioE2eTestBase
             new DocumentTemplateService(connectionHandler));
             new CountryService(connectionHandler));
             new SalutationService(connectionHandler));
+            new TitleService(connectionHandler));
     }
 
     /// <summary>
