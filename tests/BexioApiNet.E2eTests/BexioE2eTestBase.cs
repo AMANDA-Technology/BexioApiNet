@@ -31,6 +31,7 @@ using BexioApiNet.Services.Connectors.Items;
 using BexioApiNet.Services.Connectors.Sales;
 using BexioApiNet.Services.Connectors.Sales.Positions;
 using BexioApiNet.Services.Connectors.Timesheets;
+using BexioApiNet.Services.Connectors.Tasks;
 
 namespace BexioApiNet.E2eTests;
 
@@ -112,7 +113,10 @@ public abstract class BexioE2eTestBase
             new SubPositionService(connectionHandler),
             new PagebreakPositionService(connectionHandler),
             new TimesheetService(connectionHandler),
-            new TimesheetStatusService(connectionHandler));
+            new TimesheetStatusService(connectionHandler),
+            new TaskService(connectionHandler),
+            new TaskPriorityService(connectionHandler),
+            new TaskStatusService(connectionHandler));
     }
 
     /// <summary>
