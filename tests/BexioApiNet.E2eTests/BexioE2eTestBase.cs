@@ -142,6 +142,10 @@ public abstract class BexioE2eTestBase
             new CountryService(connectionHandler));
             new SalutationService(connectionHandler));
             new TitleService(connectionHandler));
+            new LanguageService(connectionHandler),
+            new CommunicationTypeService(connectionHandler),
+            new CompanyProfileService(connectionHandler),
+            new PermissionService(connectionHandler));
     }
 
     /// <summary>

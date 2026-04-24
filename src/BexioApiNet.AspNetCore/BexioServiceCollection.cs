@@ -174,6 +174,10 @@ public static class BexioServiceCollection
         services.AddScoped<ICountryService, CountryService>();
         services.AddScoped<ISalutationService, SalutationService>();
         services.AddScoped<ITitleService, TitleService>();
+        services.AddScoped<ILanguageService, LanguageService>();
+        services.AddScoped<ICommunicationTypeService, CommunicationTypeService>();
+        services.AddScoped<ICompanyProfileService, CompanyProfileService>();
+        services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;

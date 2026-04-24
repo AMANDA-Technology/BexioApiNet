@@ -339,4 +339,24 @@ public interface IBexioApiClient : IDisposable
     ///     <see href="https://docs.bexio.com/#tag/Titles">Titles</see>
     /// </summary>
     public ITitleService Titles { get; set; }
+    ///     Bexio languages connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Languages">Languages</see>
+    /// </summary>
+    public ILanguageService Languages { get; set; }
+
+    /// <summary>
+    ///     Bexio communication types connector (read-only lookup). Exposed under the <c>/2.0/communication_kind</c> route.
+    ///     <see href="https://docs.bexio.com/#tag/Communication-Types">Communication Types</see>
+    /// </summary>
+    public ICommunicationTypeService CommunicationTypes { get; set; }
+
+    /// <summary>
+    ///     Bexio company profile connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Company-Profile">Company Profile</see>
+    /// </summary>
+    public ICompanyProfileService CompanyProfiles { get; set; }
+
+    /// <summary>
+    ///     Bexio permissions connector (read-only singleton for the signed-in user).
+    ///     <see href="https://docs.bexio.com/#tag/Permissions">Permissions</see>
+    /// </summary>
+    public IPermissionService Permissions { get; set; }
 }

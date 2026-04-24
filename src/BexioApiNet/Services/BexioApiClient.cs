@@ -212,6 +212,16 @@ public sealed class BexioApiClient : IBexioApiClient
     public ICountryService Countries { get; set; }
     public ISalutationService Salutations { get; set; }
     public ITitleService Titles { get; set; }
+    public ILanguageService Languages { get; set; }
+
+    /// <inheritdoc />
+    public ICommunicationTypeService CommunicationTypes { get; set; }
+
+    /// <inheritdoc />
+    public ICompanyProfileService CompanyProfiles { get; set; }
+
+    /// <inheritdoc />
+    public IPermissionService Permissions { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
@@ -275,6 +285,10 @@ public sealed class BexioApiClient : IBexioApiClient
         ICountryService countries)
         ISalutationService salutations)
         ITitleService titles)
+        ILanguageService languages,
+        ICommunicationTypeService communicationTypes,
+        ICompanyProfileService companyProfiles,
+        IPermissionService permissions)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -334,6 +348,10 @@ public sealed class BexioApiClient : IBexioApiClient
         Countries = countries;
         Salutations = salutations;
         Titles = titles;
+        Languages = languages;
+        CommunicationTypes = communicationTypes;
+        CompanyProfiles = companyProfiles;
+        Permissions = permissions;
     }
 
     /// <inheritdoc />

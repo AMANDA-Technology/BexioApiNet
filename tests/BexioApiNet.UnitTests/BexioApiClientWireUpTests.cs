@@ -119,6 +119,10 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<ICountryService>());
             Substitute.For<ISalutationService>());
             Substitute.For<ITitleService>());
+            Substitute.For<ILanguageService>(),
+            Substitute.For<ICommunicationTypeService>(),
+            Substitute.For<ICompanyProfileService>(),
+            Substitute.For<IPermissionService>());
 
         Assert.Multiple(() =>
         {
@@ -179,6 +183,10 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.Countries, Is.Not.Null);
             Assert.That(client.Salutations, Is.Not.Null);
             Assert.That(client.Titles, Is.Not.Null);
+            Assert.That(client.Languages, Is.Not.Null);
+            Assert.That(client.CommunicationTypes, Is.Not.Null);
+            Assert.That(client.CompanyProfiles, Is.Not.Null);
+            Assert.That(client.Permissions, Is.Not.Null);
         });
     }
 }
