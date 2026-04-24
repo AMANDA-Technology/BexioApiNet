@@ -5,7 +5,7 @@ tags: [readiness, ai, assessment]
 
 # AI Readiness Assessment
 
-_Last updated: 2026-04-19 (Issue #59 — typed polymorphic positions and order-repetition schedules)_
+_Last updated: 2026-04-24 (Issue #28 — Wave 5 Purchase, Expenses & Payroll services)_
 
 ## Section 1: Documentation Quality
 The documentation landscape for this project is formal and AI-aware.
@@ -33,16 +33,17 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
     - Live E2E only: `dotnet test --filter TestCategory=E2E` (requires `BexioApiNet__BaseUri` + `BexioApiNet__JwtToken`)
     - CI-safe default (Offline only): `dotnet test --filter TestCategory!=E2E`
 - **What IS covered today**:
-  - **Unit tests**: AccountService, CurrencyService, TaxService, BankAccountService, ManualEntryService, BexioConnectionHandler, Item-related services, Position-related services
-  - **Integration tests**: Cancellation, Concurrency, ErrorResponse, Pagination, ParamValidation, per-service integration tests (Accounting / Banking / Contacts / Items / Sales domains)
+  - **Unit tests**: AccountService, CurrencyService, TaxService, BankAccountService, ManualEntryService, BexioConnectionHandler, Item-related services, Position-related services, Wave 5 services (BillService, PurchaseOrderService, ExpenseService, EmployeeService, AbsenceService, PaystubService)
+  - **Integration tests**: Cancellation, Concurrency, ErrorResponse, Pagination, ParamValidation, per-service integration tests (Accounting / Banking / Contacts / Items / Sales / Purchases / Expenses / Payroll domains)
   - **E2E tests**:
     - `Accounting/Accounts/GetAll`
     - `Accounting/Currencies/GetAll`
     - `Accounting/ManualEntries` (Create, CreateAndAddFile, CreateAndAddFileFromStream, GetAll, GetAllAndDelete)
     - `Accounting/Taxes/GetAll`
     - `Banking/BankAccount/GetAll`
+    - `Purchases/Bills`, `Purchases/PurchaseOrders`, `Expenses/Expenses`, `Payroll/Employees`, `Payroll/Absences`, `Payroll/Paystubs` (Wave 5 — graceful skip when no creds)
 - **What is NOT covered**:
-  - Significant portions of the Bexio API (Projects, Timesheets, Payroll, etc.) are not yet implemented.
+  - Remaining Bexio domains not yet implemented (Files & Documents, Master Data & Settings — Waves 6).
 - **Test quality assessment**:
   - Offline tests are comprehensive and fast. The E2E test suite skips gracefully, unblocking agents and CI that lack credentials. The E2E base class `BexioE2eTestBase` is categorized `[Category("E2E")]`, and offline test classes are categorized `[Category("Unit")]` or `[Category("Integration")]`.
 - **Rate**: Partial Coverage (ready to expand; infrastructure is in place)
@@ -99,6 +100,4 @@ Three-tier testing strategy now in place: offline unit tests, offline integratio
 | Vendor Bexio OpenAPI Spec | Issue #8 — `doc/openapi/bexio-v3.json` committed (OpenAPI 3.0.2, API v3.0.0, 355 paths, retrieved 2026-04-18). Refresh procedure in `doc/openapi/README.md`. |
 | Typed polymorphic positions and repetition schedules | Issue #59 — `IReadOnlyList<JsonElement>? Positions` replaced by `IReadOnlyList<Position>?` on 9 DTOs; `JsonElement? Repetition` replaced by `OrderRepetitionSchedule?` on 2 DTOs. Round-trip tests cover every variant. |
 | API Doc Comparison & Audit | Issue #71 — Wave 3 implementation audited against OpenAPI spec. 36 connector services fully compliant. Zero discrepancies found. |
-trip tests cover every variant. |
-over every variant. |
-trip tests cover every variant. |
+| Wave 5 — Purchase, Expenses & Payroll | Issue #28 — 6 new connector services: `BillService` (#86, `/4.0/purchase/bills`), `PurchaseOrderService` (#87, `/3.0/purchase_orders`), `ExpenseService` (#88, `/4.0/expenses`), `EmployeeService` (#89, `/4.0/payroll/employees`, PATCH verb), `AbsenceService` (#90, nested under employees), and `PaystubService` (#91, binary PDF). Total 31 new endpoint methods → implemented coverage 62.1% → 72.2%. |
