@@ -31,6 +31,7 @@ using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 using BexioApiNet.Interfaces.Connectors.Tasks;
@@ -41,6 +42,7 @@ using BexioApiNet.Services.Connectors.Banking;
 using BexioApiNet.Services.Connectors.BusinessActivities;
 using BexioApiNet.Services.Connectors.Contacts;
 using BexioApiNet.Services.Connectors.Items;
+using BexioApiNet.Services.Connectors.Projects;
 using BexioApiNet.Services.Connectors.Sales;
 using BexioApiNet.Services.Connectors.Sales.Positions;
 using BexioApiNet.Services.Connectors.Tasks;
@@ -145,6 +147,11 @@ public static class BexioServiceCollection
         services.AddScoped<ITaskPriorityService, TaskPriorityService>();
         services.AddScoped<ITaskStatusService, TaskStatusService>();
         services.AddScoped<IBusinessActivityService, BusinessActivityService>();
+        services.AddScoped<IProjectService, ProjectService>();
+        services.AddScoped<IProjectStateService, ProjectStateService>();
+        services.AddScoped<IProjectTypeService, ProjectTypeService>();
+        services.AddScoped<IMilestoneService, MilestoneService>();
+        services.AddScoped<IPackageService, PackageService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;

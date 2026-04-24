@@ -29,6 +29,7 @@ using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 using BexioApiNet.Interfaces.Connectors.Timesheets;
@@ -164,6 +165,21 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IBusinessActivityService BusinessActivities { get; set; }
 
+    /// <inheritdoc />
+    public IProjectService Projects { get; set; }
+
+    /// <inheritdoc />
+    public IProjectStateService ProjectStates { get; set; }
+
+    /// <inheritdoc />
+    public IProjectTypeService ProjectTypes { get; set; }
+
+    /// <inheritdoc />
+    public IMilestoneService Milestones { get; set; }
+
+    /// <inheritdoc />
+    public IPackageService Packages { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -208,7 +224,12 @@ public sealed class BexioApiClient : IBexioApiClient
         ITaskService tasks,
         ITaskPriorityService taskPriorities,
         ITaskStatusService taskStatuses,
-        IBusinessActivityService businessActivities)
+        IBusinessActivityService businessActivities,
+        IProjectService projects,
+        IProjectStateService projectStates,
+        IProjectTypeService projectTypes,
+        IMilestoneService milestones,
+        IPackageService packages)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -251,6 +272,11 @@ public sealed class BexioApiClient : IBexioApiClient
         TaskPriorities = taskPriorities;
         TaskStatuses = taskStatuses;
         BusinessActivities = businessActivities;
+        Projects = projects;
+        ProjectStates = projectStates;
+        ProjectTypes = projectTypes;
+        Milestones = milestones;
+        Packages = packages;
     }
 
     /// <inheritdoc />

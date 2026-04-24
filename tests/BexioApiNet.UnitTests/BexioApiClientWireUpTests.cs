@@ -28,6 +28,7 @@ using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 using BexioApiNet.Interfaces.Connectors.Timesheets;
@@ -95,7 +96,12 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<ITaskService>(),
             Substitute.For<ITaskPriorityService>(),
             Substitute.For<ITaskStatusService>(),
-            Substitute.For<IBusinessActivityService>());
+            Substitute.For<IBusinessActivityService>(),
+            Substitute.For<IProjectService>(),
+            Substitute.For<IProjectStateService>(),
+            Substitute.For<IProjectTypeService>(),
+            Substitute.For<IMilestoneService>(),
+            Substitute.For<IPackageService>());
 
         Assert.Multiple(() =>
         {
@@ -139,6 +145,11 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.TaskPriorities, Is.Not.Null);
             Assert.That(client.TaskStatuses, Is.Not.Null);
             Assert.That(client.BusinessActivities, Is.Not.Null);
+            Assert.That(client.Projects, Is.Not.Null);
+            Assert.That(client.ProjectStates, Is.Not.Null);
+            Assert.That(client.ProjectTypes, Is.Not.Null);
+            Assert.That(client.Milestones, Is.Not.Null);
+            Assert.That(client.Packages, Is.Not.Null);
         });
     }
 }

@@ -28,6 +28,7 @@ using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 using BexioApiNet.Interfaces.Connectors.Timesheets;
@@ -251,4 +252,31 @@ public interface IBexioApiClient : IDisposable
     /// <see href="https://docs.bexio.com/#tag/Business-Activities">Business Activities</see>
     /// </summary>
     public IBusinessActivityService BusinessActivities { get; set; }
+
+    /// <summary>
+    /// Bexio projects connector. <see href="https://docs.bexio.com/#tag/Projects">Projects</see>
+    /// </summary>
+    public IProjectService Projects { get; set; }
+
+    /// <summary>
+    /// Bexio project states connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Projects/operation/v2ListProjectStatus">List Project Status</see>
+    /// </summary>
+    public IProjectStateService ProjectStates { get; set; }
+
+    /// <summary>
+    /// Bexio project types connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Projects/operation/v2ListProjectType">List Project Type</see>
+    /// </summary>
+    public IProjectTypeService ProjectTypes { get; set; }
+
+    /// <summary>
+    /// Bexio project milestones connector, nested under <c>/3.0/projects/{project_id}/milestones</c>.
+    /// <see href="https://docs.bexio.com/#tag/Projects">Projects</see>
+    /// </summary>
+    public IMilestoneService Milestones { get; set; }
+
+    /// <summary>
+    /// Bexio project work packages connector, nested under <c>/3.0/projects/{project_id}/packages</c>.
+    /// <see href="https://docs.bexio.com/#tag/Projects">Projects</see>
+    /// </summary>
+    public IPackageService Packages { get; set; }
 }
