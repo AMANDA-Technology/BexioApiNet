@@ -31,6 +31,7 @@ using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
+using BexioApiNet.Interfaces.Connectors.Files;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
@@ -45,6 +46,7 @@ using BexioApiNet.Services.Connectors.Banking;
 using BexioApiNet.Services.Connectors.BusinessActivities;
 using BexioApiNet.Services.Connectors.Contacts;
 using BexioApiNet.Services.Connectors.Expenses;
+using BexioApiNet.Services.Connectors.Files;
 using BexioApiNet.Services.Connectors.Items;
 using BexioApiNet.Services.Connectors.Payroll;
 using BexioApiNet.Services.Connectors.Projects;
@@ -164,6 +166,7 @@ public static class BexioServiceCollection
         services.AddScoped<IEmployeeService, EmployeeService>();
         services.AddScoped<IAbsenceService, AbsenceService>();
         services.AddScoped<IPaystubService, PaystubService>();
+        services.AddScoped<IFileService, FileService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;
