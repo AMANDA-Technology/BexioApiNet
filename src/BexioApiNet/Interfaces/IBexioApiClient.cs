@@ -372,4 +372,7 @@ public interface IBexioApiClient : IDisposable
     ///     Bexio notes connector. <see href="https://docs.bexio.com/#tag/Notes">Notes</see>
     /// </summary>
     public INoteService Notes { get; set; }
+    ///     Bexio document comments connector. <see href="https://docs.bexio.com/#tag/Comments">Comments</see>
+    /// </summary>
+    public ICommentService Comments { get; set; }
 }

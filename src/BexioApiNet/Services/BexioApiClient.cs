@@ -227,6 +227,7 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IFictionalUserService FictionalUsers { get; set; }
     public INoteService Notes { get; set; }
+    public ICommentService Comments { get; set; }
 
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
@@ -297,6 +298,7 @@ public sealed class BexioApiClient : IBexioApiClient
         IUserService users,
         IFictionalUserService fictionalUsers)
         INoteService notes)
+        ICommentService comments)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -363,6 +365,7 @@ public sealed class BexioApiClient : IBexioApiClient
         Users = users;
         FictionalUsers = fictionalUsers;
         Notes = notes;
+        Comments = comments;
     }
 
     /// <inheritdoc />

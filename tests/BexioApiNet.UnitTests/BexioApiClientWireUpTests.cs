@@ -126,6 +126,7 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IUserService>(),
             Substitute.For<IFictionalUserService>());
             Substitute.For<INoteService>());
+            Substitute.For<ICommentService>());
 
         Assert.Multiple(() =>
         {
@@ -193,6 +194,7 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.Users, Is.Not.Null);
             Assert.That(client.FictionalUsers, Is.Not.Null);
             Assert.That(client.Notes, Is.Not.Null);
+            Assert.That(client.Comments, Is.Not.Null);
         });
     }
 }
