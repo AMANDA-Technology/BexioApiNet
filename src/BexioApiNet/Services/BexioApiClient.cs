@@ -30,6 +30,7 @@ using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
+using BexioApiNet.Interfaces.Connectors.Tasks;
 
 namespace BexioApiNet.Services;
 
@@ -143,6 +144,15 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IPagebreakPositionService PagebreakPositions { get; set; }
 
+    /// <inheritdoc />
+    public ITaskService Tasks { get; set; }
+
+    /// <inheritdoc />
+    public ITaskPriorityService TaskPriorities { get; set; }
+
+    /// <inheritdoc />
+    public ITaskStatusService TaskStatuses { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -181,7 +191,10 @@ public sealed class BexioApiClient : IBexioApiClient
         ITextPositionService salesTextPositions,
         ISubtotalPositionService salesSubtotalPositions,
         ISubPositionService subPositions,
-        IPagebreakPositionService pagebreakPositions)
+        IPagebreakPositionService pagebreakPositions,
+        ITaskService tasks,
+        ITaskPriorityService taskPriorities,
+        ITaskStatusService taskStatuses)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -218,6 +231,9 @@ public sealed class BexioApiClient : IBexioApiClient
         SalesSubtotalPositions = salesSubtotalPositions;
         SubPositions = subPositions;
         PagebreakPositions = pagebreakPositions;
+        Tasks = tasks;
+        TaskPriorities = taskPriorities;
+        TaskStatuses = taskStatuses;
     }
 
     /// <inheritdoc />

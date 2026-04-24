@@ -30,6 +30,7 @@ using BexioApiNet.Services.Connectors.Contacts;
 using BexioApiNet.Services.Connectors.Items;
 using BexioApiNet.Services.Connectors.Sales;
 using BexioApiNet.Services.Connectors.Sales.Positions;
+using BexioApiNet.Services.Connectors.Tasks;
 
 namespace BexioApiNet.E2eTests;
 
@@ -109,7 +110,10 @@ public abstract class BexioE2eTestBase
             new TextPositionService(connectionHandler),
             new SubtotalPositionService(connectionHandler),
             new SubPositionService(connectionHandler),
-            new PagebreakPositionService(connectionHandler));
+            new PagebreakPositionService(connectionHandler),
+            new TaskService(connectionHandler),
+            new TaskPriorityService(connectionHandler),
+            new TaskStatusService(connectionHandler));
     }
 
     /// <summary>

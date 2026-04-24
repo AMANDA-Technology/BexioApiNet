@@ -29,6 +29,7 @@ using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
+using BexioApiNet.Interfaces.Connectors.Tasks;
 
 namespace BexioApiNet.UnitTests;
 
@@ -86,7 +87,10 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<ITextPositionService>(),
             Substitute.For<ISubtotalPositionService>(),
             Substitute.For<ISubPositionService>(),
-            Substitute.For<IPagebreakPositionService>());
+            Substitute.For<IPagebreakPositionService>(),
+            Substitute.For<ITaskService>(),
+            Substitute.For<ITaskPriorityService>(),
+            Substitute.For<ITaskStatusService>());
 
         Assert.Multiple(() =>
         {
@@ -124,6 +128,9 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.SalesSubtotalPositions, Is.Not.Null);
             Assert.That(client.SubPositions, Is.Not.Null);
             Assert.That(client.PagebreakPositions, Is.Not.Null);
+            Assert.That(client.Tasks, Is.Not.Null);
+            Assert.That(client.TaskPriorities, Is.Not.Null);
+            Assert.That(client.TaskStatuses, Is.Not.Null);
         });
     }
 }

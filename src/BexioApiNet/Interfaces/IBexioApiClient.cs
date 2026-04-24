@@ -29,6 +29,7 @@ using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
+using BexioApiNet.Interfaces.Connectors.Tasks;
 
 namespace BexioApiNet.Interfaces;
 
@@ -217,4 +218,19 @@ public interface IBexioApiClient : IDisposable
     /// Bexio document pagebreak-positions connector. <see href="https://docs.bexio.com/#tag/Pagebreak-positions">Pagebreak-positions</see>
     /// </summary>
     public IPagebreakPositionService PagebreakPositions { get; set; }
+
+    /// <summary>
+    /// Bexio tasks connector. <see href="https://docs.bexio.com/#tag/Tasks">Tasks</see>
+    /// </summary>
+    public ITaskService Tasks { get; set; }
+
+    /// <summary>
+    /// Bexio task priorities connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Tasks/operation/v2ListTaskPriority">List Task Priority</see>
+    /// </summary>
+    public ITaskPriorityService TaskPriorities { get; set; }
+
+    /// <summary>
+    /// Bexio task statuses connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Tasks/operation/v2ListTaskStatus">List Task Status</see>
+    /// </summary>
+    public ITaskStatusService TaskStatuses { get; set; }
 }
