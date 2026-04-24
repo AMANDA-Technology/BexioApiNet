@@ -136,19 +136,19 @@ public abstract class BexioE2eTestBase
             new EmployeeService(connectionHandler),
             new AbsenceService(connectionHandler),
             new PaystubService(connectionHandler),
-            new FileService(connectionHandler));
+            new FileService(connectionHandler),
             new DocumentSettingService(connectionHandler),
-            new DocumentTemplateService(connectionHandler));
-            new CountryService(connectionHandler));
-            new SalutationService(connectionHandler));
-            new TitleService(connectionHandler));
+            new DocumentTemplateService(connectionHandler),
+            new CountryService(connectionHandler),
+            new SalutationService(connectionHandler),
+            new TitleService(connectionHandler),
             new LanguageService(connectionHandler),
             new CommunicationTypeService(connectionHandler),
             new CompanyProfileService(connectionHandler),
-            new PermissionService(connectionHandler));
+            new PermissionService(connectionHandler),
             new UserService(connectionHandler),
-            new FictionalUserService(connectionHandler));
-            new NoteService(connectionHandler));
+            new FictionalUserService(connectionHandler),
+            new NoteService(connectionHandler),
             new CommentService(connectionHandler));
     }
 

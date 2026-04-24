@@ -113,19 +113,19 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IEmployeeService>(),
             Substitute.For<IAbsenceService>(),
             Substitute.For<IPaystubService>(),
-            Substitute.For<IFileService>());
+            Substitute.For<IFileService>(),
             Substitute.For<IDocumentSettingService>(),
-            Substitute.For<IDocumentTemplateService>());
-            Substitute.For<ICountryService>());
-            Substitute.For<ISalutationService>());
-            Substitute.For<ITitleService>());
+            Substitute.For<IDocumentTemplateService>(),
+            Substitute.For<ICountryService>(),
+            Substitute.For<ISalutationService>(),
+            Substitute.For<ITitleService>(),
             Substitute.For<ILanguageService>(),
             Substitute.For<ICommunicationTypeService>(),
             Substitute.For<ICompanyProfileService>(),
-            Substitute.For<IPermissionService>());
+            Substitute.For<IPermissionService>(),
             Substitute.For<IUserService>(),
-            Substitute.For<IFictionalUserService>());
-            Substitute.For<INoteService>());
+            Substitute.For<IFictionalUserService>(),
+            Substitute.For<INoteService>(),
             Substitute.For<ICommentService>());
 
         Assert.Multiple(() =>

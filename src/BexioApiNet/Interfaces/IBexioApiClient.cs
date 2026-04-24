@@ -319,6 +319,8 @@ public interface IBexioApiClient : IDisposable
     ///     Bexio files connector. <see href="https://docs.bexio.com/#tag/Files">Files</see>
     /// </summary>
     public IFileService Files { get; set; }
+
+    /// <summary>
     ///     Bexio document settings connector (<c>kb_item_setting</c> lookup).
     ///     <see href="https://docs.bexio.com/#tag/Document-Settings">Document Settings</see>
     /// </summary>
@@ -329,16 +331,24 @@ public interface IBexioApiClient : IDisposable
     ///     <see href="https://docs.bexio.com/#tag/Document-templates">Document templates</see>
     /// </summary>
     public IDocumentTemplateService DocumentTemplates { get; set; }
+
+    /// <summary>
     ///     Bexio countries connector. <see href="https://docs.bexio.com/#tag/Countries">Countries</see>
     /// </summary>
     public ICountryService Countries { get; set; }
+
+    /// <summary>
     ///     Bexio salutations connector. <see href="https://docs.bexio.com/#tag/Salutations">Salutations</see>
     /// </summary>
     public ISalutationService Salutations { get; set; }
+
+    /// <summary>
     ///     Bexio titles connector (honorifics such as "Dr." or "Prof.").
     ///     <see href="https://docs.bexio.com/#tag/Titles">Titles</see>
     /// </summary>
     public ITitleService Titles { get; set; }
+
+    /// <summary>
     ///     Bexio languages connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Languages">Languages</see>
     /// </summary>
     public ILanguageService Languages { get; set; }
@@ -359,6 +369,8 @@ public interface IBexioApiClient : IDisposable
     ///     <see href="https://docs.bexio.com/#tag/Permissions">Permissions</see>
     /// </summary>
     public IPermissionService Permissions { get; set; }
+
+    /// <summary>
     ///     Bexio users connector (read-only v3.0 user management).
     ///     <see href="https://docs.bexio.com/#tag/User-Management">User Management</see>
     /// </summary>
@@ -369,9 +381,13 @@ public interface IBexioApiClient : IDisposable
     ///     <see href="https://docs.bexio.com/#tag/Fictional-User-Management">Fictional User Management</see>
     /// </summary>
     public IFictionalUserService FictionalUsers { get; set; }
+
+    /// <summary>
     ///     Bexio notes connector. <see href="https://docs.bexio.com/#tag/Notes">Notes</see>
     /// </summary>
     public INoteService Notes { get; set; }
+
+    /// <summary>
     ///     Bexio document comments connector. <see href="https://docs.bexio.com/#tag/Comments">Comments</see>
     /// </summary>
     public ICommentService Comments { get; set; }

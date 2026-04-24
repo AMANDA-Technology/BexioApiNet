@@ -205,13 +205,23 @@ public sealed class BexioApiClient : IBexioApiClient
 
     /// <inheritdoc />
     public IFileService Files { get; set; }
+
+    /// <inheritdoc />
     public IDocumentSettingService DocumentSettings { get; set; }
 
     /// <inheritdoc />
     public IDocumentTemplateService DocumentTemplates { get; set; }
+
+    /// <inheritdoc />
     public ICountryService Countries { get; set; }
+
+    /// <inheritdoc />
     public ISalutationService Salutations { get; set; }
+
+    /// <inheritdoc />
     public ITitleService Titles { get; set; }
+
+    /// <inheritdoc />
     public ILanguageService Languages { get; set; }
 
     /// <inheritdoc />
@@ -222,11 +232,17 @@ public sealed class BexioApiClient : IBexioApiClient
 
     /// <inheritdoc />
     public IPermissionService Permissions { get; set; }
+
+    /// <inheritdoc />
     public IUserService Users { get; set; }
 
     /// <inheritdoc />
     public IFictionalUserService FictionalUsers { get; set; }
+
+    /// <inheritdoc />
     public INoteService Notes { get; set; }
+
+    /// <inheritdoc />
     public ICommentService Comments { get; set; }
 
     /// <summary>
@@ -285,19 +301,19 @@ public sealed class BexioApiClient : IBexioApiClient
         IEmployeeService payrollEmployees,
         IAbsenceService payrollAbsences,
         IPaystubService payrollPaystubs,
-        IFileService files)
+        IFileService files,
         IDocumentSettingService documentSettings,
-        IDocumentTemplateService documentTemplates)
-        ICountryService countries)
-        ISalutationService salutations)
-        ITitleService titles)
+        IDocumentTemplateService documentTemplates,
+        ICountryService countries,
+        ISalutationService salutations,
+        ITitleService titles,
         ILanguageService languages,
         ICommunicationTypeService communicationTypes,
         ICompanyProfileService companyProfiles,
-        IPermissionService permissions)
+        IPermissionService permissions,
         IUserService users,
-        IFictionalUserService fictionalUsers)
-        INoteService notes)
+        IFictionalUserService fictionalUsers,
+        INoteService notes,
         ICommentService comments)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
