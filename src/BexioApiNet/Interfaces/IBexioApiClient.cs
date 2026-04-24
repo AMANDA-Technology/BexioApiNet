@@ -369,4 +369,7 @@ public interface IBexioApiClient : IDisposable
     ///     <see href="https://docs.bexio.com/#tag/Fictional-User-Management">Fictional User Management</see>
     /// </summary>
     public IFictionalUserService FictionalUsers { get; set; }
+    ///     Bexio notes connector. <see href="https://docs.bexio.com/#tag/Notes">Notes</see>
+    /// </summary>
+    public INoteService Notes { get; set; }
 }

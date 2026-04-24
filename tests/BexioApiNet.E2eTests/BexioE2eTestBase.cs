@@ -148,6 +148,7 @@ public abstract class BexioE2eTestBase
             new PermissionService(connectionHandler));
             new UserService(connectionHandler),
             new FictionalUserService(connectionHandler));
+            new NoteService(connectionHandler));
     }
 
     /// <summary>

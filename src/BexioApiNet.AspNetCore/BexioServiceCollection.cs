@@ -180,6 +180,7 @@ public static class BexioServiceCollection
         services.AddScoped<IPermissionService, PermissionService>();
         services.AddScoped<IUserService, UserService>();
         services.AddScoped<IFictionalUserService, FictionalUserService>();
+        services.AddScoped<INoteService, NoteService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;
