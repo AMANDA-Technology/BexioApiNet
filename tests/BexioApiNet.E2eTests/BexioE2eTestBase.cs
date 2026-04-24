@@ -146,6 +146,8 @@ public abstract class BexioE2eTestBase
             new CommunicationTypeService(connectionHandler),
             new CompanyProfileService(connectionHandler),
             new PermissionService(connectionHandler));
+            new UserService(connectionHandler),
+            new FictionalUserService(connectionHandler));
     }
 
     /// <summary>

@@ -359,4 +359,14 @@ public interface IBexioApiClient : IDisposable
     ///     <see href="https://docs.bexio.com/#tag/Permissions">Permissions</see>
     /// </summary>
     public IPermissionService Permissions { get; set; }
+    ///     Bexio users connector (read-only v3.0 user management).
+    ///     <see href="https://docs.bexio.com/#tag/User-Management">User Management</see>
+    /// </summary>
+    public IUserService Users { get; set; }
+
+    /// <summary>
+    ///     Bexio fictional users connector (v3.0 fictional user management).
+    ///     <see href="https://docs.bexio.com/#tag/Fictional-User-Management">Fictional User Management</see>
+    /// </summary>
+    public IFictionalUserService FictionalUsers { get; set; }
 }

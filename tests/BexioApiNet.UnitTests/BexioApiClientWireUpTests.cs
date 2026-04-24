@@ -123,6 +123,8 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<ICommunicationTypeService>(),
             Substitute.For<ICompanyProfileService>(),
             Substitute.For<IPermissionService>());
+            Substitute.For<IUserService>(),
+            Substitute.For<IFictionalUserService>());
 
         Assert.Multiple(() =>
         {
@@ -187,6 +189,8 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.CommunicationTypes, Is.Not.Null);
             Assert.That(client.CompanyProfiles, Is.Not.Null);
             Assert.That(client.Permissions, Is.Not.Null);
+            Assert.That(client.Users, Is.Not.Null);
+            Assert.That(client.FictionalUsers, Is.Not.Null);
         });
     }
 }

@@ -178,6 +178,8 @@ public static class BexioServiceCollection
         services.AddScoped<ICommunicationTypeService, CommunicationTypeService>();
         services.AddScoped<ICompanyProfileService, CompanyProfileService>();
         services.AddScoped<IPermissionService, PermissionService>();
+        services.AddScoped<IUserService, UserService>();
+        services.AddScoped<IFictionalUserService, FictionalUserService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;
