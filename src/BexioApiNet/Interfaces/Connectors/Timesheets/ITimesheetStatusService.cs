@@ -23,10 +23,23 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Global using directives
+using System.Runtime.InteropServices;
+using BexioApiNet.Abstractions.Models.Api;
+using BexioApiNet.Abstractions.Models.Timesheets.TimesheetStatus;
 
-global using NUnit.Framework;
-global using NSubstitute;
-global using Shouldly;
-global using BexioApiNet.Interfaces;
-global using BexioApiNet.Services;
+namespace BexioApiNet.Interfaces.Connectors.Timesheets;
+
+/// <summary>
+/// Read-only service for the Bexio timesheet status lookup endpoint.
+/// <see href="https://docs.bexio.com/#tag/Timesheets/operation/v2ListTimeSheetStatus">Timesheet Status</see>
+/// </summary>
+public interface ITimesheetStatusService
+{
+    /// <summary>
+    /// List all timesheet statuses.
+    /// <see href="https://docs.bexio.com/#tag/Timesheets/operation/v2ListTimeSheetStatus">List Timesheet Status</see>
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The list of timesheet statuses.</returns>
+    public Task<ApiResult<List<TimesheetStatus>>> Get([Optional] CancellationToken cancellationToken);
+}

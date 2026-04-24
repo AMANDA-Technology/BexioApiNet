@@ -23,10 +23,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Global using directives
+using BexioApiNet.Abstractions.Json;
 
-global using NUnit.Framework;
-global using NSubstitute;
-global using Shouldly;
-global using BexioApiNet.Interfaces;
-global using BexioApiNet.Services;
+namespace BexioApiNet.Abstractions.Models.Timesheets.Timesheet;
+
+/// <summary>
+/// Discriminated union over the three formats Bexio accepts for tracked time on a
+/// <see cref="Timesheet" /> — <see cref="TimesheetDurationTracking" />,
+/// <see cref="TimesheetRangeTracking" /> and <see cref="TimesheetStopwatchTracking" />.
+/// The concrete subtype is selected from the <c>type</c> discriminator (<c>duration</c>,
+/// <c>range</c>, <c>stopwatch</c>). Only <see cref="TimesheetDurationTracking" /> and
+/// <see cref="TimesheetRangeTracking" /> may be submitted on create/update —
+/// <see cref="TimesheetStopwatchTracking" /> is response-only.
+/// <see href="https://docs.bexio.com/#tag/Timesheets/operation/v2ListTimesheets" />
+/// </summary>
+[JsonConverter(typeof(TimesheetTrackingJsonConverter))]
+public abstract record TimesheetTracking
+{
+    /// <summary>
+    /// Discriminator string identifying the concrete tracking format
+    /// (<c>duration</c>, <c>range</c> or <c>stopwatch</c>).
+    /// </summary>
+    [JsonPropertyName("type")]
+    public abstract string Type { get; }
+}

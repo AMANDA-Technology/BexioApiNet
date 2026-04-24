@@ -23,10 +23,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Global using directives
+namespace BexioApiNet.Abstractions.Models.Timesheets.TimesheetStatus;
 
-global using NUnit.Framework;
-global using NSubstitute;
-global using Shouldly;
-global using BexioApiNet.Interfaces;
-global using BexioApiNet.Services;
+/// <summary>
+/// Read-only lookup entry returned by <c>GET /2.0/timesheet_status</c>. Used as the
+/// target of <c>status_id</c> on a <see cref="Timesheet.Timesheet" /> entry.
+/// <see href="https://docs.bexio.com/#tag/Timesheets/operation/v2ListTimeSheetStatus" />
+/// </summary>
+/// <param name="Id">Unique identifier of the status (read-only).</param>
+/// <param name="Name">Display name of the status (e.g. <c>In Progress</c>).</param>
+public sealed record TimesheetStatus(
+    [property: JsonPropertyName("id")] int Id,
+    [property: JsonPropertyName("name")] string Name
+);

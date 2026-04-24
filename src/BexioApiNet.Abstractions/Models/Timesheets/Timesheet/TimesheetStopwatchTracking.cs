@@ -23,10 +23,18 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Global using directives
+namespace BexioApiNet.Abstractions.Models.Timesheets.Timesheet;
 
-global using NUnit.Framework;
-global using NSubstitute;
-global using Shouldly;
-global using BexioApiNet.Interfaces;
-global using BexioApiNet.Services;
+/// <summary>
+/// Tracked time emitted by a running stopwatch — response-only; Bexio rejects this
+/// variant on create/update requests. Corresponds to the Bexio <c>TimesheetStopwatch</c>
+/// schema (<c>type = "stopwatch"</c>).
+/// </summary>
+/// <param name="Duration">Elapsed duration of the stopwatch in <c>HH:mm</c> format (e.g. <c>01:40</c>).</param>
+public sealed record TimesheetStopwatchTracking(
+    [property: JsonPropertyName("duration")] string Duration
+) : TimesheetTracking
+{
+    /// <inheritdoc />
+    public override string Type => TimesheetTrackingTypes.Stopwatch;
+}

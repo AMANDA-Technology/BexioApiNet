@@ -23,10 +23,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Global using directives
+namespace BexioApiNet.Abstractions.Models.Timesheets.Timesheet;
 
-global using NUnit.Framework;
-global using NSubstitute;
-global using Shouldly;
-global using BexioApiNet.Interfaces;
-global using BexioApiNet.Services;
+/// <summary>
+/// Tracked time expressed as a start/end date-time range. Corresponds to the Bexio
+/// <c>TimesheetRange</c> schema (<c>type = "range"</c>).
+/// </summary>
+/// <param name="Start">Start timestamp of the work (e.g. <c>2019-05-20 14:22:48</c>).</param>
+/// <param name="End">End timestamp of the work (e.g. <c>2019-05-20 16:13:25</c>).</param>
+public sealed record TimesheetRangeTracking(
+    [property: JsonPropertyName("start")] string Start,
+    [property: JsonPropertyName("end")] string End
+) : TimesheetTracking
+{
+    /// <inheritdoc />
+    public override string Type => TimesheetTrackingTypes.Range;
+}

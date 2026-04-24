@@ -32,6 +32,7 @@ using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
+using BexioApiNet.Interfaces.Connectors.Timesheets;
 using BexioApiNet.Services;
 using BexioApiNet.Services.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Banking;
@@ -39,6 +40,7 @@ using BexioApiNet.Services.Connectors.Contacts;
 using BexioApiNet.Services.Connectors.Items;
 using BexioApiNet.Services.Connectors.Sales;
 using BexioApiNet.Services.Connectors.Sales.Positions;
+using BexioApiNet.Services.Connectors.Timesheets;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace BexioApiNet.AspNetCore;
@@ -133,6 +135,8 @@ public static class BexioServiceCollection
         services.AddScoped<ISubtotalPositionService, SubtotalPositionService>();
         services.AddScoped<ISubPositionService, SubPositionService>();
         services.AddScoped<IPagebreakPositionService, PagebreakPositionService>();
+        services.AddScoped<ITimesheetService, TimesheetService>();
+        services.AddScoped<ITimesheetStatusService, TimesheetStatusService>();
         services.AddScoped<IBexioApiClient, BexioApiClient>();
 
         return services;

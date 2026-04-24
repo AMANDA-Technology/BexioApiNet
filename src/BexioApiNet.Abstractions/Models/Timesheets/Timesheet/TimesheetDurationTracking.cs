@@ -23,10 +23,19 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Global using directives
+namespace BexioApiNet.Abstractions.Models.Timesheets.Timesheet;
 
-global using NUnit.Framework;
-global using NSubstitute;
-global using Shouldly;
-global using BexioApiNet.Interfaces;
-global using BexioApiNet.Services;
+/// <summary>
+/// Tracked time expressed as a fixed duration on a given day. Corresponds to the Bexio
+/// <c>TimesheetDuration</c> schema (<c>type = "duration"</c>).
+/// </summary>
+/// <param name="Date">Date the work was performed (e.g. <c>2019-05-20</c>).</param>
+/// <param name="Duration">Duration of the work in <c>HH:mm</c> format (e.g. <c>01:40</c>).</param>
+public sealed record TimesheetDurationTracking(
+    [property: JsonPropertyName("date")] DateOnly Date,
+    [property: JsonPropertyName("duration")] string Duration
+) : TimesheetTracking
+{
+    /// <inheritdoc />
+    public override string Type => TimesheetTrackingTypes.Duration;
+}

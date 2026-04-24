@@ -23,10 +23,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Global using directives
+using BexioApiNet.Abstractions.Models.Timesheets.Timesheet;
 
-global using NUnit.Framework;
-global using NSubstitute;
-global using Shouldly;
-global using BexioApiNet.Interfaces;
-global using BexioApiNet.Services;
+namespace BexioApiNet.Abstractions.Json;
+
+/// <summary>
+/// <see cref="System.Text.Json.Serialization.JsonConverter{T}" /> that maps Bexio's
+/// <c>oneOf</c> timesheet-tracking payload onto the strongly-typed
+/// <see cref="TimesheetTracking" /> hierarchy. Uses the <c>type</c> discriminator
+/// (<c>duration</c>, <c>range</c>, <c>stopwatch</c>).
+/// </summary>
+public sealed class TimesheetTrackingJsonConverter : DiscriminatedJsonConverter<TimesheetTracking>
+{
+    /// <inheritdoc />
+    protected override string DiscriminatorPropertyName => "type";
+
+    /// <inheritdoc />
+    protected override Type? ResolveType(string discriminator) => discriminator switch
+    {
+        TimesheetTrackingTypes.Duration => typeof(TimesheetDurationTracking),
+        TimesheetTrackingTypes.Range => typeof(TimesheetRangeTracking),
+        TimesheetTrackingTypes.Stopwatch => typeof(TimesheetStopwatchTracking),
+        _ => null
+    };
+}

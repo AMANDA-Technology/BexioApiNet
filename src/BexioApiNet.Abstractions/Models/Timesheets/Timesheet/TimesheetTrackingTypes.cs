@@ -23,10 +23,21 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Global using directives
+namespace BexioApiNet.Abstractions.Models.Timesheets.Timesheet;
 
-global using NUnit.Framework;
-global using NSubstitute;
-global using Shouldly;
-global using BexioApiNet.Interfaces;
-global using BexioApiNet.Services;
+/// <summary>
+/// String literals for the Bexio <c>type</c> discriminator identifying each concrete
+/// <see cref="TimesheetTracking" /> variant on the wire. Kept in one place so the converter
+/// and each concrete record share a single source of truth.
+/// </summary>
+internal static class TimesheetTrackingTypes
+{
+    /// <summary>Discriminator for <see cref="TimesheetDurationTracking" />.</summary>
+    public const string Duration = "duration";
+
+    /// <summary>Discriminator for <see cref="TimesheetRangeTracking" />.</summary>
+    public const string Range = "range";
+
+    /// <summary>Discriminator for <see cref="TimesheetStopwatchTracking" />.</summary>
+    public const string Stopwatch = "stopwatch";
+}

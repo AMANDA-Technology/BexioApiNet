@@ -23,10 +23,20 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Global using directives
+namespace BexioApiNet.Services.Connectors.Timesheets;
 
-global using NUnit.Framework;
-global using NSubstitute;
-global using Shouldly;
-global using BexioApiNet.Interfaces;
-global using BexioApiNet.Services;
+/// <summary>
+/// Timesheet endpoint configuration.
+/// </summary>
+public static class TimesheetConfiguration
+{
+    /// <summary>
+    /// Current api version of the endpoint.
+    /// </summary>
+    public const string ApiVersion = "2.0";
+
+    /// <summary>
+    /// The request path.
+    /// </summary>
+    public const string EndpointRoot = "timesheet";
+}
