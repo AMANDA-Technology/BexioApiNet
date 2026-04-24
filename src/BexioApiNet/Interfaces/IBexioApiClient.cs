@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -25,10 +25,14 @@ SOFTWARE.
 
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
+using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
+using BexioApiNet.Interfaces.Connectors.Timesheets;
+using BexioApiNet.Interfaces.Connectors.Tasks;
 
 namespace BexioApiNet.Interfaces;
 
@@ -217,4 +221,62 @@ public interface IBexioApiClient : IDisposable
     /// Bexio document pagebreak-positions connector. <see href="https://docs.bexio.com/#tag/Pagebreak-positions">Pagebreak-positions</see>
     /// </summary>
     public IPagebreakPositionService PagebreakPositions { get; set; }
+
+    /// <summary>
+    /// Bexio timesheets connector. <see href="https://docs.bexio.com/#tag/Timesheets">Timesheets</see>
+    /// </summary>
+    public ITimesheetService Timesheets { get; set; }
+
+    /// <summary>
+    /// Bexio timesheet status lookup connector. <see href="https://docs.bexio.com/#tag/Timesheets/operation/v2ListTimeSheetStatus">Timesheet Status</see>
+    /// </summary>
+    public ITimesheetStatusService TimesheetStatuses { get; set; }
+
+    /// <summary>
+    /// Bexio tasks connector. <see href="https://docs.bexio.com/#tag/Tasks">Tasks</see>
+    /// </summary>
+    public ITaskService Tasks { get; set; }
+
+    /// <summary>
+    /// Bexio task priorities connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Tasks/operation/v2ListTaskPriority">List Task Priority</see>
+    /// </summary>
+    public ITaskPriorityService TaskPriorities { get; set; }
+
+    /// <summary>
+    /// Bexio task statuses connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Tasks/operation/v2ListTaskStatus">List Task Status</see>
+    /// </summary>
+    public ITaskStatusService TaskStatuses { get; set; }
+
+    /// <summary>
+    /// Bexio business activities connector. Exposed under the <c>/2.0/client_service</c> route.
+    /// <see href="https://docs.bexio.com/#tag/Business-Activities">Business Activities</see>
+    /// </summary>
+    public IBusinessActivityService BusinessActivities { get; set; }
+
+    /// <summary>
+    /// Bexio projects connector. <see href="https://docs.bexio.com/#tag/Projects">Projects</see>
+    /// </summary>
+    public IProjectService Projects { get; set; }
+
+    /// <summary>
+    /// Bexio project states connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Projects/operation/v2ListProjectStatus">List Project Status</see>
+    /// </summary>
+    public IProjectStateService ProjectStates { get; set; }
+
+    /// <summary>
+    /// Bexio project types connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Projects/operation/v2ListProjectType">List Project Type</see>
+    /// </summary>
+    public IProjectTypeService ProjectTypes { get; set; }
+
+    /// <summary>
+    /// Bexio project milestones connector, nested under <c>/3.0/projects/{project_id}/milestones</c>.
+    /// <see href="https://docs.bexio.com/#tag/Projects">Projects</see>
+    /// </summary>
+    public IMilestoneService Milestones { get; set; }
+
+    /// <summary>
+    /// Bexio project work packages connector, nested under <c>/3.0/projects/{project_id}/packages</c>.
+    /// <see href="https://docs.bexio.com/#tag/Projects">Projects</see>
+    /// </summary>
+    public IPackageService Packages { get; set; }
 }

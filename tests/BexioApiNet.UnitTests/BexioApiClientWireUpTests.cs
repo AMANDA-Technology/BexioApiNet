@@ -25,10 +25,14 @@ SOFTWARE.
 
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
+using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
+using BexioApiNet.Interfaces.Connectors.Timesheets;
+using BexioApiNet.Interfaces.Connectors.Tasks;
 
 namespace BexioApiNet.UnitTests;
 
@@ -86,7 +90,18 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<ITextPositionService>(),
             Substitute.For<ISubtotalPositionService>(),
             Substitute.For<ISubPositionService>(),
-            Substitute.For<IPagebreakPositionService>());
+            Substitute.For<IPagebreakPositionService>(),
+            Substitute.For<ITimesheetService>(),
+            Substitute.For<ITimesheetStatusService>(),
+            Substitute.For<ITaskService>(),
+            Substitute.For<ITaskPriorityService>(),
+            Substitute.For<ITaskStatusService>(),
+            Substitute.For<IBusinessActivityService>(),
+            Substitute.For<IProjectService>(),
+            Substitute.For<IProjectStateService>(),
+            Substitute.For<IProjectTypeService>(),
+            Substitute.For<IMilestoneService>(),
+            Substitute.For<IPackageService>());
 
         Assert.Multiple(() =>
         {
@@ -124,6 +139,17 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.SalesSubtotalPositions, Is.Not.Null);
             Assert.That(client.SubPositions, Is.Not.Null);
             Assert.That(client.PagebreakPositions, Is.Not.Null);
+            Assert.That(client.Timesheets, Is.Not.Null);
+            Assert.That(client.TimesheetStatuses, Is.Not.Null);
+            Assert.That(client.Tasks, Is.Not.Null);
+            Assert.That(client.TaskPriorities, Is.Not.Null);
+            Assert.That(client.TaskStatuses, Is.Not.Null);
+            Assert.That(client.BusinessActivities, Is.Not.Null);
+            Assert.That(client.Projects, Is.Not.Null);
+            Assert.That(client.ProjectStates, Is.Not.Null);
+            Assert.That(client.ProjectTypes, Is.Not.Null);
+            Assert.That(client.Milestones, Is.Not.Null);
+            Assert.That(client.Packages, Is.Not.Null);
         });
     }
 }
