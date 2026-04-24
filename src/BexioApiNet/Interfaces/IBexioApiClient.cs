@@ -29,6 +29,7 @@ using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
+using BexioApiNet.Interfaces.Connectors.Timesheets;
 
 namespace BexioApiNet.Interfaces;
 
@@ -217,4 +218,14 @@ public interface IBexioApiClient : IDisposable
     /// Bexio document pagebreak-positions connector. <see href="https://docs.bexio.com/#tag/Pagebreak-positions">Pagebreak-positions</see>
     /// </summary>
     public IPagebreakPositionService PagebreakPositions { get; set; }
+
+    /// <summary>
+    /// Bexio timesheets connector. <see href="https://docs.bexio.com/#tag/Timesheets">Timesheets</see>
+    /// </summary>
+    public ITimesheetService Timesheets { get; set; }
+
+    /// <summary>
+    /// Bexio timesheet status lookup connector. <see href="https://docs.bexio.com/#tag/Timesheets/operation/v2ListTimeSheetStatus">Timesheet Status</see>
+    /// </summary>
+    public ITimesheetStatusService TimesheetStatuses { get; set; }
 }

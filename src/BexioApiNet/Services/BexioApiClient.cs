@@ -30,6 +30,7 @@ using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Items;
 using BexioApiNet.Interfaces.Connectors.Sales;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
+using BexioApiNet.Interfaces.Connectors.Timesheets;
 
 namespace BexioApiNet.Services;
 
@@ -143,6 +144,12 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IPagebreakPositionService PagebreakPositions { get; set; }
 
+    /// <inheritdoc />
+    public ITimesheetService Timesheets { get; set; }
+
+    /// <inheritdoc />
+    public ITimesheetStatusService TimesheetStatuses { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -181,7 +188,9 @@ public sealed class BexioApiClient : IBexioApiClient
         ITextPositionService salesTextPositions,
         ISubtotalPositionService salesSubtotalPositions,
         ISubPositionService subPositions,
-        IPagebreakPositionService pagebreakPositions)
+        IPagebreakPositionService pagebreakPositions,
+        ITimesheetService timesheets,
+        ITimesheetStatusService timesheetStatuses)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -218,6 +227,8 @@ public sealed class BexioApiClient : IBexioApiClient
         SalesSubtotalPositions = salesSubtotalPositions;
         SubPositions = subPositions;
         PagebreakPositions = pagebreakPositions;
+        Timesheets = timesheets;
+        TimesheetStatuses = timesheetStatuses;
     }
 
     /// <inheritdoc />
