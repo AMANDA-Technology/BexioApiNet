@@ -29,6 +29,7 @@ using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.MasterData;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
@@ -312,4 +313,10 @@ public interface IBexioApiClient : IDisposable
     ///     Bexio payroll paystubs connector. <see href="https://docs.bexio.com/#tag/Paystubs">Paystubs</see>
     /// </summary>
     public IPaystubService PayrollPaystubs { get; set; }
+
+    /// <summary>
+    ///     Bexio titles connector (honorifics such as "Dr." or "Prof.").
+    ///     <see href="https://docs.bexio.com/#tag/Titles">Titles</see>
+    /// </summary>
+    public ITitleService Titles { get; set; }
 }
