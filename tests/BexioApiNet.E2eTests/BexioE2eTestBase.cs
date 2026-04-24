@@ -132,7 +132,8 @@ public abstract class BexioE2eTestBase
             new PurchaseOrderService(connectionHandler),
             new ExpenseService(connectionHandler),
             new EmployeeService(connectionHandler),
-            new AbsenceService(connectionHandler));
+            new AbsenceService(connectionHandler),
+            new PaystubService(connectionHandler));
     }
 
     /// <summary>

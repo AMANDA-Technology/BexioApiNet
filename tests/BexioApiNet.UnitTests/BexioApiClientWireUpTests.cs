@@ -109,7 +109,8 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IPurchaseOrderService>(),
             Substitute.For<IExpenseService>(),
             Substitute.For<IEmployeeService>(),
-            Substitute.For<IAbsenceService>());
+            Substitute.For<IAbsenceService>(),
+            Substitute.For<IPaystubService>());
 
         Assert.Multiple(() =>
         {
@@ -163,6 +164,7 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.Expenses, Is.Not.Null);
             Assert.That(client.PayrollEmployees, Is.Not.Null);
             Assert.That(client.PayrollAbsences, Is.Not.Null);
+            Assert.That(client.PayrollPaystubs, Is.Not.Null);
         });
     }
 }

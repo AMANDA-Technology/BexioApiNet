@@ -198,6 +198,9 @@ public sealed class BexioApiClient : IBexioApiClient
     /// <inheritdoc />
     public IAbsenceService PayrollAbsences { get; set; }
 
+    /// <inheritdoc />
+    public IPaystubService PayrollPaystubs { get; set; }
+
     /// <summary>
     /// Initializes a new instance of the <see cref="BexioApiClient"/> class.
     /// </summary>
@@ -252,7 +255,8 @@ public sealed class BexioApiClient : IBexioApiClient
         IPurchaseOrderService purchaseOrders,
         IExpenseService expenses,
         IEmployeeService payrollEmployees,
-        IAbsenceService payrollAbsences)
+        IAbsenceService payrollAbsences,
+        IPaystubService payrollPaystubs)
     {
         _bexioConnectionHandler = bexioConnectionHandler;
         BankingBankAccounts = bankingBankAccounts;
@@ -305,6 +309,7 @@ public sealed class BexioApiClient : IBexioApiClient
         Expenses = expenses;
         PayrollEmployees = payrollEmployees;
         PayrollAbsences = payrollAbsences;
+        PayrollPaystubs = payrollPaystubs;
     }
 
     /// <inheritdoc />

@@ -307,4 +307,9 @@ public interface IBexioApiClient : IDisposable
     ///     Bexio payroll absences connector. <see href="https://docs.bexio.com/#tag/Absences">Absences</see>
     /// </summary>
     public IAbsenceService PayrollAbsences { get; set; }
+
+    /// <summary>
+    ///     Bexio payroll paystubs connector. <see href="https://docs.bexio.com/#tag/Paystubs">Paystubs</see>
+    /// </summary>
+    public IPaystubService PayrollPaystubs { get; set; }
 }
