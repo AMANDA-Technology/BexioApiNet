@@ -29,6 +29,7 @@ using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.MasterData;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
@@ -312,4 +313,26 @@ public interface IBexioApiClient : IDisposable
     ///     Bexio payroll paystubs connector. <see href="https://docs.bexio.com/#tag/Paystubs">Paystubs</see>
     /// </summary>
     public IPaystubService PayrollPaystubs { get; set; }
+
+    /// <summary>
+    ///     Bexio languages connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Languages">Languages</see>
+    /// </summary>
+    public ILanguageService Languages { get; set; }
+
+    /// <summary>
+    ///     Bexio communication types connector (read-only lookup). Exposed under the <c>/2.0/communication_kind</c> route.
+    ///     <see href="https://docs.bexio.com/#tag/Communication-Types">Communication Types</see>
+    /// </summary>
+    public ICommunicationTypeService CommunicationTypes { get; set; }
+
+    /// <summary>
+    ///     Bexio company profile connector (read-only lookup). <see href="https://docs.bexio.com/#tag/Company-Profile">Company Profile</see>
+    /// </summary>
+    public ICompanyProfileService CompanyProfiles { get; set; }
+
+    /// <summary>
+    ///     Bexio permissions connector (read-only singleton for the signed-in user).
+    ///     <see href="https://docs.bexio.com/#tag/Permissions">Permissions</see>
+    /// </summary>
+    public IPermissionService Permissions { get; set; }
 }
