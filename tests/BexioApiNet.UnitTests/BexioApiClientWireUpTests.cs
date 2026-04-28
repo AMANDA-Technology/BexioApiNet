@@ -28,7 +28,9 @@ using BexioApiNet.Interfaces.Connectors.Banking;
 using BexioApiNet.Interfaces.Connectors.BusinessActivities;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Interfaces.Connectors.Expenses;
+using BexioApiNet.Interfaces.Connectors.Files;
 using BexioApiNet.Interfaces.Connectors.Items;
+using BexioApiNet.Interfaces.Connectors.MasterData;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Interfaces.Connectors.Projects;
 using BexioApiNet.Interfaces.Connectors.Purchases;
@@ -110,7 +112,21 @@ public sealed class BexioApiClientWireUpTests
             Substitute.For<IExpenseService>(),
             Substitute.For<IEmployeeService>(),
             Substitute.For<IAbsenceService>(),
-            Substitute.For<IPaystubService>());
+            Substitute.For<IPaystubService>(),
+            Substitute.For<IFileService>(),
+            Substitute.For<IDocumentSettingService>(),
+            Substitute.For<IDocumentTemplateService>(),
+            Substitute.For<ICountryService>(),
+            Substitute.For<ISalutationService>(),
+            Substitute.For<ITitleService>(),
+            Substitute.For<ILanguageService>(),
+            Substitute.For<ICommunicationTypeService>(),
+            Substitute.For<ICompanyProfileService>(),
+            Substitute.For<IPermissionService>(),
+            Substitute.For<IUserService>(),
+            Substitute.For<IFictionalUserService>(),
+            Substitute.For<INoteService>(),
+            Substitute.For<ICommentService>());
 
         Assert.Multiple(() =>
         {
@@ -165,6 +181,20 @@ public sealed class BexioApiClientWireUpTests
             Assert.That(client.PayrollEmployees, Is.Not.Null);
             Assert.That(client.PayrollAbsences, Is.Not.Null);
             Assert.That(client.PayrollPaystubs, Is.Not.Null);
+            Assert.That(client.Files, Is.Not.Null);
+            Assert.That(client.DocumentSettings, Is.Not.Null);
+            Assert.That(client.DocumentTemplates, Is.Not.Null);
+            Assert.That(client.Countries, Is.Not.Null);
+            Assert.That(client.Salutations, Is.Not.Null);
+            Assert.That(client.Titles, Is.Not.Null);
+            Assert.That(client.Languages, Is.Not.Null);
+            Assert.That(client.CommunicationTypes, Is.Not.Null);
+            Assert.That(client.CompanyProfiles, Is.Not.Null);
+            Assert.That(client.Permissions, Is.Not.Null);
+            Assert.That(client.Users, Is.Not.Null);
+            Assert.That(client.FictionalUsers, Is.Not.Null);
+            Assert.That(client.Notes, Is.Not.Null);
+            Assert.That(client.Comments, Is.Not.Null);
         });
     }
 }

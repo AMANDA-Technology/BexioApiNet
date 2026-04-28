@@ -29,7 +29,9 @@ using BexioApiNet.Services.Connectors.Banking;
 using BexioApiNet.Services.Connectors.BusinessActivities;
 using BexioApiNet.Services.Connectors.Contacts;
 using BexioApiNet.Services.Connectors.Expenses;
+using BexioApiNet.Services.Connectors.Files;
 using BexioApiNet.Services.Connectors.Items;
+using BexioApiNet.Services.Connectors.MasterData;
 using BexioApiNet.Services.Connectors.Payroll;
 using BexioApiNet.Services.Connectors.Projects;
 using BexioApiNet.Services.Connectors.Purchases;
@@ -133,7 +135,21 @@ public abstract class BexioE2eTestBase
             new ExpenseService(connectionHandler),
             new EmployeeService(connectionHandler),
             new AbsenceService(connectionHandler),
-            new PaystubService(connectionHandler));
+            new PaystubService(connectionHandler),
+            new FileService(connectionHandler),
+            new DocumentSettingService(connectionHandler),
+            new DocumentTemplateService(connectionHandler),
+            new CountryService(connectionHandler),
+            new SalutationService(connectionHandler),
+            new TitleService(connectionHandler),
+            new LanguageService(connectionHandler),
+            new CommunicationTypeService(connectionHandler),
+            new CompanyProfileService(connectionHandler),
+            new PermissionService(connectionHandler),
+            new UserService(connectionHandler),
+            new FictionalUserService(connectionHandler),
+            new NoteService(connectionHandler),
+            new CommentService(connectionHandler));
     }
 
     /// <summary>

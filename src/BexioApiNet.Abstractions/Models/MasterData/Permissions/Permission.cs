@@ -1,0 +1,50 @@
+/*
+MIT License
+
+Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
+Copyright (c) 2022 Manuel Gysin <manuel.gysin@amanda-technology.ch>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+*/
+
+namespace BexioApiNet.Abstractions.Models.MasterData.Permissions;
+
+/// <summary>
+/// Access information of the currently signed-in user, returned by Bexio's
+/// <c>/3.0/permissions</c> singleton endpoint.
+/// <see href="https://docs.bexio.com/#tag/Permissions/operation/Permissions">Get permissions</see>
+/// </summary>
+public sealed record Permission
+{
+    /// <summary>
+    /// Activated modules / functionalities for the signed-in user. The Bexio docs describe this
+    /// as a list of feature flags (e.g. <c>functionality1</c>).
+    /// </summary>
+    [JsonPropertyName("components")]
+    public IReadOnlyList<string>? Components { get; init; }
+
+    /// <summary>
+    /// Per-resource permission descriptors. Keys are Bexio resource names (e.g. <c>contact</c>,
+    /// <c>kb_invoice</c>, <c>article</c>). The shape of each value follows <see cref="PermissionAccess"/>.
+    /// The set of keys varies per user and per activated module; an unknown key should not be
+    /// treated as an error.
+    /// </summary>
+    [JsonPropertyName("permissions")]
+    public IReadOnlyDictionary<string, PermissionAccess>? Permissions { get; init; }
+}
