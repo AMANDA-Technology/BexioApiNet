@@ -98,7 +98,7 @@ public sealed class UnitService : ConnectorService, IUnitService
     /// <inheritdoc />
     public async Task<ApiResult<Unit>> Update(int id, UnitUpdate unit, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PutAsync<Unit, UnitUpdate>(unit, $"{ApiVersion}/{EndpointRoot}/{id}",
+        return await ConnectionHandler.PostAsync<Unit, UnitUpdate>(unit, $"{ApiVersion}/{EndpointRoot}/{id}",
             cancellationToken);
     }
 
