@@ -319,4 +319,55 @@ public sealed class AdditionalAddressServiceTests : ServiceTestBase
         CountryId: 1,
         Subject: "Additional address",
         Description: null);
+
+    /// <summary>
+    /// <see cref="QueryParameterAdditionalAddress"/> serializes <c>limit</c>, <c>offset</c>
+    /// and <c>order_by</c> entries that match the Bexio OpenAPI spec parameter names.
+    /// </summary>
+    [Test]
+    public void QueryParameterAdditionalAddress_SerializesLimitOffsetAndOrderBy()
+    {
+        var queryParameter = new QueryParameterAdditionalAddress(Limit: 25, Offset: 50, OrderBy: "postcode_asc");
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter!.Parameters, Contains.Key("limit"));
+        Assert.That(queryParameter.QueryParameter.Parameters["limit"], Is.EqualTo(25));
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("offset"));
+        Assert.That(queryParameter.QueryParameter.Parameters["offset"], Is.EqualTo(50));
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("order_by"));
+        Assert.That(queryParameter.QueryParameter.Parameters["order_by"], Is.EqualTo("postcode_asc"));
+    }
+
+    /// <summary>
+    /// When all <see cref="QueryParameterAdditionalAddress"/> arguments are <see langword="null"/>,
+    /// the inner <see cref="QueryParameter"/> is also <see langword="null"/> so the connection
+    /// handler does not append any query string.
+    /// </summary>
+    [Test]
+    public void QueryParameterAdditionalAddress_AllNullProducesNullQueryParameter()
+    {
+        var queryParameter = new QueryParameterAdditionalAddress();
+
+        Assert.That(queryParameter.QueryParameter, Is.Null);
+    }
+
+    /// <summary>
+    /// GetById forwards the cancellation token supplied by the caller to the connection
+    /// handler so cooperative cancellation flows end-to-end.
+    /// </summary>
+    [Test]
+    public async Task GetById_ForwardsCancellationToken()
+    {
+        using var cts = new CancellationTokenSource();
+        ConnectionHandler
+            .GetAsync<AdditionalAddress>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<AdditionalAddress> { IsSuccess = true });
+
+        await _sut.GetById(ContactId, AdditionalAddressId, cts.Token);
+
+        await ConnectionHandler.Received(1).GetAsync<AdditionalAddress>(
+            $"{EndpointRoot}/{AdditionalAddressId}",
+            null,
+            cts.Token);
+    }
 }

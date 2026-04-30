@@ -433,4 +433,114 @@ public sealed class ContactServiceTests : ServiceTestBase
             UpdatedAt: null,
             ProfileImage: null);
     }
+
+    /// <summary>
+    /// <see cref="QueryParameterContact"/> emits all four spec-defined parameters
+    /// (<c>limit</c>, <c>offset</c>, <c>order_by</c>, <c>show_archived</c>) when populated,
+    /// using snake_case keys as required by the Bexio API.
+    /// </summary>
+    [Test]
+    public void QueryParameterContact_SerializesLimitOffsetOrderByAndShowArchived()
+    {
+        var queryParameter = new QueryParameterContact(
+            Limit: 100,
+            Offset: 50,
+            OrderBy: "name_1_desc",
+            ShowArchived: true);
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter!.Parameters, Contains.Key("limit"));
+        Assert.That(queryParameter.QueryParameter.Parameters["limit"], Is.EqualTo(100));
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("offset"));
+        Assert.That(queryParameter.QueryParameter.Parameters["offset"], Is.EqualTo(50));
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("order_by"));
+        Assert.That(queryParameter.QueryParameter.Parameters["order_by"], Is.EqualTo("name_1_desc"));
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("show_archived"));
+        Assert.That(queryParameter.QueryParameter.Parameters["show_archived"], Is.EqualTo("true"));
+    }
+
+    /// <summary>
+    /// When all <see cref="QueryParameterContact"/> arguments are <see langword="null"/>,
+    /// the inner <see cref="QueryParameter"/> is also <see langword="null"/> so the connection
+    /// handler does not append any query string.
+    /// </summary>
+    [Test]
+    public void QueryParameterContact_AllNullProducesNullQueryParameter()
+    {
+        var queryParameter = new QueryParameterContact();
+
+        Assert.That(queryParameter.QueryParameter, Is.Null);
+    }
+
+    /// <summary>
+    /// BulkCreate returns the connection handler's <see cref="ApiResult{T}"/> verbatim.
+    /// </summary>
+    [Test]
+    public async Task BulkCreate_ReturnsApiResultFromConnectionHandler()
+    {
+        var payloads = new List<ContactCreate> { BuildCreatePayload() };
+        var response = new ApiResult<List<Contact>> { IsSuccess = true, Data = [BuildContact(1)] };
+        ConnectionHandler
+            .PostBulkAsync<Contact, ContactCreate>(
+                Arg.Any<List<ContactCreate>>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.BulkCreate(payloads);
+
+        Assert.That(result, Is.SameAs(response));
+    }
+
+    /// <summary>
+    /// Update returns the connection handler's <see cref="ApiResult{T}"/> verbatim.
+    /// </summary>
+    [Test]
+    public async Task Update_ReturnsApiResultFromConnectionHandler()
+    {
+        var payload = BuildUpdatePayload();
+        var response = new ApiResult<Contact> { IsSuccess = true, Data = BuildContact(1) };
+        ConnectionHandler
+            .PostAsync<Contact, ContactUpdate>(
+                Arg.Any<ContactUpdate>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Update(1, payload);
+
+        Assert.That(result, Is.SameAs(response));
+    }
+
+    /// <summary>
+    /// Restore returns the connection handler's <see cref="ApiResult{T}"/> verbatim.
+    /// </summary>
+    [Test]
+    public async Task Restore_ReturnsApiResultFromConnectionHandler()
+    {
+        var response = new ApiResult<object> { IsSuccess = true };
+        ConnectionHandler
+            .PatchAsync<object, object?>(Arg.Any<object?>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Restore(1);
+
+        Assert.That(result, Is.SameAs(response));
+    }
+
+    /// <summary>
+    /// Delete returns the connection handler's <see cref="ApiResult{T}"/> verbatim.
+    /// </summary>
+    [Test]
+    public async Task Delete_ReturnsApiResultFromConnectionHandler()
+    {
+        var response = new ApiResult<object> { IsSuccess = true };
+        ConnectionHandler
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Delete(1);
+
+        Assert.That(result, Is.SameAs(response));
+    }
 }

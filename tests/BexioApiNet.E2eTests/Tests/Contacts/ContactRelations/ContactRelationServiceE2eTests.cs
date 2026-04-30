@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Contacts.ContactRelations.Views;
+using BexioApiNet.Abstractions.Models.Contacts.Contacts.Views;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Contacts;
@@ -33,17 +34,20 @@ using BexioApiNet.Services.Connectors.Contacts;
 namespace BexioApiNet.E2eTests.Tests.Contacts.ContactRelations;
 
 /// <summary>
-/// Live E2E test stubs for <see cref="ContactRelationService"/>. Stand-alone class (does not
-/// inherit <see cref="BexioE2eTestBase"/>) so that this sub-issue does not modify the shared
-/// test base — DI wire-up is handled by a separate sub-issue (#49). Credentials are read from
-/// the same environment variables; tests are skipped via <see cref="Assert.Ignore(string)"/>
-/// when they are missing.
+/// Live end-to-end tests for <see cref="ContactRelationService"/>. The tests are fully
+/// self-contained: they create two parent contacts, exercise the contact relation CRUD
+/// endpoints between them, and clean up everything in <c>try/finally</c> blocks. Tests
+/// are skipped automatically when <c>BexioApiNet__BaseUri</c> or <c>BexioApiNet__JwtToken</c>
+/// are missing.
 /// </summary>
 [Category("E2E")]
-public class ContactRelationServiceE2eTests
+public sealed class ContactRelationServiceE2eTests
 {
+    private const int CompanyContactType = 1;
+
     private BexioConnectionHandler? _connectionHandler;
     private IContactRelationService? _service;
+    private ContactService? _contactService;
 
     /// <summary>
     /// Reads <c>BexioApiNet__BaseUri</c> and <c>BexioApiNet__JwtToken</c> from the environment.
@@ -71,6 +75,7 @@ public class ContactRelationServiceE2eTests
             });
 
         _service = new ContactRelationService(_connectionHandler);
+        _contactService = new ContactService(_connectionHandler);
     }
 
     /// <summary>
@@ -83,83 +88,27 @@ public class ContactRelationServiceE2eTests
     }
 
     /// <summary>
-    /// Stub — live test for <c>GET /2.0/contact_relation</c>. Requires a tenant with at least
-    /// one contact relation.
+    /// Lists contact relations to verify the GET /2.0/contact_relation endpoint round-trips.
     /// </summary>
     [Test]
     public async Task GetList_ReturnsContactRelations()
     {
-        Assert.That(_service, Is.Not.Null);
-
-        var result = await _service!.Get(new QueryParameterContactRelation(5, 0));
+        var result = await _service!.Get(new QueryParameterContactRelation(Limit: 5, Offset: 0));
 
         Assert.That(result, Is.Not.Null);
         Assert.That(result.IsSuccess, Is.True);
     }
 
     /// <summary>
-    /// Stub — live test for <c>GET /2.0/contact_relation/{id}</c>. Fetches the first
-    /// contact relation from the list and looks it up by id.
-    /// </summary>
-    [Test]
-    public async Task GetById_ReturnsContactRelation()
-    {
-        Assert.That(_service, Is.Not.Null);
-
-        var list = await _service!.Get(new QueryParameterContactRelation(1, 0));
-        Assert.That(list.IsSuccess, Is.True);
-        if (list.Data is null || list.Data.Count is 0)
-            Assert.Ignore("no contact relation available to query by id");
-
-        var id = list.Data![0].Id;
-
-        var result = await _service.GetById(id);
-
-        Assert.That(result, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Data?.Id, Is.EqualTo(id));
-        });
-    }
-
-    /// <summary>
-    /// Stub — live test for <c>POST /2.0/contact_relation</c>. The create/delete cycle requires
-    /// two valid contact ids in the target tenant; skip rather than fail if none are available.
-    /// </summary>
-    [Test]
-    public async Task Create_CreatesAndDeletesContactRelation()
-    {
-        Assert.That(_service, Is.Not.Null);
-
-        const int contactId = 1;
-        const int contactSubId = 2;
-
-        var created = await _service!.Create(new ContactRelationCreate(
-            ContactId: contactId,
-            ContactSubId: contactSubId,
-            Description: "E2E-ContactRelation"));
-
-        if (!created.IsSuccess)
-            Assert.Ignore($"create failed ({created.StatusCode}) — check that contact ids {contactId} and {contactSubId} exist in the tenant");
-
-        Assert.That(created.Data, Is.Not.Null);
-
-        var cleanup = await _service.Delete(created.Data!.Id);
-        Assert.That(cleanup.IsSuccess, Is.True);
-    }
-
-    /// <summary>
-    /// Stub — live test for <c>POST /2.0/contact_relation/search</c>.
+    /// Searches contact relations with a contact_id filter.
     /// </summary>
     [Test]
     public async Task Search_ReturnsContactRelations()
     {
-        Assert.That(_service, Is.Not.Null);
-
+        var ownerId = await ResolveOwnerIdAsync();
         var criteria = new List<SearchCriteria>
         {
-            new() { Field = "contact_id", Value = "1", Criteria = "=" }
+            new() { Field = "contact_id", Value = ownerId.ToString(), Criteria = "=" }
         };
 
         var result = await _service!.Search(criteria);
@@ -169,72 +118,77 @@ public class ContactRelationServiceE2eTests
     }
 
     /// <summary>
-    /// Stub — live test for <c>POST /2.0/contact_relation/{id}</c> (Bexio v2.0 edit semantics).
-    /// Creates a contact relation, updates its description, then cleans up.
+    /// Creates two parent contacts, then exercises Create → Read → Update → Delete on a
+    /// contact relation between them. Cleans up the relation and both parent contacts in
+    /// nested <c>try/finally</c> blocks.
     /// </summary>
     [Test]
-    public async Task Update_EditsContactRelation()
+    public async Task FullCrudLifecycle_OnContactRelation()
     {
-        Assert.That(_service, Is.Not.Null);
-
-        const int contactId = 1;
-        const int contactSubId = 2;
-
-        var created = await _service!.Create(new ContactRelationCreate(
-            ContactId: contactId,
-            ContactSubId: contactSubId,
-            Description: "E2E-ContactRelation-Update"));
-
-        if (!created.IsSuccess)
-            Assert.Ignore($"create failed ({created.StatusCode}) — check that contact ids {contactId} and {contactSubId} exist in the tenant");
-
-        Assert.That(created.Data, Is.Not.Null);
-
+        var ownerId = await ResolveOwnerIdAsync();
+        var contactA = await CreateContactAsync(ownerId, $"E2E-Relation-A-{DateTime.UtcNow:yyyyMMddHHmmssfff}");
         try
         {
-            var updated = await _service.Update(created.Data!.Id, new ContactRelationUpdate(
-                ContactId: contactId,
-                ContactSubId: contactSubId,
-                Description: "E2E-ContactRelation-Updated"));
-
-            Assert.That(updated, Is.Not.Null);
-            Assert.Multiple(() =>
+            var contactB = await CreateContactAsync(ownerId, $"E2E-Relation-B-{DateTime.UtcNow:yyyyMMddHHmmssfff}");
+            try
             {
-                Assert.That(updated.IsSuccess, Is.True);
-                Assert.That(updated.Data?.Description, Is.EqualTo("E2E-ContactRelation-Updated"));
-            });
+                var create = await _service!.Create(new ContactRelationCreate(
+                    ContactId: contactA,
+                    ContactSubId: contactB,
+                    Description: "E2E-ContactRelation"));
+                Assert.That(create.IsSuccess, Is.True, $"Create failed: {create.ApiError?.Message}");
+                Assert.That(create.Data, Is.Not.Null);
+                var relationId = create.Data!.Id;
+
+                try
+                {
+                    var read = await _service.GetById(relationId);
+                    Assert.That(read.IsSuccess, Is.True);
+                    Assert.That(read.Data?.Id, Is.EqualTo(relationId));
+
+                    var update = await _service.Update(relationId, new ContactRelationUpdate(
+                        ContactId: contactA,
+                        ContactSubId: contactB,
+                        Description: "E2E-ContactRelation-Updated"));
+                    Assert.That(update.IsSuccess, Is.True);
+                    Assert.That(update.Data?.Description, Is.EqualTo("E2E-ContactRelation-Updated"));
+                }
+                finally
+                {
+                    await _service.Delete(relationId);
+                }
+            }
+            finally
+            {
+                await _contactService!.Delete(contactB);
+            }
         }
         finally
         {
-            await _service.Delete(created.Data!.Id);
+            await _contactService!.Delete(contactA);
         }
     }
 
-    /// <summary>
-    /// Stub — live test for <c>DELETE /2.0/contact_relation/{id}</c>. Creates a contact relation,
-    /// deletes it, and verifies the API reports success.
-    /// </summary>
-    [Test]
-    public async Task Delete_RemovesContactRelation()
+    private async Task<int> CreateContactAsync(int ownerId, string name)
     {
-        Assert.That(_service, Is.Not.Null);
+        var result = await _contactService!.Create(new ContactCreate(
+            ContactTypeId: CompanyContactType,
+            Name1: name,
+            UserId: ownerId,
+            OwnerId: ownerId));
+        Assert.That(result.IsSuccess, Is.True, $"Parent contact create failed: {result.ApiError?.Message}");
+        return result.Data!.Id;
+    }
 
-        const int contactId = 1;
-        const int contactSubId = 2;
-
-        var created = await _service!.Create(new ContactRelationCreate(
-            ContactId: contactId,
-            ContactSubId: contactSubId,
-            Description: "E2E-ContactRelation-Delete"));
-
-        if (!created.IsSuccess)
-            Assert.Ignore($"create failed ({created.StatusCode}) — check that contact ids {contactId} and {contactSubId} exist in the tenant");
-
-        Assert.That(created.Data, Is.Not.Null);
-
-        var result = await _service.Delete(created.Data!.Id);
-
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.IsSuccess, Is.True);
+    /// <summary>
+    /// Probes the tenant for the first contact's owner id. Using an existing owner keeps
+    /// the test safe across tenants without hardcoding ids.
+    /// </summary>
+    private async Task<int> ResolveOwnerIdAsync()
+    {
+        var existing = await _contactService!.Get(new QueryParameterContact(Limit: 1));
+        return existing.IsSuccess && existing.Data is { Count: > 0 }
+            ? existing.Data[0].OwnerId
+            : 1;
     }
 }
