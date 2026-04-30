@@ -98,7 +98,7 @@ public sealed class NoteService : ConnectorService, INoteService
     /// <inheritdoc />
     public async Task<ApiResult<Note>> Update(int id, NoteUpdate note, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PutAsync<Note, NoteUpdate>(note, $"{ApiVersion}/{EndpointRoot}/{id}",
+        return await ConnectionHandler.PostAsync<Note, NoteUpdate>(note, $"{ApiVersion}/{EndpointRoot}/{id}",
             cancellationToken);
     }
 

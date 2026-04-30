@@ -287,17 +287,18 @@ public sealed class NoteServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Update forwards the update view to <see cref="IBexioConnectionHandler.PutAsync{TResult,TUpdate}" />
-    ///     against the per-id sub-path (the Bexio Notes API uses PUT for full-replacement edits).
+    ///     Update forwards the update view to <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />
+    ///     against the per-id sub-path. The Bexio v2 Notes API uses POST (operationId
+    ///     <c>v2EditNote</c>) for full-replacement edits.
     /// </summary>
     [Test]
-    public async Task Update_CallsPutAsyncWithIdInPath()
+    public async Task Update_CallsPostAsyncWithIdInPath()
     {
         const int id = 7;
         var payload = NewNoteUpdate();
         var expected = new ApiResult<Note> { IsSuccess = true, Data = NewNote(id) };
         ConnectionHandler
-            .PutAsync<Note, NoteUpdate>(
+            .PostAsync<Note, NoteUpdate>(
                 Arg.Any<NoteUpdate>(),
                 Arg.Any<string>(),
                 Arg.Any<CancellationToken>())
@@ -306,7 +307,7 @@ public sealed class NoteServiceTests : ServiceTestBase
         var result = await _sut.Update(id, payload);
 
         Assert.That(result, Is.SameAs(expected));
-        await ConnectionHandler.Received(1).PutAsync<Note, NoteUpdate>(
+        await ConnectionHandler.Received(1).PostAsync<Note, NoteUpdate>(
             payload,
             $"{ExpectedEndpoint}/{id}",
             Arg.Any<CancellationToken>());

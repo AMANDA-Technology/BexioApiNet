@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Json;
+
 namespace BexioApiNet.Abstractions.Models.MasterData.Notes.Views;
 
 /// <summary>
@@ -48,6 +50,7 @@ public sealed record NoteUpdate(
     [property: JsonPropertyName("user_id")]
     int UserId,
     [property: JsonPropertyName("event_start")]
+    [property: JsonConverter(typeof(BexioDateTimeJsonConverter))]
     DateTime EventStart,
     [property: JsonPropertyName("subject")]
     string Subject,

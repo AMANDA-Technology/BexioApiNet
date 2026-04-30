@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Json;
+
 namespace BexioApiNet.Abstractions.Models.MasterData.Notes;
 
 /// <summary>
@@ -33,7 +35,10 @@ namespace BexioApiNet.Abstractions.Models.MasterData.Notes;
 /// <param name="UserId">Reference to the user that owns the note.</param>
 /// <param name="EventStart">Timestamp of the note's event in Bexio's <c>yyyy-MM-dd HH:mm:ss</c> format.</param>
 /// <param name="Subject">Short subject / title of the note.</param>
-/// <param name="Info">Free-text body of the note.</param>
+/// <param name="Info">
+///     Free-text body of the note. Optional in the Bexio response — null when the field was not
+///     supplied on create / update.
+/// </param>
 /// <param name="ContactId">Optional reference to a linked contact object.</param>
 /// <param name="ProjectId">
 ///     Optional reference to a linked project object (read-only — Bexio mirrors
@@ -47,10 +52,11 @@ public sealed record Note(
     [property: JsonPropertyName("user_id")]
     int UserId,
     [property: JsonPropertyName("event_start")]
+    [property: JsonConverter(typeof(BexioDateTimeJsonConverter))]
     DateTime EventStart,
     [property: JsonPropertyName("subject")]
     string Subject,
-    [property: JsonPropertyName("info")] string Info,
+    [property: JsonPropertyName("info")] string? Info,
     [property: JsonPropertyName("contact_id")]
     int? ContactId,
     [property: JsonPropertyName("project_id")]
