@@ -65,9 +65,9 @@ public interface IPurchaseOrderService
     public Task<ApiResult<PurchaseOrder>> Create(PurchaseOrderCreate purchaseOrder, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
-    /// Update an existing purchase order. Bexio v3.0 uses <c>POST /3.0/purchase/orders/{id}</c>
-    /// (not <c>PUT</c>) for full-replacement updates — the same convention as v2.0 sales documents.
-    /// <see href="https://docs.bexio.com/#tag/Purchase-Orders">Update Purchase Order</see>
+    /// Update an existing purchase order. Bexio v3.0 uses <c>PUT /3.0/purchase_orders/{id}</c>
+    /// for full-replacement updates.
+    /// <see href="https://docs.bexio.com/#tag/Purchase-Orders/operation/v3PurchaseOrderUpdate">Update Purchase Order</see>
     /// </summary>
     /// <param name="id">Purchase order identifier to update.</param>
     /// <param name="purchaseOrder">Update view containing the full purchase order state.</param>

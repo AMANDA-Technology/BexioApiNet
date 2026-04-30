@@ -36,7 +36,9 @@ namespace BexioApiNet.UnitTests.MasterData;
 ///     Offline unit tests for <see cref="TitleService" />. Each test verifies that the service
 ///     forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected verb and path,
 ///     propagates the response unchanged, and honours the canonical <c>autoPage</c> + <c>X-Total-Count</c>
-///     pagination contract. No network access.
+///     pagination contract. The Bexio Titles API uses <c>POST /2.0/title/{id}</c> for full
+///     replacement edits — see <see href="https://docs.bexio.com/#tag/Titles/operation/v2EditTitle" />.
+///     No network access.
 /// </summary>
 [TestFixture]
 public sealed class TitleServiceTests : ServiceTestBase
@@ -101,6 +103,38 @@ public sealed class TitleServiceTests : ServiceTestBase
             ExpectedEndpoint,
             queryParameter.QueryParameter,
             Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     <see cref="QueryParameterTitle" /> emits the spec-supported pagination and ordering
+    ///     parameters (<c>limit</c>, <c>offset</c>, <c>order_by</c>) and only includes a key
+    ///     when the caller supplied a value.
+    /// </summary>
+    [Test]
+    public void QueryParameterTitle_Serializes_AllSpecSupportedParameters()
+    {
+        var queryParameter = new QueryParameterTitle(limit: 25, offset: 50, orderBy: "name_desc");
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter.Parameters.Keys,
+            Is.EquivalentTo(new[] { "limit", "offset", "order_by" }));
+        Assert.That(queryParameter.QueryParameter.Parameters["limit"], Is.EqualTo(25));
+        Assert.That(queryParameter.QueryParameter.Parameters["offset"], Is.EqualTo(50));
+        Assert.That(queryParameter.QueryParameter.Parameters["order_by"], Is.EqualTo("name_desc"));
+    }
+
+    /// <summary>
+    ///     <see cref="QueryParameterTitle" /> does not include keys for parameters the caller
+    ///     omitted — only supplied values reach the URL.
+    /// </summary>
+    [Test]
+    public void QueryParameterTitle_OmitsUnsetParameters()
+    {
+        var queryParameter = new QueryParameterTitle(limit: 25);
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter.Parameters.Keys, Is.EquivalentTo(new[] { "limit" }));
+        Assert.That(queryParameter.QueryParameter.Parameters["limit"], Is.EqualTo(25));
     }
 
     /// <summary>
@@ -287,17 +321,19 @@ public sealed class TitleServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Update forwards the update view to <see cref="IBexioConnectionHandler.PutAsync{TResult,TUpdate}" />
-    ///     against the per-id sub-path (the Bexio Titles API uses PUT for full-replacement edits).
+    ///     Update forwards the update view to <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />
+    ///     against the per-id sub-path. The Bexio Titles API uses <c>POST</c> (not <c>PUT</c>)
+    ///     for full-replacement edits — see
+    ///     <see href="https://docs.bexio.com/#tag/Titles/operation/v2EditTitle" />.
     /// </summary>
     [Test]
-    public async Task Update_CallsPutAsyncWithIdInPath()
+    public async Task Update_CallsPostAsyncWithIdInPath()
     {
         const int id = 7;
         var payload = new TitleUpdate("Prof.");
         var expected = new ApiResult<Title> { IsSuccess = true, Data = NewTitle(id) };
         ConnectionHandler
-            .PutAsync<Title, TitleUpdate>(
+            .PostAsync<Title, TitleUpdate>(
                 Arg.Any<TitleUpdate>(),
                 Arg.Any<string>(),
                 Arg.Any<CancellationToken>())
@@ -306,7 +342,7 @@ public sealed class TitleServiceTests : ServiceTestBase
         var result = await _sut.Update(id, payload);
 
         Assert.That(result, Is.SameAs(expected));
-        await ConnectionHandler.Received(1).PutAsync<Title, TitleUpdate>(
+        await ConnectionHandler.Received(1).PostAsync<Title, TitleUpdate>(
             payload,
             $"{ExpectedEndpoint}/{id}",
             Arg.Any<CancellationToken>());

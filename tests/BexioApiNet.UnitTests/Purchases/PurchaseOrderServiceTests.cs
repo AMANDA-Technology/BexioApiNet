@@ -34,14 +34,15 @@ namespace BexioApiNet.UnitTests.Purchases;
 /// <summary>
 /// Offline unit tests for <see cref="PurchaseOrderService"/>. Each test asserts that the service
 /// forwards its calls to <see cref="IBexioConnectionHandler"/> with the expected verb, path and
-/// payload, and returns the handler's <see cref="ApiResult{T}"/> unchanged. Note in particular
-/// that <c>Update</c> uses <c>POST</c> (not <c>PUT</c>) — Bexio v3.0 follows the same
-/// POST-to-id update convention as v2.0.
+/// payload, and returns the handler's <see cref="ApiResult{T}"/> unchanged. The Bexio Purchase
+/// Orders API is rooted at <c>/3.0/purchase_orders</c> and uses <c>PUT</c> for full-replacement
+/// updates per the v3.0.0 OpenAPI spec
+/// (see <see href="https://docs.bexio.com/#tag/Purchase-Orders/operation/v3PurchaseOrderUpdate" />).
 /// </summary>
 [TestFixture]
 public sealed class PurchaseOrderServiceTests : ServiceTestBase
 {
-    private const string ExpectedEndpoint = "3.0/purchase/orders";
+    private const string ExpectedEndpoint = "3.0/purchase_orders";
 
     private PurchaseOrderService _sut = null!;
 
@@ -157,18 +158,17 @@ public sealed class PurchaseOrderServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    /// Update calls <see cref="IBexioConnectionHandler.PostAsync{TResult,TUpdate}"/> (POST, not PUT)
-    /// at <c>/3.0/purchase/orders/{id}</c> — Bexio v3.0 routes update via POST on the resource,
-    /// matching the v2.0 sales-document convention.
+    /// Update calls <see cref="IBexioConnectionHandler.PutAsync{TResult,TUpdate}"/> at
+    /// <c>/3.0/purchase_orders/{id}</c> per the OpenAPI spec.
     /// </summary>
     [Test]
-    public async Task Update_CallsPostAsync_WithIdInPath()
+    public async Task Update_CallsPutAsync_WithIdInPath()
     {
         const int id = 42;
         var payload = BuildUpdatePayload();
         string? capturedPath = null;
         ConnectionHandler
-            .PostAsync<PurchaseOrder, PurchaseOrderUpdate>(
+            .PutAsync<PurchaseOrder, PurchaseOrderUpdate>(
                 Arg.Any<PurchaseOrderUpdate>(),
                 Arg.Do<string>(path => capturedPath = path),
                 Arg.Any<CancellationToken>())
@@ -177,7 +177,7 @@ public sealed class PurchaseOrderServiceTests : ServiceTestBase
         await _sut.Update(id, payload);
 
         Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{id}"));
-        await ConnectionHandler.Received(1).PostAsync<PurchaseOrder, PurchaseOrderUpdate>(
+        await ConnectionHandler.Received(1).PutAsync<PurchaseOrder, PurchaseOrderUpdate>(
             payload,
             $"{ExpectedEndpoint}/{id}",
             Arg.Any<CancellationToken>());

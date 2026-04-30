@@ -26,15 +26,15 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Purchases.PurchaseOrders.Views;
 
 /// <summary>
-/// Create view for <c>POST /3.0/purchase/orders</c>. Read-only fields (id, totals,
-/// updated_at) are intentionally omitted. <c>document_no</c> is optional — Bexio
+/// Create view for <c>POST /3.0/purchase_orders</c>. Read-only fields (id, totals,
+/// updated_at) are intentionally omitted. <c>document_nr</c> is optional — Bexio
 /// auto-generates it when omitted.
 /// <see href="https://docs.bexio.com/#tag/Purchase-Orders">Purchase Orders</see>
 /// </summary>
 /// <param name="ContactId">Identifier of the supplier contact the order is addressed to.</param>
 /// <param name="CurrencyId">Identifier of the currency in which the order is denominated.</param>
 /// <param name="UserId">Identifier of the user that owns the purchase order.</param>
-/// <param name="DocumentNo">Optional document number. Auto-generated when omitted.</param>
+/// <param name="DocumentNr">Optional document number. Auto-generated when omitted.</param>
 /// <param name="Title">Free-form purchase order title.</param>
 /// <param name="ContactSubId">Optional additional contact reference (e.g. addressee within the supplier company).</param>
 /// <param name="IsValidFrom">Order validity start in Bexio's <c>yyyy-MM-dd</c> format.</param>
@@ -44,7 +44,7 @@ public sealed record PurchaseOrderCreate(
     [property: JsonPropertyName("contact_id")] int ContactId,
     [property: JsonPropertyName("currency_id")] int CurrencyId,
     [property: JsonPropertyName("user_id")] int UserId,
-    [property: JsonPropertyName("document_no")] string? DocumentNo = null,
+    [property: JsonPropertyName("document_nr")] string? DocumentNr = null,
     [property: JsonPropertyName("title")] string? Title = null,
     [property: JsonPropertyName("contact_sub_id")] int? ContactSubId = null,
     [property: JsonPropertyName("is_valid_from")] string? IsValidFrom = null,

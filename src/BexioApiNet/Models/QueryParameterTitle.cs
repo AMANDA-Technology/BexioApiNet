@@ -26,19 +26,31 @@ SOFTWARE.
 namespace BexioApiNet.Models;
 
 /// <summary>
-///     Dictionary for optional query parameters for the titles endpoint.
+///     Optional query parameters for the titles endpoint
+///     (<c>GET /2.0/title</c> and <c>POST /2.0/title/search</c>). All values are
+///     optional and only supplied parameters are appended to the request URL.
 /// </summary>
-public sealed record QueryParameterTitle(
-    int Limit,
-    int Offset
-)
+public sealed record QueryParameterTitle
 {
     /// <summary>
+    ///     Initializes a new <see cref="QueryParameterTitle" />.
     /// </summary>
-    public QueryParameter? QueryParameter { get; } =
-        new(new Dictionary<string, object>
-        {
-            { "limit", Limit },
-            { "offset", Offset }
-        });
+    /// <param name="limit">Maximum number of titles to return (Bexio default 500, max 2000).</param>
+    /// <param name="offset">Number of records to skip for pagination.</param>
+    /// <param name="orderBy">Field name to sort by (e.g. <c>name</c>). Append <c>_desc</c> for descending order.</param>
+    public QueryParameterTitle(int? limit = null, int? offset = null, string? orderBy = null)
+    {
+        var parameters = new Dictionary<string, object>();
+
+        if (limit is { } l) parameters["limit"] = l;
+        if (offset is { } o) parameters["offset"] = o;
+        if (!string.IsNullOrWhiteSpace(orderBy)) parameters["order_by"] = orderBy;
+
+        QueryParameter = new(parameters);
+    }
+
+    /// <summary>
+    ///     The wrapped query parameter dictionary serialized onto the URL.
+    /// </summary>
+    public QueryParameter QueryParameter { get; }
 }
