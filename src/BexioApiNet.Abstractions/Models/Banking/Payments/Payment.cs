@@ -48,7 +48,7 @@ namespace BexioApiNet.Abstractions.Models.Banking.Payments;
 /// <param name="Status">Lifecycle status of the payment.</param>
 /// <param name="Type">Type of the payment (iban or qr).</param>
 /// <param name="DueDate">Due date for the purchase payment.</param>
-/// <param name="CreatedAt">Timestamp when the payment was created.</param>
+/// <param name="CreatedAt">Timestamp when the payment was created (ISO 8601 with offset).</param>
 /// <param name="IsEditingRestricted">If true, editing is restricted to the API client that created the payment.</param>
 public sealed record Payment(
     [property: JsonPropertyName("id")] int? Id,
@@ -68,6 +68,6 @@ public sealed record Payment(
     [property: JsonPropertyName("status")] PaymentStatus? Status,
     [property: JsonPropertyName("type")] PaymentType? Type,
     [property: JsonPropertyName("due_date")] DateOnly? DueDate,
-    [property: JsonPropertyName("created_at")] string? CreatedAt,
+    [property: JsonPropertyName("created_at")] DateTimeOffset? CreatedAt,
     [property: JsonPropertyName("is_editing_restricted")] bool? IsEditingRestricted
 );

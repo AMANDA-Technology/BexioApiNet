@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -26,20 +26,34 @@ SOFTWARE.
 namespace BexioApiNet.Models;
 
 /// <summary>
-/// Dictionary for optional query parameters
+/// Optional query parameters for <c>GET /3.0/banking/accounts</c>. All parameters are optional
+/// per the Bexio v3.0 spec; only the values supplied by the caller are added to the request URI.
+/// <see href="https://docs.bexio.com/#tag/Bank-Accounts/operation/ListBankAccounts">List Bank Accounts</see>
 /// </summary>
+/// <param name="Limit">Maximum number of results (1–2000). Bexio default is 500.</param>
+/// <param name="Offset">Offset to skip from the start of the result set.</param>
 public sealed record QueryParameterBankAccount(
-    int Limit,
-    int Offset
+    int? Limit = null,
+    int? Offset = null
 )
 {
     /// <summary>
-    ///
+    /// Underlying <see cref="BexioApiNet.Models.QueryParameter"/> forwarded to
+    /// <see cref="BexioApiNet.Interfaces.IBexioConnectionHandler.GetAsync{TResult}"/>.
+    /// Only properties that have been set by the caller are added to the dictionary.
     /// </summary>
-    public QueryParameter? QueryParameter { get; } =
-        new(Parameters: new()
-        {
-            {"limit", Limit},
-            {"offset", Offset}
-        });
-};
+    public QueryParameter? QueryParameter { get; } = Build(Limit, Offset);
+
+    private static QueryParameter? Build(int? limit, int? offset)
+    {
+        var parameters = new Dictionary<string, object>();
+
+        if (limit is { } l)
+            parameters["limit"] = l;
+
+        if (offset is { } o)
+            parameters["offset"] = o;
+
+        return parameters.Count is 0 ? null : new QueryParameter(parameters);
+    }
+}

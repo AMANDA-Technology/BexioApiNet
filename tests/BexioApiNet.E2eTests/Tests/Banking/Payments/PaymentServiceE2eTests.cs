@@ -38,6 +38,10 @@ namespace BexioApiNet.E2eTests.Tests.Banking.Payments;
 /// aggregate <see cref="IBexioApiClient"/> wire-up lives in a separate issue (#49).
 /// All tests skip automatically when <c>BexioApiNet__BaseUri</c> or
 /// <c>BexioApiNet__JwtToken</c> is missing.
+/// <para>
+/// Mutating endpoints (Create, Cancel, Update, Delete) are gated by
+/// <c>BexioApiNet__AllowMutatingE2E=true</c> to prevent accidental writes in CI.
+/// </para>
 /// </summary>
 [Category("E2E")]
 public sealed class PaymentServiceE2eTests
@@ -84,10 +88,11 @@ public sealed class PaymentServiceE2eTests
 
     /// <summary>
     /// GET <c>4.0/banking/payments</c> returns a successful <see cref="ApiResult{T}"/> and
-    /// a (possibly empty) list of payments.
+    /// (when payments exist) every item carries the schema-required <c>uuid</c>,
+    /// <c>amount</c>, <c>currency</c>, <c>execution_date</c>, and <c>status</c> fields.
     /// </summary>
     [Test]
-    public async Task Get_ReturnsPayments()
+    public async Task Get_ReturnsPaymentsMatchingSchemaShape()
     {
         Assert.That(_sut, Is.Not.Null);
 
@@ -100,6 +105,21 @@ public sealed class PaymentServiceE2eTests
             Assert.That(result.ApiError, Is.Null);
             Assert.That(result.Data, Is.Not.Null);
         });
+
+        // Live API may return empty if no payments exist; only assert structure when populated.
+        if (result.Data!.Count > 0)
+        {
+            var first = result.Data[0];
+            Assert.Multiple(() =>
+            {
+                Assert.That(first.Uuid, Is.Not.Null);
+                Assert.That(first.Currency, Is.Not.Null);
+                Assert.That(first.Amount, Is.Not.Null);
+                Assert.That(first.ExecutionDate, Is.Not.Null);
+                Assert.That(first.Status, Is.Not.Null);
+                Assert.That(first.Type, Is.Not.Null);
+            });
+        }
     }
 
     /// <summary>
@@ -125,7 +145,7 @@ public sealed class PaymentServiceE2eTests
     /// payment is requested by UUID. Test is skipped when the account has no payments.
     /// </summary>
     [Test]
-    public async Task GetById_ReturnsPayment()
+    public async Task GetById_ReturnsPaymentWithFullSchema()
     {
         Assert.That(_sut, Is.Not.Null);
 
@@ -143,16 +163,24 @@ public sealed class PaymentServiceE2eTests
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.ApiError, Is.Null);
-            Assert.That(result.Data?.Uuid, Is.EqualTo(list.Data[0].Uuid));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!.Uuid, Is.EqualTo(list.Data[0].Uuid));
+            Assert.That(result.Data.Currency, Is.Not.Null);
+            Assert.That(result.Data.Amount, Is.Not.Null);
+            Assert.That(result.Data.ExecutionDate, Is.Not.Null);
+            Assert.That(result.Data.Status, Is.Not.Null);
+            Assert.That(result.Data.Type, Is.Not.Null);
         });
     }
 
     /// <summary>
-    /// POST <c>4.0/banking/payments</c> creates a payment. Mutating test — only runs when
-    /// <c>BexioApiNet__AllowMutatingE2E</c> is set to prevent accidental writes in CI.
+    /// POST <c>4.0/banking/payments</c> creates a payment then verifies the full lifecycle:
+    /// the created payment is fetchable by id, can be updated, and can be deleted. Mutating
+    /// test — only runs when <c>BexioApiNet__AllowMutatingE2E</c> is set to prevent
+    /// accidental writes in CI. <c>BexioApiNet__PaymentAccountId</c> is required.
     /// </summary>
     [Test]
-    public async Task Create_CreatesPayment()
+    public async Task CreateUpdateDelete_LifecycleCompletes()
     {
         Assert.That(_sut, Is.Not.Null);
 
@@ -189,15 +217,32 @@ public sealed class PaymentServiceE2eTests
             ExecutionDate: DateOnly.FromDateTime(DateTime.UtcNow.AddDays(7)),
             IsSalary: false);
 
-        var result = await _sut!.Create(payload);
+        var created = await _sut!.Create(payload);
 
-        Assert.That(result, Is.Not.Null);
+        Assert.That(created, Is.Not.Null);
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.ApiError, Is.Null);
-            Assert.That(result.Data?.Uuid, Is.Not.Null);
+            Assert.That(created.IsSuccess, Is.True, created.ApiError?.Message);
+            Assert.That(created.Data, Is.Not.Null);
+            Assert.That(created.Data!.Uuid, Is.Not.Null);
         });
+
+        var createdId = Guid.Parse(created.Data!.Uuid!);
+
+        var fetched = await _sut.GetById(createdId);
+        Assert.Multiple(() =>
+        {
+            Assert.That(fetched.IsSuccess, Is.True);
+            Assert.That(fetched.Data?.Uuid, Is.EqualTo(created.Data.Uuid));
+        });
+
+        var updated = await _sut.Update(
+            createdId,
+            new PaymentUpdate(AdditionalInformation: "Updated by BexioApiNet E2E test"));
+        Assert.That(updated.IsSuccess, Is.True, updated.ApiError?.Message);
+
+        var deleted = await _sut.Delete(createdId);
+        Assert.That(deleted.IsSuccess, Is.True, deleted.ApiError?.Message);
     }
 
     /// <summary>
@@ -227,70 +272,6 @@ public sealed class PaymentServiceE2eTests
         }
 
         var result = await _sut!.Cancel(paymentId);
-
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.IsSuccess, Is.True);
-    }
-
-    /// <summary>
-    /// PUT <c>4.0/banking/payments/{id}</c> updates a payment. Mutating test — gated by
-    /// <c>BexioApiNet__AllowMutatingE2E</c> and <c>BexioApiNet__UpdatePaymentId</c>.
-    /// </summary>
-    [Test]
-    public async Task Update_UpdatesPayment()
-    {
-        Assert.That(_sut, Is.Not.Null);
-
-        if (!string.Equals(
-                Environment.GetEnvironmentVariable("BexioApiNet__AllowMutatingE2E"),
-                "true",
-                StringComparison.OrdinalIgnoreCase))
-        {
-            Assert.Ignore("set BexioApiNet__AllowMutatingE2E=true to run mutating payment tests");
-            return;
-        }
-
-        var paymentIdValue = Environment.GetEnvironmentVariable("BexioApiNet__UpdatePaymentId");
-        if (!Guid.TryParse(paymentIdValue, out var paymentId))
-        {
-            Assert.Ignore("set BexioApiNet__UpdatePaymentId to an editable payment UUID");
-            return;
-        }
-
-        var payload = new PaymentUpdate(AdditionalInformation: "Updated by BexioApiNet E2E test");
-
-        var result = await _sut!.Update(paymentId, payload);
-
-        Assert.That(result, Is.Not.Null);
-        Assert.That(result.IsSuccess, Is.True);
-    }
-
-    /// <summary>
-    /// DELETE <c>4.0/banking/payments/{id}</c> removes a payment. Mutating test — gated by
-    /// <c>BexioApiNet__AllowMutatingE2E</c> and <c>BexioApiNet__DeletePaymentId</c>.
-    /// </summary>
-    [Test]
-    public async Task Delete_DeletesPayment()
-    {
-        Assert.That(_sut, Is.Not.Null);
-
-        if (!string.Equals(
-                Environment.GetEnvironmentVariable("BexioApiNet__AllowMutatingE2E"),
-                "true",
-                StringComparison.OrdinalIgnoreCase))
-        {
-            Assert.Ignore("set BexioApiNet__AllowMutatingE2E=true to run mutating payment tests");
-            return;
-        }
-
-        var paymentIdValue = Environment.GetEnvironmentVariable("BexioApiNet__DeletePaymentId");
-        if (!Guid.TryParse(paymentIdValue, out var paymentId))
-        {
-            Assert.Ignore("set BexioApiNet__DeletePaymentId to a deletable payment UUID");
-            return;
-        }
-
-        var result = await _sut!.Delete(paymentId);
 
         Assert.That(result, Is.Not.Null);
         Assert.That(result.IsSuccess, Is.True);

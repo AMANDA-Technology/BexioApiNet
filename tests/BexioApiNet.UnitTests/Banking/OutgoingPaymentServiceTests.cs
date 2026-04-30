@@ -138,6 +138,46 @@ public sealed class OutgoingPaymentServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    /// <see cref="QueryParameterOutgoingPayment"/> always emits the mandatory <c>bill_id</c>
+    /// query parameter even when no other parameters are set — the Bexio v4.0 spec requires it.
+    /// </summary>
+    [Test]
+    public void QueryParameterOutgoingPayment_BillIdAlwaysEmitted()
+    {
+        var billId = Guid.NewGuid();
+        var queryParameter = new QueryParameterOutgoingPayment(billId);
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("bill_id"));
+        Assert.That(queryParameter.QueryParameter.Parameters["bill_id"], Is.EqualTo(billId));
+    }
+
+    /// <summary>
+    /// <see cref="QueryParameterOutgoingPayment"/> emits all four optional parameters
+    /// (<c>limit</c>, <c>page</c>, <c>order</c>, <c>sort</c>) under the keys defined by Bexio
+    /// when the caller supplies them.
+    /// </summary>
+    [Test]
+    public void QueryParameterOutgoingPayment_EmitsAllOptionalParameters()
+    {
+        var billId = Guid.NewGuid();
+
+        var queryParameter = new QueryParameterOutgoingPayment(
+            billId,
+            limit: 50,
+            page: 2,
+            order: "desc",
+            sort: "execution_date");
+
+        Assert.That(queryParameter.QueryParameter.Parameters, Has.Count.EqualTo(5));
+        Assert.That(queryParameter.QueryParameter.Parameters["bill_id"], Is.EqualTo(billId));
+        Assert.That(queryParameter.QueryParameter.Parameters["limit"], Is.EqualTo(50));
+        Assert.That(queryParameter.QueryParameter.Parameters["page"], Is.EqualTo(2));
+        Assert.That(queryParameter.QueryParameter.Parameters["order"], Is.EqualTo("desc"));
+        Assert.That(queryParameter.QueryParameter.Parameters["sort"], Is.EqualTo("execution_date"));
+    }
+
+    /// <summary>
     /// GetById calls <see cref="IBexioConnectionHandler.GetAsync{TResult}"/> with the
     /// payment id appended to the endpoint root and a <see langword="null"/> query parameter.
     /// </summary>
@@ -183,6 +223,30 @@ public sealed class OutgoingPaymentServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    /// GetById forwards the caller-supplied cancellation token to the connection handler
+    /// so cooperative cancellation flows end-to-end.
+    /// </summary>
+    [Test]
+    public async Task GetById_ForwardsCancellationToken()
+    {
+        using var cts = new CancellationTokenSource();
+        var id = Guid.NewGuid();
+        ConnectionHandler
+            .GetAsync<OutgoingPayment>(
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<OutgoingPayment> { IsSuccess = true });
+
+        await _sut.GetById(id, cts.Token);
+
+        await ConnectionHandler.Received(1).GetAsync<OutgoingPayment>(
+            $"{ExpectedEndpoint}/{id}",
+            null,
+            cts.Token);
+    }
+
+    /// <summary>
     /// Create forwards the <see cref="OutgoingPaymentCreate"/> payload and endpoint
     /// path to <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}"/>.
     /// </summary>
@@ -224,6 +288,29 @@ public sealed class OutgoingPaymentServiceTests : ServiceTestBase
         var result = await _sut.Create(payload);
 
         Assert.That(result, Is.SameAs(response));
+    }
+
+    /// <summary>
+    /// Create forwards the caller-supplied cancellation token to the connection handler.
+    /// </summary>
+    [Test]
+    public async Task Create_ForwardsCancellationToken()
+    {
+        using var cts = new CancellationTokenSource();
+        var payload = BuildCreatePayload();
+        ConnectionHandler
+            .PostAsync<OutgoingPayment, OutgoingPaymentCreate>(
+                Arg.Any<OutgoingPaymentCreate>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<OutgoingPayment> { IsSuccess = true });
+
+        await _sut.Create(payload, cts.Token);
+
+        await ConnectionHandler.Received(1).PostAsync<OutgoingPayment, OutgoingPaymentCreate>(
+            payload,
+            ExpectedEndpoint,
+            cts.Token);
     }
 
     /// <summary>
@@ -311,6 +398,25 @@ public sealed class OutgoingPaymentServiceTests : ServiceTestBase
         var result = await _sut.Delete(id);
 
         Assert.That(result, Is.SameAs(response));
+    }
+
+    /// <summary>
+    /// Delete forwards the caller-supplied cancellation token to the connection handler.
+    /// </summary>
+    [Test]
+    public async Task Delete_ForwardsCancellationToken()
+    {
+        using var cts = new CancellationTokenSource();
+        var id = Guid.NewGuid();
+        ConnectionHandler
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<object> { IsSuccess = true });
+
+        await _sut.Delete(id, cts.Token);
+
+        await ConnectionHandler.Received(1).Delete(
+            $"{ExpectedEndpoint}/{id}",
+            cts.Token);
     }
 
     private static OutgoingPaymentCreate BuildCreatePayload() =>
