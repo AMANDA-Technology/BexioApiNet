@@ -23,7 +23,9 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Accounting.Taxes;
+using BexioApiNet.Abstractions.Models.Accounting.Taxes.Enums;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Accounting;
@@ -266,6 +268,74 @@ public sealed class TaxServiceTests : ServiceTestBase
         Assert.That(result, Is.SameAs(response));
     }
 
+    /// <summary>
+    /// When a <see cref="QueryParameterTax"/> is supplied, its inner <see cref="QueryParameter"/>
+    /// is forwarded to the connection handler verbatim so the optional <c>scope</c>, <c>date</c>,
+    /// <c>types</c>, <c>limit</c> and <c>offset</c> query parameters reach the API.
+    /// </summary>
+    [Test]
+    public async Task Get_WithQueryParameter_PassesQueryParameterToConnectionHandler()
+    {
+        var query = new QueryParameterTax(
+            Scope: TaxScope.active,
+            Date: new DateOnly(2026, 4, 30),
+            Type: TaxType.sales_tax,
+            Limit: 50,
+            Offset: 100);
+        ConnectionHandler
+            .GetAsync<List<Tax>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ApiResult<List<Tax>> { IsSuccess = true, Data = [] }));
+
+        var service = new TaxService(ConnectionHandler);
+
+        await service.Get(query);
+
+        await ConnectionHandler.Received(1).GetAsync<List<Tax>>(
+            ExpectedPath,
+            query.QueryParameter,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// When <c>autoPage</c> is on and the first response advertises a <c>X-Total-Count</c>
+    /// header, the service must call <c>FetchAll</c> with the count of already-fetched items,
+    /// the total, the same path, and the same query parameter so the rest of the result set
+    /// is loaded.
+    /// </summary>
+    [Test]
+    public async Task Get_WithAutoPage_WhenTotalResultsHeaderPresent_CallsFetchAll()
+    {
+        var first = NewTax(1);
+        var firstPage = new ApiResult<List<Tax>>
+        {
+            IsSuccess = true,
+            Data = [first],
+            ResponseHeaders = new Dictionary<string, int?>
+            {
+                [ApiHeaderNames.TotalResults] = 3
+            }
+        };
+        ConnectionHandler
+            .GetAsync<List<Tax>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(firstPage));
+        var remaining = new List<Tax> { NewTax(2), NewTax(3) };
+        ConnectionHandler
+            .FetchAll<Tax>(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(remaining));
+
+        var service = new TaxService(ConnectionHandler);
+
+        var result = await service.Get(autoPage: true);
+
+        await ConnectionHandler.Received(1).FetchAll<Tax>(
+            1,
+            3,
+            ExpectedPath,
+            null,
+            Arg.Any<CancellationToken>());
+        Assert.That(result.Data, Has.Count.EqualTo(3));
+    }
+
     private static Tax NewTax(int id) =>
         new(
             Id: id,
@@ -285,3 +355,4 @@ public sealed class TaxServiceTests : ServiceTestBase
             StartMonth: null,
             EndMonth: null);
 }
+

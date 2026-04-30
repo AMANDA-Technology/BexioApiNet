@@ -26,27 +26,26 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Accounting.ManualEntries;
 
 /// <summary>
-/// Manual entry entry. <see href="https://docs.bexio.com/#tag/Manual-Entries/operation/ListManualEntries"/>
+/// Manual entry as returned by the Bexio accounting manual entry endpoints.
+/// <see href="https://docs.bexio.com/#tag/Manual-Entries/operation/ListManualEntries"/>
 /// </summary>
-/// <param name="Id"></param>
-/// <param name="Type"></param>
-/// <param name="BookingType"></param>
-/// <param name="Date"></param>
-/// <param name="ReferenceNr"></param>
-/// <param name="CreatedByUserId"></param>
-/// <param name="EditedByUserId"></param>
-/// <param name="Entries"></param>
-/// <param name="IsLocked"></param>
-/// <param name="LockedInfo"></param>
+/// <param name="Id">The id of the manual entry.</param>
+/// <param name="Type">Type of the manual entry (manual_single_entry, manual_compound_entry, manual_group_entry).</param>
+/// <param name="Date">Date of the manual entry.</param>
+/// <param name="ReferenceNr">Reference number of the manual entry.</param>
+/// <param name="CreatedByUserId">The id of the user who created the manual entry.</param>
+/// <param name="EditedByUserId">The id of the user who last edited the manual entry.</param>
+/// <param name="Entries">List of accounting entry lines that compose this manual entry.</param>
+/// <param name="IsLocked">Indicates whether the manual entry is locked.</param>
+/// <param name="LockedInfo">Reason why the manual entry is locked (closed_business_year, closed_tax_period, is_generated, Banking_transaction, locked_business_year).</param>
 public sealed record ManualEntry(
     [property: JsonPropertyName("id")] int Id,
     [property: JsonPropertyName("type")] string Type,
-    [property: JsonPropertyName("booking_type")] string BookingType,
     [property: JsonPropertyName("date")] DateOnly Date,
-    [property: JsonPropertyName("reference_nr")] string ReferenceNr,
+    [property: JsonPropertyName("reference_nr")] string? ReferenceNr,
     [property: JsonPropertyName("created_by_user_id")] int? CreatedByUserId,
     [property: JsonPropertyName("edited_by_user_id")] int? EditedByUserId,
     [property: JsonPropertyName("entries")] IReadOnlyList<ManualEntryEntry> Entries,
     [property: JsonPropertyName("is_locked")] bool? IsLocked,
-    [property: JsonPropertyName("locked_info")] string LockedInfo
+    [property: JsonPropertyName("locked_info")] string? LockedInfo
 );

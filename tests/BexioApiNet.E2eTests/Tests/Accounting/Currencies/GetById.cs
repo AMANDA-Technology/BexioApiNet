@@ -33,7 +33,8 @@ public class TestGetById : BexioE2eTestBase
     /// <summary>
     /// Fetches the first currency returned by <c>Get()</c> and asserts that
     /// <c>GetById</c> returns the same record. Using a discovered id keeps the
-    /// test stable across tenants.
+    /// test stable across tenants. Verifies the returned <c>v3CurrencyResponse</c>
+    /// object matches the OpenAPI schema (id, name, round_factor are required).
     /// </summary>
     [Test]
     public async Task GetById()
@@ -55,6 +56,8 @@ public class TestGetById : BexioE2eTestBase
             Assert.That(res.Data, Is.Not.Null);
             Assert.That(res.Data!.Id, Is.EqualTo(first.Id));
             Assert.That(res.Data!.Name, Is.EqualTo(first.Name));
+            Assert.That(res.Data!.Name, Is.Not.Empty);
+            Assert.That(res.Data!.RoundFactor, Is.GreaterThan(0));
         });
     }
 }

@@ -33,7 +33,9 @@ public class TestGetById : BexioE2eTestBase
 {
     /// <summary>
     /// Lists taxes, picks the first id, and re-fetches that tax via
-    /// <c>GetById</c>. Asserts the response is successful and the id matches.
+    /// <c>GetById</c>. Asserts the response is successful, the id matches and the
+    /// returned object satisfies the OpenAPI <c>v3Tax</c> schema (required: id, name,
+    /// code, type, value, display_name).
     /// </summary>
     [Test]
     public async Task GetById()
@@ -53,7 +55,13 @@ public class TestGetById : BexioE2eTestBase
         {
             Assert.That(res.IsSuccess, Is.True);
             Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data?.Id, Is.EqualTo(firstId));
+            Assert.That(res.Data, Is.Not.Null);
+            Assert.That(res.Data!.Id, Is.EqualTo(firstId));
+            Assert.That(res.Data!.Name, Is.Not.Null.And.Not.Empty);
+            Assert.That(res.Data!.Code, Is.Not.Null.And.Not.Empty);
+            Assert.That(res.Data!.Type, Is.Not.Null.And.Not.Empty);
+            Assert.That(res.Data!.Value, Is.GreaterThanOrEqualTo(0));
+            Assert.That(res.Data!.DisplayName, Is.Not.Null.And.Not.Empty);
         });
     }
 }

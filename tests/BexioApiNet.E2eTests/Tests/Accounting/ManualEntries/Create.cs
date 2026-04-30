@@ -28,10 +28,17 @@ using BexioApiNet.Abstractions.Models.Accounting.ManualEntries.Views;
 
 namespace BexioApiNet.E2eTests.Tests.Accounting.ManualEntries;
 
+/// <summary>
+/// Live E2E coverage for <c>POST /3.0/accounting/manual_entries</c>. Creates a single-entry
+/// manual entry and asserts the response payload matches the OpenAPI <c>v3ManualEntryResponse</c>
+/// schema (id integer, type enum, date, entries array with an integer entry-line id).
+/// </summary>
 public class Create : BexioE2eTestBase
 {
     /// <summary>
-    ///
+    /// Creates a manual entry with a single line and asserts the response shape — id is
+    /// populated, the type round-trips, the entries list returns the line with an id, the
+    /// amount and reference number match the request.
     /// </summary>
     [Test]
     public async Task CreateSingleEntry()
@@ -50,7 +57,13 @@ public class Create : BexioE2eTestBase
         Assert.That(res, Is.Not.Null);
         Assert.Multiple(() =>
         {
+            Assert.That(res.IsSuccess, Is.True);
+            Assert.That(res.Data, Is.Not.Null);
+            Assert.That(res.Data!.Id, Is.GreaterThan(0));
+            Assert.That(res.Data!.Type, Is.EqualTo("manual_single_entry"));
             Assert.That(res.Data!.ReferenceNr, Is.EqualTo("123"));
+            Assert.That(res.Data!.Entries, Has.Count.EqualTo(1));
+            Assert.That(res.Data!.Entries[0].Id, Is.Not.Null.And.GreaterThan(0));
             Assert.That(res.Data!.Entries[0].Amount, Is.EqualTo(100m));
         });
     }
