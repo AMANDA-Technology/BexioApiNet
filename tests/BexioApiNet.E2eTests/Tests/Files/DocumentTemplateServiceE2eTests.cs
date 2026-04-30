@@ -23,26 +23,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace BexioApiNet.E2eTests.Tests.Tasks;
+namespace BexioApiNet.E2eTests.Tests.Files;
 
 /// <summary>
-///     Live E2E coverage for <c>GET /2.0/task_priority</c>. Read-only lookup endpoint, so no
+///     Live E2E coverage for <c>GET /3.0/document_templates</c>. Read-only endpoint, so no
 ///     create/update/delete lifecycle is exercised. Skipped automatically when Bexio credentials
 ///     are missing via <see cref="BexioE2eTestBase" />.
 /// </summary>
-public class TaskPriorityServiceE2eTests : BexioE2eTestBase
+public class DocumentTemplateServiceE2eTests : BexioE2eTestBase
 {
     /// <summary>
-    ///     Retrieves the task priority list from the live Bexio API and asserts the call is
-    ///     successful. Performs structural assertions against the OpenAPI <c>task_priority</c>
-    ///     schema — every entry must carry a positive <c>id</c> and a non-empty <c>name</c>.
+    ///     Retrieves the document template list from the live Bexio API and asserts the call is
+    ///     successful and returns at least one template (Bexio always seeds a default template per
+    ///     tenant). Performs structural assertions against the OpenAPI <c>ListDocumentTemplate</c>
+    ///     schema — every field must be present and well-typed.
     /// </summary>
     [Test]
     public async Task GetAll_StructurallyMatchesOpenApiSchema()
     {
         Assert.That(BexioApiClient, Is.Not.Null);
 
-        var res = await BexioApiClient!.TaskPriorities.Get();
+        var res = await BexioApiClient!.DocumentTemplates.Get();
 
         Assert.That(res, Is.Not.Null);
         Assert.Multiple(() =>
@@ -50,18 +51,15 @@ public class TaskPriorityServiceE2eTests : BexioE2eTestBase
             Assert.That(res.IsSuccess, Is.True);
             Assert.That(res.ApiError, Is.Null);
             Assert.That(res.Data, Is.Not.Null);
+            Assert.That(res.Data, Is.Not.Empty, "Bexio should expose at least one document template per tenant.");
         });
 
-        if (res.Data is null || res.Data.Count is 0)
-            return;
-
-        foreach (var priority in res.Data)
+        var template = res.Data!.First();
+        Assert.Multiple(() =>
         {
-            Assert.Multiple(() =>
-            {
-                Assert.That(priority.Id, Is.GreaterThan(0));
-                Assert.That(priority.Name, Is.Not.Null.And.Not.Empty);
-            });
-        }
+            Assert.That(template.TemplateSlug, Is.Not.Null.And.Not.Empty);
+            Assert.That(template.Name, Is.Not.Null.And.Not.Empty);
+            Assert.That(template.DefaultForDocumentTypes, Is.Not.Null);
+        });
     }
 }
