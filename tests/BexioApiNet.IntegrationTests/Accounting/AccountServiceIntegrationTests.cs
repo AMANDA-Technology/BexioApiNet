@@ -39,6 +39,24 @@ public sealed class AccountServiceIntegrationTests : IntegrationTestBase
     private const string AccountsPath = "/2.0/accounts";
 
     /// <summary>
+    /// Single account payload matching the <c>v2Account</c> schema in
+    /// <c>doc/openapi/bexio-v3.json</c> for the <c>v2ListAccounts</c> operation.
+    /// </summary>
+    private const string AccountResponse = """
+                                           {
+                                               "id": 1,
+                                               "uuid": "c7da5b70-2d27-467e-abd9-9c3ac0f83c7d",
+                                               "account_no": "3201",
+                                               "name": "Gross proceeds credit sales",
+                                               "account_type": 1,
+                                               "tax_id": 40,
+                                               "fibu_account_group_id": 65,
+                                               "is_active": true,
+                                               "is_locked": false
+                                           }
+                                           """;
+
+    /// <summary>
     /// <c>AccountService.Get()</c> must issue a single <c>GET</c> request to
     /// <c>/2.0/accounts</c> and surface a successful <c>ApiResult</c> when the server replies
     /// with an empty array.
@@ -64,6 +82,75 @@ public sealed class AccountServiceIntegrationTests : IntegrationTestBase
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(AccountsPath));
         });
+    }
+
+    /// <summary>
+    /// When the server returns a fully-populated account payload, the deserialized
+    /// <c>Account</c> record must round-trip every field defined by the
+    /// <c>v2Account</c> schema (id, uuid, account_no, name, account_type, tax_id,
+    /// fibu_account_group_id, is_active, is_locked).
+    /// </summary>
+    [Test]
+    public async Task AccountService_Get_DeserializesAllSchemaFields()
+    {
+        Server
+            .Given(Request.Create().WithPath(AccountsPath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{AccountResponse}]"));
+
+        var service = new AccountService(ConnectionHandler);
+
+        var result = await service.Get(cancellationToken: TestContext.CurrentContext.CancellationToken);
+
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Data, Is.Not.Null.And.Not.Empty);
+
+        var account = result.Data![0];
+        Assert.Multiple(() =>
+        {
+            Assert.That(account.Id, Is.EqualTo(1));
+            Assert.That(account.Uuid, Is.EqualTo("c7da5b70-2d27-467e-abd9-9c3ac0f83c7d"));
+            Assert.That(account.AccountNo, Is.EqualTo("3201"));
+            Assert.That(account.Name, Is.EqualTo("Gross proceeds credit sales"));
+            Assert.That(account.AccountType, Is.EqualTo(1));
+            Assert.That(account.TaxId, Is.EqualTo(40));
+            Assert.That(account.FibuAccountGroupId, Is.EqualTo(65));
+            Assert.That(account.IsActive, Is.True);
+            Assert.That(account.IsLocked, Is.False);
+        });
+    }
+
+    /// <summary>
+    /// When Bexio omits <c>tax_id</c> the field is nullable per the spec — the
+    /// deserialized <c>Account.TaxId</c> must therefore round-trip as <see langword="null" />.
+    /// </summary>
+    [Test]
+    public async Task AccountService_Get_DeserializesNullTaxId()
+    {
+        const string responseWithNullTax = """
+                                           [{
+                                               "id": 2,
+                                               "uuid": "5fe93c8a-b05f-4004-91f5-9177ffd011fd",
+                                               "account_no": "1000",
+                                               "name": "Cash",
+                                               "account_type": 3,
+                                               "tax_id": null,
+                                               "fibu_account_group_id": 1,
+                                               "is_active": true,
+                                               "is_locked": false
+                                           }]
+                                           """;
+
+        Server
+            .Given(Request.Create().WithPath(AccountsPath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(responseWithNullTax));
+
+        var service = new AccountService(ConnectionHandler);
+
+        var result = await service.Get(cancellationToken: TestContext.CurrentContext.CancellationToken);
+
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Data, Is.Not.Null.And.Not.Empty);
+        Assert.That(result.Data![0].TaxId, Is.Null);
     }
 
     /// <summary>

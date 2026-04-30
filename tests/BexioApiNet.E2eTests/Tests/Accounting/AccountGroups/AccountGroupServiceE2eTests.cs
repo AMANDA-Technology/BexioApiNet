@@ -79,8 +79,9 @@ public class AccountGroupServiceE2eTests
     }
 
     /// <summary>
-    /// Fetches all account groups from the live Bexio tenant and asserts the
-    /// response is successful with at least one account group returned.
+    /// Fetches all account groups from the live Bexio tenant and asserts the response is
+    /// successful with at least one account group returned. The first record is structurally
+    /// validated against the <c>v2AccountGroup</c> schema fields (id, uuid, account_no, name).
     /// </summary>
     [Test]
     public async Task GetAll()
@@ -94,7 +95,16 @@ public class AccountGroupServiceE2eTests
         {
             Assert.That(res.IsSuccess, Is.True);
             Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data?.First().Id, Is.Not.Null);
+            Assert.That(res.Data, Is.Not.Null.And.Not.Empty);
+        });
+
+        var first = res.Data!.First();
+        Assert.Multiple(() =>
+        {
+            Assert.That(first.Id, Is.GreaterThan(0), "id is required by the v2AccountGroup schema");
+            Assert.That(first.Uuid, Is.Not.Null.And.Not.Empty, "uuid is required by the v2AccountGroup schema");
+            Assert.That(first.AccountNo, Is.Not.Null.And.Not.Empty, "account_no is required by the v2AccountGroup schema");
+            Assert.That(first.Name, Is.Not.Null.And.Not.Empty, "name is required by the v2AccountGroup schema");
         });
     }
 }

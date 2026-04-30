@@ -26,12 +26,15 @@ SOFTWARE.
 namespace BexioApiNet.E2eTests.Tests.Accounting.Accounts;
 
 /// <summary>
-///
+/// Live E2E tests for <c>BexioApiClient.Accounts</c> (the <c>v2ListAccounts</c> endpoint).
+/// Tests assert the response payload structurally matches the <c>v2Account</c> schema in
+/// <c>doc/openapi/bexio-v3.json</c>. Skipped automatically when no live credentials are set.
 /// </summary>
 public class TestGetAll : BexioE2eTestBase
 {
     /// <summary>
-    ///
+    /// Fetches all accounts from the live tenant and asserts the response is successful and
+    /// each returned record carries the schema-required identifier and metadata fields.
     /// </summary>
     [Test]
     public async Task GetAll()
@@ -45,7 +48,18 @@ public class TestGetAll : BexioE2eTestBase
         {
             Assert.That(res.IsSuccess, Is.True);
             Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data?.First().Id, Is.Not.Null);
+            Assert.That(res.Data, Is.Not.Null.And.Not.Empty);
+        });
+
+        var first = res.Data!.First();
+        Assert.Multiple(() =>
+        {
+            Assert.That(first.Id, Is.GreaterThan(0), "id is required by the v2Account schema");
+            Assert.That(first.Uuid, Is.Not.Null.And.Not.Empty, "uuid is required by the v2Account schema");
+            Assert.That(first.AccountNo, Is.Not.Null.And.Not.Empty, "account_no is required by the v2Account schema");
+            Assert.That(first.Name, Is.Not.Null.And.Not.Empty, "name is required by the v2Account schema");
+            Assert.That(first.AccountType, Is.InRange(1, 5), "account_type must be one of [1..5] per the v2Account schema");
+            Assert.That(first.FibuAccountGroupId, Is.GreaterThan(0), "fibu_account_group_id is required by the v2Account schema");
         });
     }
 }

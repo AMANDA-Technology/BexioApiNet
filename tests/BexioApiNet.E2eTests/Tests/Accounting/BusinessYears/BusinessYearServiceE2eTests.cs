@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Enums.Api;
+using BexioApiNet.Abstractions.Models.Accounting.BusinessYears.Enums;
 using BexioApiNet.Services.Connectors.Accounting;
 
 namespace BexioApiNet.E2eTests.Tests.Accounting.BusinessYears;
@@ -77,8 +78,10 @@ public sealed class BusinessYearServiceE2eTests
     }
 
     /// <summary>
-    /// Fetches the full list of business years from the live tenant and asserts
-    /// at least one entry is returned with a valid id.
+    /// Fetches the full list of business years from the live tenant and asserts the
+    /// returned records structurally match the <c>BusinessYear</c> OpenAPI schema:
+    /// every entry must have an id, a start/end pair where start &lt;= end, and a
+    /// status value within the allowed enum (open / locked / closed).
     /// </summary>
     [Test]
     public async Task GetAll()
@@ -92,13 +95,27 @@ public sealed class BusinessYearServiceE2eTests
         {
             Assert.That(res.IsSuccess, Is.True);
             Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data?.First().Id, Is.Not.Null);
+            Assert.That(res.Data, Is.Not.Null.And.Not.Empty);
         });
+
+        foreach (var year in res.Data!)
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(year.Id, Is.GreaterThan(0), "id is required by the BusinessYear schema");
+                Assert.That(year.End, Is.GreaterThanOrEqualTo(year.Start), "end must not precede start");
+                Assert.That(year.Status, Is.AnyOf(BusinessYearStatus.open, BusinessYearStatus.locked, BusinessYearStatus.closed));
+                if (year.Status is BusinessYearStatus.closed)
+                {
+                    Assert.That(year.ClosedAt, Is.Not.Null, "closed business years should expose closed_at");
+                }
+            });
+        }
     }
 
     /// <summary>
     /// Fetches a single business year by id (using the first one returned by the
-    /// list endpoint) and asserts round-trip equality on the id.
+    /// list endpoint) and asserts round-trip equality on every schema field.
     /// </summary>
     [Test]
     public async Task GetById()
@@ -109,15 +126,20 @@ public sealed class BusinessYearServiceE2eTests
         Assert.That(list.IsSuccess, Is.True);
         Assert.That(list.Data, Is.Not.Null.And.Not.Empty);
 
-        var firstId = list.Data!.First().Id;
-        var res = await _service.GetById(firstId);
+        var listed = list.Data!.First();
+        var res = await _service.GetById(listed.Id);
 
         Assert.That(res, Is.Not.Null);
         Assert.Multiple(() =>
         {
             Assert.That(res.IsSuccess, Is.True);
             Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data?.Id, Is.EqualTo(firstId));
+            Assert.That(res.Data, Is.Not.Null);
+            Assert.That(res.Data!.Id, Is.EqualTo(listed.Id));
+            Assert.That(res.Data!.Start, Is.EqualTo(listed.Start));
+            Assert.That(res.Data!.End, Is.EqualTo(listed.End));
+            Assert.That(res.Data!.Status, Is.EqualTo(listed.Status));
+            Assert.That(res.Data!.ClosedAt, Is.EqualTo(listed.ClosedAt));
         });
     }
 }

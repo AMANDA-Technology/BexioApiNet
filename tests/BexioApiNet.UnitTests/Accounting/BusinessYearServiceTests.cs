@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using System.Net;
+using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Accounting.BusinessYears;
 using BexioApiNet.Abstractions.Models.Accounting.BusinessYears.Enums;
 using BexioApiNet.Abstractions.Models.Api;
@@ -112,6 +113,76 @@ public sealed class BusinessYearServiceTests : ServiceTestBase
             ExpectedListPath,
             null,
             cts.Token);
+    }
+
+    /// <summary>
+    /// When <c>autoPage</c> is on and the first response advertises a <c>X-Total-Count</c>
+    /// header, the service must call <c>FetchAll</c> with the count of already-fetched items,
+    /// the total, the same path, and the same query parameter.
+    /// </summary>
+    [Test]
+    public async Task Get_WithAutoPage_WhenTotalResultsHeaderPresent_CallsFetchAll()
+    {
+        var firstYear = NewBusinessYear(1);
+        var firstPage = new ApiResult<List<BusinessYear>>
+        {
+            IsSuccess = true,
+            Data = [firstYear],
+            ResponseHeaders = new Dictionary<string, int?>
+            {
+                [ApiHeaderNames.TotalResults] = 3
+            }
+        };
+        ConnectionHandler
+            .GetAsync<List<BusinessYear>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(firstPage));
+        var remaining = new List<BusinessYear> { NewBusinessYear(2), NewBusinessYear(3) };
+        ConnectionHandler
+            .FetchAll<BusinessYear>(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(remaining));
+
+        var service = new BusinessYearService(ConnectionHandler);
+
+        var result = await service.Get(autoPage: true);
+
+        await ConnectionHandler.Received(1).FetchAll<BusinessYear>(
+            1,
+            3,
+            ExpectedListPath,
+            null,
+            Arg.Any<CancellationToken>());
+        Assert.That(result.Data, Has.Count.EqualTo(3));
+        Assert.That(result.Data, Is.EquivalentTo(new[] { firstYear, remaining[0], remaining[1] }));
+    }
+
+    /// <summary>
+    /// When <c>autoPage</c> is requested but the response carries no <c>X-Total-Count</c>
+    /// header, the service must not invoke <c>FetchAll</c> — there is nothing more to fetch.
+    /// </summary>
+    [Test]
+    public async Task Get_WithAutoPage_WhenTotalResultsHeaderMissing_DoesNotCallFetchAll()
+    {
+        var response = new ApiResult<List<BusinessYear>>
+        {
+            IsSuccess = true,
+            Data = [NewBusinessYear(1)],
+            ResponseHeaders = new Dictionary<string, int?>()
+        };
+        ConnectionHandler
+            .GetAsync<List<BusinessYear>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var service = new BusinessYearService(ConnectionHandler);
+
+        var result = await service.Get(autoPage: true);
+
+        Assert.That(result, Is.SameAs(response));
+        await ConnectionHandler.DidNotReceive().FetchAll<BusinessYear>(
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            Arg.Any<string>(),
+            Arg.Any<QueryParameter?>(),
+            Arg.Any<CancellationToken>());
     }
 
     /// <summary>
