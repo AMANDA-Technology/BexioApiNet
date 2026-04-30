@@ -28,46 +28,55 @@ using BexioApiNet.Services.Connectors.Payroll;
 namespace BexioApiNet.IntegrationTests.Payroll;
 
 /// <summary>
-///     Integration tests for <see cref="PaystubService" /> against WireMock stubs. Verifies the
-///     nested path composed from <see cref="PaystubConfiguration" />
+///     Integration tests for <see cref="PaystubService" /> against WireMock stubs. Verifies
+///     the nested path composed from <see cref="PaystubConfiguration" />
 ///     (<c>4.0/payroll/employees/{employeeId}/paystub-pdf/{year}/{month}</c>) reaches the
-///     handler correctly, the PDF bytes are returned verbatim on success and a <c>GET</c>
-///     verb is used.
+///     handler correctly, that a <c>GET</c> verb is used and that the JSON envelope
+///     containing the <c>location</c> URL deserializes into the C# model.
 /// </summary>
 [Category("Integration")]
 public sealed class PaystubServiceIntegrationTests : IntegrationTestBase
 {
+    private static readonly Guid TestEmployeeId = Guid.Parse("f47ac10b-58cc-4372-a567-0e02b2c3d479");
+
+    private const string PaystubResponse = """
+                                           {
+                                               "location": "https://example.test/paystub/2026-01.pdf"
+                                           }
+                                           """;
+
     /// <summary>
     ///     <c>PaystubService.GetPdf</c> issues a <c>GET</c> against
     ///     <c>/4.0/payroll/employees/{employeeId}/paystub-pdf/{year}/{month}</c> and
-    ///     surfaces the raw PDF bytes on success.
+    ///     deserializes the JSON envelope, surfacing the <see cref="System.Uri" /> on the
+    ///     C# model.
     /// </summary>
     [Test]
-    public async Task PaystubService_GetPdf_SendsGetRequest_AndReturnsBytes()
+    public async Task PaystubService_GetPdf_SendsGetRequest_AndReturnsLocation()
     {
-        const int employeeId = 1;
         const int year = 2026;
         const int month = 1;
-        var expectedPath = $"/4.0/payroll/employees/{employeeId}/paystub-pdf/{year}/{month}";
-        var pdfBytes = "%PDF-1.4 fake"u8.ToArray();
+        var expectedPath = $"/4.0/payroll/employees/{TestEmployeeId}/paystub-pdf/{year}/{month}";
 
         Server
             .Given(Request.Create().WithPath(expectedPath).UsingGet())
             .RespondWith(Response.Create()
                 .WithStatusCode(200)
-                .WithHeader("Content-Type", "application/pdf")
-                .WithBody(pdfBytes));
+                .WithHeader("Content-Type", "application/json")
+                .WithBody(PaystubResponse));
 
         var service = new PaystubService(ConnectionHandler);
 
-        var result = await service.GetPdf(employeeId, year, month, TestContext.CurrentContext.CancellationToken);
+        var result = await service.GetPdf(TestEmployeeId, year, month, TestContext.CurrentContext.CancellationToken);
 
         var request = Server.LogEntries.Last().RequestMessage!;
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Data, Is.EqualTo(pdfBytes));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!.Location, Is.Not.Null);
+            Assert.That(result.Data.Location!.ToString(), Is.EqualTo("https://example.test/paystub/2026-01.pdf"));
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
         });

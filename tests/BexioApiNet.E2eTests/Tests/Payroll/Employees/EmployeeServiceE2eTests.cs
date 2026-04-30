@@ -27,15 +27,20 @@ namespace BexioApiNet.E2eTests.Tests.Payroll.Employees;
 
 /// <summary>
 /// Live E2E tests for the <see cref="BexioApiNet.Services.Connectors.Payroll.EmployeeService"/>.
-/// Read-only calls only: listing active payroll employees. Tests are auto-skipped when
+/// Exercises the read-side of the Bexio v4.0 <c>/4.0/payroll/employees</c> surface —
+/// list and GET-by-id-on-date. Create / Patch are not exercised live because Bexio's
+/// payroll module rejects bogus AHV numbers and creating employees has business-side
+/// side-effects that cannot be cleanly rolled back. Tests are auto-skipped when
 /// credentials are missing per <see cref="BexioE2eTestBase"/>.
 /// </summary>
 [Category("E2E")]
 public sealed class EmployeeServiceE2eTests : BexioE2eTestBase
 {
     /// <summary>
-    /// Lists payroll employees and asserts the response deserializes correctly — the call
-    /// must succeed and <c>Data</c> must be populated (possibly empty).
+    /// Lists payroll employees and asserts the response deserializes into the v4.0
+    /// envelope shape (<c>{ data: [...] }</c>) with each entry exposing the
+    /// spec-required <c>id</c>, <c>nationality</c>, <c>language</c> and
+    /// <c>marital_status</c> fields.
     /// </summary>
     [Test]
     public async Task Get_ReturnsListResult()
@@ -49,6 +54,50 @@ public sealed class EmployeeServiceE2eTests : BexioE2eTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.ApiError, Is.Null);
             Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!.Data, Is.Not.Null);
+        });
+
+        foreach (var employee in result.Data!.Data)
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(employee.Id, Is.Not.EqualTo(Guid.Empty));
+                Assert.That(employee.Nationality, Is.Not.Null.And.Not.Empty);
+                Assert.That(employee.Language, Is.Not.Null.And.Not.Empty);
+                Assert.That(employee.MaritalStatus, Is.Not.Null.And.Not.Empty);
+            });
+        }
+    }
+
+    /// <summary>
+    /// Lists employees, picks the first available one and retrieves it on today's
+    /// date via <c>GET /4.0/payroll/employees/{employeeId}?date=...</c>. Asserts the
+    /// extended computed fields (vacation usage, effective hours) deserialize on the
+    /// GET-by-id response per the OpenAPI <c>allOf</c> shape.
+    /// </summary>
+    [Test]
+    public async Task GetById_ReturnsExtendedEmployee()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var employees = await BexioApiClient!.PayrollEmployees.Get();
+        Assert.That(employees.IsSuccess, Is.True);
+        Assert.That(employees.Data, Is.Not.Null);
+
+        if (employees.Data!.Data.Count is 0)
+            Assert.Ignore("No payroll employees available on the test account.");
+
+        var first = employees.Data.Data[0];
+        var date = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+
+        var result = await BexioApiClient!.PayrollEmployees.GetById(first.Id, date);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!.Id, Is.EqualTo(first.Id));
         });
     }
 }

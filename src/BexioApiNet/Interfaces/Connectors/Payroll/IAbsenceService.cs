@@ -41,13 +41,15 @@ namespace BexioApiNet.Interfaces.Connectors.Payroll;
 public interface IAbsenceService
 {
     /// <summary>
-    /// List all absences for a given payroll employee.
+    /// List all absences for a given payroll employee within a business year.
+    /// The Bexio v4.0 spec requires the <c>businessYear</c> query parameter.
     /// <see href="https://docs.bexio.com/#tag/Absences">List Absences</see>
     /// </summary>
     /// <param name="employeeId">Identifier of the parent employee.</param>
+    /// <param name="businessYear">Four-digit business year used to filter the absences.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An <see cref="ApiResult{T}"/> wrapping the list of <see cref="Absence"/>.</returns>
-    public Task<ApiResult<List<Absence>>> Get(Guid employeeId, [Optional] CancellationToken cancellationToken);
+    /// <returns>An <see cref="ApiResult{T}"/> wrapping the <see cref="AbsenceListResponse"/> envelope.</returns>
+    public Task<ApiResult<AbsenceListResponse>> Get(Guid employeeId, int businessYear, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
     /// Get a single absence by id for a given payroll employee.
@@ -71,7 +73,8 @@ public interface IAbsenceService
 
     /// <summary>
     /// Update an existing absence for a given payroll employee. Bexio v4.0 uses
-    /// <c>PUT</c> for full-replacement updates.
+    /// <c>PUT</c> for full-replacement updates — all fields on
+    /// <see cref="AbsenceUpdate"/> are required.
     /// <see href="https://docs.bexio.com/#tag/Absences">Update Absence</see>
     /// </summary>
     /// <param name="employeeId">Identifier of the parent employee.</param>

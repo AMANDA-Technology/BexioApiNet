@@ -23,35 +23,132 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Models.Payroll.Absences.Views;
+
 namespace BexioApiNet.E2eTests.Tests.Payroll.Absences;
 
 /// <summary>
 /// Live E2E tests for the <see cref="BexioApiNet.Services.Connectors.Payroll.AbsenceService"/>.
-/// Read-only calls only: listing absences for a placeholder employee. Tests are
-/// auto-skipped when credentials are missing per <see cref="BexioE2eTestBase"/>.
+/// Exercises the full Bexio v4.0
+/// <c>/4.0/payroll/employees/{employeeId}/absences</c> surface, including the
+/// Create → Read → Update → Delete lifecycle when a real employee is available on the
+/// account. Tests are auto-skipped when credentials are missing per
+/// <see cref="BexioE2eTestBase"/>.
 /// </summary>
 [Category("E2E")]
 public sealed class AbsenceServiceE2eTests : BexioE2eTestBase
 {
     /// <summary>
-    /// Lists payroll absences for a placeholder employee id and asserts the response
-    /// deserializes correctly — the call must succeed and <c>Data</c> must be populated
-    /// (possibly empty). The id is a dummy because this stub is auto-skipped without
-    /// credentials.
+    /// Lists payroll absences for the first available employee in the current business
+    /// year and asserts that the response deserializes into the v4.0 envelope shape
+    /// (<c>{ data: [...] }</c>) where each entry exposes <c>reason</c>,
+    /// <c>start_date</c> and <c>id</c> per the OpenAPI spec.
     /// </summary>
     [Test]
     public async Task Get_ReturnsListResult()
     {
-        var employeeId = Guid.Empty;
         Assert.That(BexioApiClient, Is.Not.Null);
 
-        var result = await BexioApiClient!.PayrollAbsences.Get(employeeId);
+        var employees = await BexioApiClient!.PayrollEmployees.Get();
+        Assert.That(employees.IsSuccess, Is.True);
+        Assert.That(employees.Data, Is.Not.Null);
+
+        if (employees.Data!.Data.Count is 0)
+            Assert.Ignore("No payroll employees available on the test account.");
+
+        var employeeId = employees.Data.Data[0].Id;
+        var businessYear = DateTime.UtcNow.Year;
+
+        var result = await BexioApiClient!.PayrollAbsences.Get(employeeId, businessYear);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.ApiError, Is.Null);
             Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!.Data, Is.Not.Null);
         });
+
+        foreach (var absence in result.Data!.Data)
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(absence.Id, Is.Not.EqualTo(Guid.Empty));
+                Assert.That(absence.Reason, Is.Not.Null.And.Not.Empty);
+                Assert.That(absence.StartDate, Is.Not.EqualTo(default(DateOnly)));
+            });
+        }
+    }
+
+    /// <summary>
+    /// Walks the full Create → Read → Update → Delete lifecycle for an absence on the
+    /// first available payroll employee. The created absence is always cleaned up,
+    /// even if intermediate assertions fail, so the test remains idempotent.
+    /// </summary>
+    [Test]
+    public async Task CreateReadUpdateAndDelete()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var employees = await BexioApiClient!.PayrollEmployees.Get();
+        Assert.That(employees.IsSuccess, Is.True);
+        Assert.That(employees.Data, Is.Not.Null);
+
+        if (employees.Data!.Data.Count is 0)
+            Assert.Ignore("No payroll employees available on the test account.");
+
+        var employeeId = employees.Data.Data[0].Id;
+        var startDate = DateOnly.FromDateTime(DateTime.UtcNow.Date);
+        var endDate = startDate.AddDays(2);
+
+        var created = await BexioApiClient!.PayrollAbsences.Create(employeeId, new AbsenceCreate(
+            Reason: "Sickness",
+            StartDate: startDate,
+            EndDate: endDate,
+            HalfDay: false,
+            ContinuedPay: 100m,
+            Disability: 0m,
+            PaidHours: 16m));
+
+        Assert.That(created, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(created.IsSuccess, Is.True);
+            Assert.That(created.ApiError, Is.Null);
+            Assert.That(created.Data, Is.Not.Null);
+            Assert.That(created.Data!.Id, Is.Not.EqualTo(Guid.Empty));
+            Assert.That(created.Data!.Reason, Is.EqualTo("Sickness"));
+        });
+
+        try
+        {
+            var fetched = await BexioApiClient!.PayrollAbsences.GetById(employeeId, created.Data!.Id);
+
+            Assert.That(fetched, Is.Not.Null);
+            Assert.Multiple(() =>
+            {
+                Assert.That(fetched.IsSuccess, Is.True);
+                Assert.That(fetched.Data, Is.Not.Null);
+                Assert.That(fetched.Data!.Id, Is.EqualTo(created.Data!.Id));
+            });
+
+            var updated = await BexioApiClient!.PayrollAbsences.Update(employeeId, created.Data!.Id, new AbsenceUpdate(
+                Reason: "Vacation",
+                StartDate: startDate,
+                EndDate: endDate,
+                HalfDay: false,
+                ContinuedPay: 100m,
+                Disability: 0m,
+                PaidHours: 16m));
+
+            Assert.That(updated, Is.Not.Null);
+            Assert.That(updated.IsSuccess, Is.True);
+        }
+        finally
+        {
+            var deleted = await BexioApiClient!.PayrollAbsences.Delete(employeeId, created.Data!.Id);
+            Assert.That(deleted, Is.Not.Null);
+            Assert.That(deleted.IsSuccess, Is.True);
+        }
     }
 }
