@@ -28,15 +28,17 @@ namespace BexioApiNet.E2eTests.Tests.Timesheets;
 /// <summary>
 /// Live E2E coverage for the timesheet status lookup endpoint
 /// (<c>GET /2.0/timesheet_status</c>). Skipped automatically when credentials are absent.
+/// The endpoint is read-only, so only a list call is exercised.
 /// </summary>
-public class TimesheetStatusServiceE2eTests : BexioE2eTestBase
+public sealed class TimesheetStatusServiceE2eTests : BexioE2eTestBase
 {
     /// <summary>
     /// Retrieves all timesheet statuses from the live Bexio tenant and asserts the
-    /// response is successful with at least one status returned.
+    /// response is successful with at least one status returned and that each entry
+    /// carries the schema-required <c>id</c> and <c>name</c>.
     /// </summary>
     [Test]
-    public async Task GetAll()
+    public async Task GetAll_ReturnsListWithRequiredFields()
     {
         Assert.That(BexioApiClient, Is.Not.Null);
 
@@ -48,7 +50,12 @@ public class TimesheetStatusServiceE2eTests : BexioE2eTestBase
             Assert.That(res.IsSuccess, Is.True);
             Assert.That(res.ApiError, Is.Null);
             Assert.That(res.Data, Is.Not.Null.And.Not.Empty);
-            Assert.That(res.Data!.First().Name, Is.Not.Null);
         });
+
+        foreach (var status in res.Data!)
+        {
+            Assert.That(status.Id, Is.GreaterThan(0));
+            Assert.That(status.Name, Is.Not.Null.And.Not.Empty);
+        }
     }
 }

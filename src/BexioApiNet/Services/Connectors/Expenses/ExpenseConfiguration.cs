@@ -26,7 +26,7 @@ SOFTWARE.
 namespace BexioApiNet.Services.Connectors.Expenses;
 
 /// <summary>
-/// Expense endpoint configuration. Bexio <c>4.0/expenses/expenses</c>.
+/// Expense endpoint configuration. Bexio <c>/4.0/expenses</c> per the v3 OpenAPI spec.
 /// </summary>
 public static class ExpenseConfiguration
 {
@@ -36,13 +36,13 @@ public static class ExpenseConfiguration
     public const string ApiVersion = "4.0";
 
     /// <summary>
-    /// The request path for expense resources.
+    /// The request path for expense resources (<c>/4.0/expenses</c>).
     /// </summary>
-    public const string EndpointRoot = "expenses/expenses";
+    public const string EndpointRoot = "expenses";
 
     /// <summary>
-    /// The request path for the document-number validation endpoint. This is a sibling
-    /// route of <see cref="EndpointRoot"/> — <c>/4.0/expenses/documentnumbers/expenses</c>.
+    /// The request path for the document-number validation endpoint
+    /// (<c>/4.0/expenses/documentnumbers</c>).
     /// </summary>
-    public const string DocNumberEndpointRoot = "expenses/documentnumbers/expenses";
+    public const string DocNumberEndpointRoot = "expenses/documentnumbers";
 }

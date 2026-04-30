@@ -42,8 +42,8 @@ namespace BexioApiNet.UnitTests.Expenses;
 [Category("Unit")]
 public sealed class ExpenseServiceTests : ServiceTestBase
 {
-    private const string ExpectedEndpoint = "4.0/expenses/expenses";
-    private const string ExpectedDocNumberEndpoint = "4.0/expenses/documentnumbers/expenses";
+    private const string ExpectedEndpoint = "4.0/expenses";
+    private const string ExpectedDocNumberEndpoint = "4.0/expenses/documentnumbers";
 
     private ExpenseService _sut = null!;
 
@@ -88,13 +88,13 @@ public sealed class ExpenseServiceTests : ServiceTestBase
     [Test]
     public async Task Get_WithQueryParameter_ForwardsQueryParameter()
     {
-        var queryParameter = new QueryParameterExpense(limit: 50, status: "TODO");
+        var queryParameter = new QueryParameterExpense(limit: 50, page: 2);
         ConnectionHandler
             .GetAsync<ExpenseListResponse>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(new ApiResult<ExpenseListResponse>
             {
                 IsSuccess = true,
-                Data = new ExpenseListResponse([], new ExpensePaging(1, 50, 0, 0))
+                Data = new ExpenseListResponse([], new ExpensePaging(2, 50, 0, 0))
             });
 
         await _sut.Get(queryParameter);
@@ -122,7 +122,7 @@ public sealed class ExpenseServiceTests : ServiceTestBase
 
         var result = await _sut.Get();
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
     }
 
     /// <summary>
@@ -143,7 +143,7 @@ public sealed class ExpenseServiceTests : ServiceTestBase
 
         await _sut.GetById(id);
 
-        Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{id}"));
+        capturedPath.ShouldBe($"{ExpectedEndpoint}/{id}");
         await ConnectionHandler.Received(1).GetAsync<Expense>(
             $"{ExpectedEndpoint}/{id}",
             null,
@@ -152,7 +152,7 @@ public sealed class ExpenseServiceTests : ServiceTestBase
 
     /// <summary>
     /// GetDocNumbers routes to the document-number validation endpoint at
-    /// <c>/4.0/expenses/documentnumbers/expenses</c> and forwards the caller's
+    /// <c>/4.0/expenses/documentnumbers</c> and forwards the caller's
     /// <c>document_no</c> as a query parameter.
     /// </summary>
     [Test]
@@ -177,8 +177,8 @@ public sealed class ExpenseServiceTests : ServiceTestBase
             ExpectedDocNumberEndpoint,
             Arg.Any<QueryParameter?>(),
             Arg.Any<CancellationToken>());
-        Assert.That(capturedQueryParameter, Is.Not.Null);
-        Assert.That(capturedQueryParameter!.Parameters["document_no"], Is.EqualTo(documentNo));
+        capturedQueryParameter.ShouldNotBeNull();
+        capturedQueryParameter!.Parameters["document_no"].ShouldBe(documentNo);
     }
 
     /// <summary>
@@ -203,7 +203,7 @@ public sealed class ExpenseServiceTests : ServiceTestBase
 
     /// <summary>
     /// Actions posts the <see cref="ExpenseActionRequest"/> to
-    /// <c>/4.0/expenses/expenses/{id}/actions</c> via <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}"/>.
+    /// <c>/4.0/expenses/{id}/actions</c> via <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}"/>.
     /// </summary>
     [Test]
     public async Task Actions_CallsPostAsync_WithIdInPath()
@@ -220,7 +220,7 @@ public sealed class ExpenseServiceTests : ServiceTestBase
 
         await _sut.Actions(id, action);
 
-        Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{id}/actions"));
+        capturedPath.ShouldBe($"{ExpectedEndpoint}/{id}/actions");
         await ConnectionHandler.Received(1).PostAsync<Expense, ExpenseActionRequest>(
             action,
             $"{ExpectedEndpoint}/{id}/actions",
@@ -246,7 +246,7 @@ public sealed class ExpenseServiceTests : ServiceTestBase
 
         await _sut.Update(id, payload);
 
-        Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{id}"));
+        capturedPath.ShouldBe($"{ExpectedEndpoint}/{id}");
         await ConnectionHandler.Received(1).PutAsync<Expense, ExpenseUpdate>(
             payload,
             $"{ExpectedEndpoint}/{id}",
@@ -262,7 +262,7 @@ public sealed class ExpenseServiceTests : ServiceTestBase
     public async Task UpdateBookings_CallsPutAsync_WithBookingsPath()
     {
         var id = Guid.NewGuid();
-        const ExpenseBookingStatus status = ExpenseBookingStatus.BOOKED;
+        const ExpenseBookingStatus status = ExpenseBookingStatus.DONE;
         string? capturedPath = null;
         ConnectionHandler
             .PutAsync<Expense, object?>(
@@ -273,7 +273,7 @@ public sealed class ExpenseServiceTests : ServiceTestBase
 
         await _sut.UpdateBookings(id, status);
 
-        Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{id}/bookings/{status}"));
+        capturedPath.ShouldBe($"{ExpectedEndpoint}/{id}/bookings/{status}");
         await ConnectionHandler.Received(1).PutAsync<Expense, object?>(
             null,
             $"{ExpectedEndpoint}/{id}/bookings/{status}",
@@ -295,7 +295,7 @@ public sealed class ExpenseServiceTests : ServiceTestBase
 
         await _sut.Delete(id);
 
-        Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{id}"));
+        capturedPath.ShouldBe($"{ExpectedEndpoint}/{id}");
         await ConnectionHandler.Received(1).Delete(
             $"{ExpectedEndpoint}/{id}",
             Arg.Any<CancellationToken>());
@@ -315,7 +315,7 @@ public sealed class ExpenseServiceTests : ServiceTestBase
 
         var result = await _sut.Create(payload);
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
     }
 
     /// <summary>
@@ -331,35 +331,51 @@ public sealed class ExpenseServiceTests : ServiceTestBase
 
         var result = await _sut.Delete(Guid.NewGuid());
 
-        Assert.That(result, Is.SameAs(response));
+        result.ShouldBeSameAs(response);
+    }
+
+    /// <summary>
+    /// The cancellation token supplied by the caller of <c>Get</c> must be forwarded
+    /// to the connection handler so cooperative cancellation flows end-to-end.
+    /// </summary>
+    [Test]
+    public async Task Get_ForwardsCancellationTokenToConnectionHandler()
+    {
+        using var cts = new CancellationTokenSource();
+        ConnectionHandler
+            .GetAsync<ExpenseListResponse>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<ExpenseListResponse>
+            {
+                IsSuccess = true,
+                Data = new ExpenseListResponse([], new ExpensePaging(1, 100, 0, 0))
+            });
+
+        await _sut.Get(cancellationToken: cts.Token);
+
+        await ConnectionHandler.Received(1).GetAsync<ExpenseListResponse>(
+            ExpectedEndpoint,
+            null,
+            cts.Token);
     }
 
     private static ExpenseCreate BuildCreatePayload() =>
         new(
-            SupplierId: 1,
-            ContactPartnerId: 2,
+            PaidOn: new DateOnly(2026, 4, 1),
+            Amount: 100m,
             CurrencyCode: "CHF",
-            Address: new ExpenseAddress("Acme Ltd.", ExpenseAddressType.COMPANY),
-            ExpenseDate: new DateOnly(2026, 4, 1),
-            DueDate: new DateOnly(2026, 5, 1),
-            ManualAmount: false,
-            ItemNet: true,
-            LineItems: [new ExpenseLineItem(Position: 0, Amount: 100m)],
-            Discounts: [],
-            AttachmentIds: []);
+            AttachmentIds: [],
+            SupplierId: 1,
+            Title: "Sample expense",
+            Address: new ExpenseAddress("Acme Ltd.", ExpenseAddressType.COMPANY));
 
     private static ExpenseUpdate BuildUpdatePayload() =>
         new(
-            SupplierId: 1,
-            ContactPartnerId: 2,
+            PaidOn: new DateOnly(2026, 4, 1),
             CurrencyCode: "CHF",
-            Address: new ExpenseAddress("Acme Ltd.", ExpenseAddressType.COMPANY),
-            ExpenseDate: new DateOnly(2026, 4, 1),
-            DueDate: new DateOnly(2026, 5, 1),
-            ManualAmount: false,
-            ItemNet: true,
-            SplitIntoLineItems: false,
-            LineItems: [new ExpenseLineItem(Position: 0, Amount: 100m)],
-            Discounts: [],
-            AttachmentIds: []);
+            Amount: 100m,
+            AttachmentIds: [],
+            SupplierId: 1,
+            DocumentNo: "LR-12345",
+            Title: "Sample expense",
+            Address: new ExpenseAddress("Acme Ltd.", ExpenseAddressType.COMPANY));
 }

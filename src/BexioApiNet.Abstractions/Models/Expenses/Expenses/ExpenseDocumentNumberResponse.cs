@@ -26,7 +26,7 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Expenses.Expenses;
 
 /// <summary>
-/// Response payload of <c>GET /4.0/expenses/documentnumbers/expenses</c>. The endpoint
+/// Response payload of <c>GET /4.0/expenses/documentnumbers</c>. The endpoint
 /// validates a proposed document number against all existing non-draft expenses and
 /// returns the next available number when the proposed one is not unique.
 /// <see href="https://docs.bexio.com/#tag/Expenses">Expenses</see>

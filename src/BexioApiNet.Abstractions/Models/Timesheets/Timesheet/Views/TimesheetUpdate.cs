@@ -26,7 +26,7 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Timesheets.Timesheet.Views;
 
 /// <summary>
-/// Update view for a timesheet — body of <c>PUT /2.0/timesheet/{id}</c>. Read-only fields
+/// Update view for a timesheet — body of <c>POST /2.0/timesheet/{id}</c>. Read-only fields
 /// (<c>id</c>, <c>date</c>, <c>duration</c>, <c>running</c>, <c>travel_time</c>,
 /// <c>travel_charge</c>, <c>travel_distance</c>) are intentionally omitted. The
 /// <see cref="Tracking" /> payload must be either <see cref="TimesheetDurationTracking" />

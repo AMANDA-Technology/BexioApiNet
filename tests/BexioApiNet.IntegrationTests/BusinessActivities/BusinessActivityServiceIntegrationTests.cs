@@ -25,6 +25,7 @@ SOFTWARE.
 
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.BusinessActivities.BusinessActivity.Views;
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.BusinessActivities;
 
 namespace BexioApiNet.IntegrationTests.BusinessActivities;
@@ -32,7 +33,9 @@ namespace BexioApiNet.IntegrationTests.BusinessActivities;
 /// <summary>
 /// Integration tests covering <see cref="BusinessActivityService"/>. The request path is composed from
 /// <see cref="BusinessActivityConfiguration"/> (<c>2.0/client_service</c>) and must reach WireMock intact
-/// when the service is driven through the real connection handler.
+/// when the service is driven through the real connection handler. Stub bodies replicate the exact
+/// schemas defined by the v3 OpenAPI spec (<c>v2ClientService</c>) so deserialization is exercised
+/// end-to-end.
 /// </summary>
 public sealed class BusinessActivityServiceIntegrationTests : IntegrationTestBase
 {
@@ -40,26 +43,45 @@ public sealed class BusinessActivityServiceIntegrationTests : IntegrationTestBas
     private const string BusinessActivitiesSearchPath = "/2.0/client_service/search";
 
     private const string BusinessActivityResponse = """
-        {
-            "id": 1,
-            "name": "Consulting",
-            "default_is_billable": true,
-            "default_price_per_hour": 150.0,
-            "account_id": null
-        }
-        """;
+                                                    {
+                                                        "id": 1,
+                                                        "name": "Project Management",
+                                                        "default_is_billable": true,
+                                                        "default_price_per_hour": 150.0,
+                                                        "account_id": 142
+                                                    }
+                                                    """;
+
+    private const string BusinessActivityListBody = """
+                                                    [
+                                                        {
+                                                            "id": 1,
+                                                            "name": "Project Management",
+                                                            "default_is_billable": true,
+                                                            "default_price_per_hour": 150.0,
+                                                            "account_id": 142
+                                                        },
+                                                        {
+                                                            "id": 2,
+                                                            "name": "Consulting",
+                                                            "default_is_billable": false,
+                                                            "default_price_per_hour": null,
+                                                            "account_id": null
+                                                        }
+                                                    ]
+                                                    """;
 
     /// <summary>
     /// <c>BusinessActivityService.Get()</c> must issue a <c>GET</c> against
-    /// <c>/2.0/client_service</c> and return a successful <c>ApiResult</c> when the
-    /// server responds with an empty collection.
+    /// <c>/2.0/client_service</c> and deserialize every field from the populated list response,
+    /// including the optional/nullable <c>default_price_per_hour</c> and <c>account_id</c>.
     /// </summary>
     [Test]
-    public async Task BusinessActivityService_Get_SendsGetRequestToCorrectPath()
+    public async Task BusinessActivityService_Get_DeserializesPopulatedList()
     {
         Server
             .Given(Request.Create().WithPath(BusinessActivitiesPath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(BusinessActivityListBody));
 
         var service = new BusinessActivityService(ConnectionHandler);
 
@@ -70,19 +92,60 @@ public sealed class BusinessActivityServiceIntegrationTests : IntegrationTestBas
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data, Is.Empty);
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(BusinessActivitiesPath));
+
+            Assert.That(result.Data, Has.Count.EqualTo(2));
+
+            var first = result.Data![0];
+            Assert.That(first.Id, Is.EqualTo(1));
+            Assert.That(first.Name, Is.EqualTo("Project Management"));
+            Assert.That(first.DefaultIsBillable, Is.True);
+            Assert.That(first.DefaultPricePerHour, Is.EqualTo(150.0m));
+            Assert.That(first.AccountId, Is.EqualTo(142));
+
+            var second = result.Data[1];
+            Assert.That(second.Id, Is.EqualTo(2));
+            Assert.That(second.Name, Is.EqualTo("Consulting"));
+            Assert.That(second.DefaultIsBillable, Is.False);
+            Assert.That(second.DefaultPricePerHour, Is.Null);
+            Assert.That(second.AccountId, Is.Null);
+        });
+    }
+
+    /// <summary>
+    /// <c>BusinessActivityService.Get()</c> must forward the supplied query parameters
+    /// (<c>limit</c>, <c>offset</c>, <c>order_by</c>) to the URL.
+    /// </summary>
+    [Test]
+    public async Task BusinessActivityService_Get_ForwardsQueryParameters()
+    {
+        Server
+            .Given(Request.Create().WithPath(BusinessActivitiesPath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+
+        var service = new BusinessActivityService(ConnectionHandler);
+        var queryParameter = new QueryParameterBusinessActivity(Limit: 50, Offset: 25, OrderBy: "name_asc");
+
+        await service.Get(queryParameter, cancellationToken: TestContext.CurrentContext.CancellationToken);
+
+        var request = Server.LogEntries.Last().RequestMessage!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(request.Url, Does.Contain("limit=50"));
+            Assert.That(request.Url, Does.Contain("offset=25"));
+            Assert.That(request.Url, Does.Contain("order_by=name_asc"));
         });
     }
 
     /// <summary>
     /// <c>BusinessActivityService.Create()</c> must issue a <c>POST</c> request against
-    /// <c>/2.0/client_service</c> with a body containing the expected snake_case field names.
+    /// <c>/2.0/client_service</c> with a body containing the snake_case field names and
+    /// must deserialize the returned <see cref="BexioApiNet.Abstractions.Models.BusinessActivities.BusinessActivity.BusinessActivity"/>.
     /// </summary>
     [Test]
-    public async Task BusinessActivityService_Create_SendsPostRequestWithBody()
+    public async Task BusinessActivityService_Create_SendsPostRequestAndDeserializesResponse()
     {
         Server
             .Given(Request.Create().WithPath(BusinessActivitiesPath).UsingPost())
@@ -90,10 +153,10 @@ public sealed class BusinessActivityServiceIntegrationTests : IntegrationTestBas
 
         var service = new BusinessActivityService(ConnectionHandler);
         var payload = new BusinessActivityCreate(
-            Name: "Consulting",
+            Name: "Project Management",
             DefaultIsBillable: true,
             DefaultPricePerHour: 150m,
-            AccountId: null);
+            AccountId: 142);
 
         var result = await service.Create(payload, TestContext.CurrentContext.CancellationToken);
 
@@ -102,11 +165,19 @@ public sealed class BusinessActivityServiceIntegrationTests : IntegrationTestBas
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!.Id, Is.EqualTo(1));
+            Assert.That(result.Data.Name, Is.EqualTo("Project Management"));
+            Assert.That(result.Data.DefaultIsBillable, Is.True);
+            Assert.That(result.Data.DefaultPricePerHour, Is.EqualTo(150.0m));
+            Assert.That(result.Data.AccountId, Is.EqualTo(142));
+
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(BusinessActivitiesPath));
-            Assert.That(request.Body, Does.Contain("name"));
-            Assert.That(request.Body, Does.Contain("default_is_billable"));
-            Assert.That(request.Body, Does.Contain("default_price_per_hour"));
+            Assert.That(request.Body, Does.Contain("\"name\":\"Project Management\""));
+            Assert.That(request.Body, Does.Contain("\"default_is_billable\":true"));
+            Assert.That(request.Body, Does.Contain("\"default_price_per_hour\":150"));
+            Assert.That(request.Body, Does.Contain("\"account_id\":142"));
         });
     }
 
@@ -119,12 +190,12 @@ public sealed class BusinessActivityServiceIntegrationTests : IntegrationTestBas
     {
         Server
             .Given(Request.Create().WithPath(BusinessActivitiesSearchPath).UsingPost())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(BusinessActivityListBody));
 
         var service = new BusinessActivityService(ConnectionHandler);
         var criteria = new List<SearchCriteria>
         {
-            new() { Field = "name", Value = "Consulting", Criteria = "like" }
+            new() { Field = "name", Value = "Project", Criteria = "like" }
         };
 
         var result = await service.Search(criteria, cancellationToken: TestContext.CurrentContext.CancellationToken);
@@ -134,8 +205,12 @@ public sealed class BusinessActivityServiceIntegrationTests : IntegrationTestBas
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Data, Has.Count.EqualTo(2));
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(BusinessActivitiesSearchPath));
+            Assert.That(request.Body, Does.Contain("\"field\":\"name\""));
+            Assert.That(request.Body, Does.Contain("\"value\":\"Project\""));
+            Assert.That(request.Body, Does.Contain("\"criteria\":\"like\""));
         });
     }
 }

@@ -26,44 +26,33 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Expenses.Expenses.Views;
 
 /// <summary>
-/// Create view for <c>POST /4.0/expenses/expenses</c>. All required fields per the Bexio
-/// API spec are non-nullable positional parameters; optional fields default to
-/// <see langword="null"/> and are only serialized when supplied.
+/// Create view for <c>POST /4.0/expenses</c>. The Bexio API requires <c>paid_on</c>,
+/// <c>amount</c>, <c>currency_code</c> and <c>attachment_ids</c>; all other fields are optional.
 /// <see href="https://docs.bexio.com/#tag/Expenses">Expenses</see>
 /// </summary>
+/// <param name="PaidOn">Date the expense was paid on.</param>
+/// <param name="Amount">Expense amount. Up to 17 digits, max 2 decimals. Must be ≥ 0.</param>
+/// <param name="CurrencyCode">ISO currency code of the expense (max length 20).</param>
+/// <param name="AttachmentIds">Bexio file identifiers to attach to the expense (no duplicates).</param>
 /// <param name="SupplierId">Identifier of the supplier contact.</param>
-/// <param name="ContactPartnerId">Identifier of the Bexio contact partner.</param>
-/// <param name="CurrencyCode">ISO currency code of the expense.</param>
-/// <param name="Address">Address block describing the supplier.</param>
-/// <param name="ExpenseDate">Expense issue date.</param>
-/// <param name="DueDate">Due date for payment.</param>
-/// <param name="ManualAmount">Whether <c>AmountMan</c> (true) or <c>AmountCalc</c> (false) is the authoritative expense amount.</param>
-/// <param name="ItemNet">Whether line-item amounts are net (<see langword="true"/>) or gross (<see langword="false"/>).</param>
-/// <param name="LineItems">Expense line items (1-100).</param>
-/// <param name="Discounts">Discounts applied to the expense (0-100).</param>
-/// <param name="AttachmentIds">Bexio file identifiers to attach to the expense.</param>
-/// <param name="VendorRef">Vendor reference text.</param>
-/// <param name="Title">Free-form expense title.</param>
-/// <param name="AmountMan">Manual amount. Required when <see cref="ManualAmount"/> is <see langword="true"/>.</param>
-/// <param name="AmountCalc">Calculated amount. Required when <see cref="ManualAmount"/> is <see langword="false"/>.</param>
-/// <param name="ExchangeRate">Exchange rate. Required when <see cref="CurrencyCode"/> differs from the base currency.</param>
-/// <param name="BaseCurrencyAmount">Expense amount expressed in the base currency. Required with <see cref="ExchangeRate"/>.</param>
+/// <param name="Title">Optional free-form expense title (max length 80).</param>
+/// <param name="BankAccountId">Bank account identifier.</param>
+/// <param name="BookingAccountId">Booking account identifier.</param>
+/// <param name="TaxId">Tax identifier.</param>
+/// <param name="ExchangeRate">Exchange rate. Required when <see cref="CurrencyCode"/> differs from the base currency. Max 5 digits, 10 decimals.</param>
+/// <param name="BaseCurrencyAmount">Expense amount expressed in the base currency. Required when <see cref="CurrencyCode"/> differs from the base currency.</param>
+/// <param name="Address">Optional address block describing the supplier.</param>
 public sealed record ExpenseCreate(
-    [property: JsonPropertyName("supplier_id")] int SupplierId,
-    [property: JsonPropertyName("contact_partner_id")] int ContactPartnerId,
+    [property: JsonPropertyName("paid_on")] DateOnly PaidOn,
+    [property: JsonPropertyName("amount")] decimal Amount,
     [property: JsonPropertyName("currency_code")] string CurrencyCode,
-    [property: JsonPropertyName("address")] ExpenseAddress Address,
-    [property: JsonPropertyName("expense_date")] DateOnly ExpenseDate,
-    [property: JsonPropertyName("due_date")] DateOnly DueDate,
-    [property: JsonPropertyName("manual_amount")] bool ManualAmount,
-    [property: JsonPropertyName("item_net")] bool ItemNet,
-    [property: JsonPropertyName("line_items")] IReadOnlyList<ExpenseLineItem> LineItems,
-    [property: JsonPropertyName("discounts")] IReadOnlyList<ExpenseDiscount> Discounts,
     [property: JsonPropertyName("attachment_ids")] IReadOnlyList<Guid> AttachmentIds,
-    [property: JsonPropertyName("vendor_ref")] string? VendorRef = null,
+    [property: JsonPropertyName("supplier_id")] int? SupplierId = null,
     [property: JsonPropertyName("title")] string? Title = null,
-    [property: JsonPropertyName("amount_man")] decimal? AmountMan = null,
-    [property: JsonPropertyName("amount_calc")] decimal? AmountCalc = null,
+    [property: JsonPropertyName("bank_account_id")] int? BankAccountId = null,
+    [property: JsonPropertyName("booking_account_id")] int? BookingAccountId = null,
+    [property: JsonPropertyName("tax_id")] int? TaxId = null,
     [property: JsonPropertyName("exchange_rate")] decimal? ExchangeRate = null,
-    [property: JsonPropertyName("base_currency_amount")] decimal? BaseCurrencyAmount = null
+    [property: JsonPropertyName("base_currency_amount")] decimal? BaseCurrencyAmount = null,
+    [property: JsonPropertyName("address")] ExpenseAddress? Address = null
 );

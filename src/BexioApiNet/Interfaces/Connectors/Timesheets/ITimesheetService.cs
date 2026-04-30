@@ -72,7 +72,8 @@ public interface ITimesheetService
     public Task<ApiResult<List<Timesheet>>> Search(List<SearchCriteria> searchCriteria, [Optional] QueryParameterTimesheet? queryParameterTimesheet, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
-    /// Update (edit) an existing timesheet. <see href="https://docs.bexio.com/#tag/Timesheets/operation/v2EditTimesheet">Edit Timesheet</see>
+    /// Update (edit) an existing timesheet via <c>POST /2.0/timesheet/{id}</c>.
+    /// <see href="https://docs.bexio.com/#tag/Timesheets/operation/v2EditTimesheet">Edit Timesheet</see>
     /// </summary>
     /// <param name="id">The timesheet id.</param>
     /// <param name="timesheet">The timesheet update view.</param>
