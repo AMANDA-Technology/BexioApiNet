@@ -93,6 +93,51 @@ public sealed class BankAccountServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    /// A <see cref="QueryParameterBankAccount"/> with no values supplied must produce
+    /// a <see langword="null"/> <see cref="QueryParameter"/> so the request URI does
+    /// not get spurious empty query parameters appended.
+    /// </summary>
+    [Test]
+    public void QueryParameterBankAccount_WithNoValues_ProducesNullQueryParameter()
+    {
+        var queryParameter = new QueryParameterBankAccount();
+
+        Assert.That(queryParameter.QueryParameter, Is.Null);
+    }
+
+    /// <summary>
+    /// A <see cref="QueryParameterBankAccount"/> with only <c>Limit</c> emits just
+    /// the <c>limit</c> entry — <c>offset</c> must not be added when the caller
+    /// did not supply it.
+    /// </summary>
+    [Test]
+    public void QueryParameterBankAccount_WithOnlyLimit_OmitsOffset()
+    {
+        var queryParameter = new QueryParameterBankAccount(Limit: 10);
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter!.Parameters, Has.Count.EqualTo(1));
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("limit"));
+        Assert.That(queryParameter.QueryParameter.Parameters["limit"], Is.EqualTo(10));
+    }
+
+    /// <summary>
+    /// A <see cref="QueryParameterBankAccount"/> with both <c>Limit</c> and
+    /// <c>Offset</c> emits both parameters under the keys expected by Bexio
+    /// (<c>limit</c>, <c>offset</c>).
+    /// </summary>
+    [Test]
+    public void QueryParameterBankAccount_WithLimitAndOffset_EmitsBoth()
+    {
+        var queryParameter = new QueryParameterBankAccount(Limit: 10, Offset: 5);
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter!.Parameters, Has.Count.EqualTo(2));
+        Assert.That(queryParameter.QueryParameter.Parameters["limit"], Is.EqualTo(10));
+        Assert.That(queryParameter.QueryParameter.Parameters["offset"], Is.EqualTo(5));
+    }
+
+    /// <summary>
     /// The service must never invoke <c>FetchAll</c>: <see cref="BankAccountService"/>
     /// does not implement auto-paging even when <c>autoPage</c> is set.
     /// </summary>
@@ -253,8 +298,10 @@ public sealed class BankAccountServiceTests : ServiceTestBase
             Name: $"Bank {id}",
             Owner: "owner",
             OwnerAddress: "addr",
+            OwnerHouseNumber: "1",
             OwnerZip: "0000",
             OwnerCity: "city",
+            OwnerCountryCode: "CH",
             BcNr: "bc",
             BankName: "bank",
             BankNr: "bnr",
@@ -263,7 +310,12 @@ public sealed class BankAccountServiceTests : ServiceTestBase
             CurrencyId: null,
             AccountId: null,
             Remarks: "",
-            InvoiceMode: "",
             QrInvoiceIban: "",
-            Type: "");
+            InvoiceMode: null,
+            IsEsr: null,
+            EsrBesrId: null,
+            EsrPostAccountNr: null,
+            EsrPaymentForText: null,
+            EsrInFavourOfText: null,
+            Type: "bank");
 }

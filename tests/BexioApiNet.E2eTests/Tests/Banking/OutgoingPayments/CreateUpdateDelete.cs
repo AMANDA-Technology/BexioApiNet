@@ -29,7 +29,8 @@ using BexioApiNet.Abstractions.Models.Banking.OutgoingPayments.Views;
 namespace BexioApiNet.E2eTests.Tests.Banking.OutgoingPayments;
 
 /// <summary>
-/// Live exercises POST, PUT, and DELETE on <c>/4.0/purchase/outgoing-payments</c>.
+/// Live exercises POST → GET → PUT → DELETE on <c>/4.0/purchase/outgoing-payments</c>,
+/// asserting the full Create → Read → Update → Delete lifecycle.
 /// <para>
 /// The test is intentionally left as a stub: the Bexio API enforces many preconditions
 /// (existing non-draft bill, sender bank account, business-year window, valid IBAN, etc.)
@@ -41,13 +42,13 @@ namespace BexioApiNet.E2eTests.Tests.Banking.OutgoingPayments;
 public class TestCreateUpdateDelete : OutgoingPaymentE2eTestBase
 {
     /// <summary>
-    /// End-to-end create → update → delete flow. Skipped by default. Enable by setting
+    /// End-to-end Create → Read → Update → Delete flow. Skipped by default. Enable by setting
     /// the env vars <c>BexioApiNet__OutgoingPaymentRunMutating=true</c>,
     /// <c>BexioApiNet__OutgoingPaymentBillId</c>, and
     /// <c>BexioApiNet__OutgoingPaymentSenderBankAccountId</c> on a seeded tenant.
     /// </summary>
     [Test]
-    public async Task CreateUpdateDelete()
+    public async Task CreateReadUpdateDelete_LifecycleCompletes()
     {
         if (Environment.GetEnvironmentVariable("BexioApiNet__OutgoingPaymentRunMutating") is not { } mutating
             || !bool.TryParse(mutating, out var runMutating)
@@ -76,15 +77,29 @@ public class TestCreateUpdateDelete : OutgoingPaymentE2eTestBase
             SenderBankAccountId: senderBankAccountId,
             IsSalaryPayment: false);
 
+        // Create
         var created = await OutgoingPayments!.Create(createPayload);
         Assert.Multiple(() =>
         {
             Assert.That(created.IsSuccess, Is.True, created.ApiError?.Message);
             Assert.That(created.Data, Is.Not.Null);
+            Assert.That(created.Data!.PaymentType, Is.EqualTo(OutgoingPaymentType.MANUAL));
+            Assert.That(created.Data.Amount, Is.EqualTo(0.01m));
+            Assert.That(created.Data.CurrencyCode, Is.EqualTo("CHF"));
+            Assert.That(created.Data.BillId, Is.EqualTo(billId));
         });
 
         var createdId = created.Data!.Id;
 
+        // Read
+        var fetched = await OutgoingPayments.GetById(createdId);
+        Assert.Multiple(() =>
+        {
+            Assert.That(fetched.IsSuccess, Is.True, fetched.ApiError?.Message);
+            Assert.That(fetched.Data?.Id, Is.EqualTo(createdId));
+        });
+
+        // Update
         var updatePayload = new OutgoingPaymentUpdate(
             PaymentId: createdId,
             ExecutionDate: createPayload.ExecutionDate,
@@ -98,6 +113,7 @@ public class TestCreateUpdateDelete : OutgoingPaymentE2eTestBase
             Assert.That(updated.Data?.Id, Is.EqualTo(createdId));
         });
 
+        // Delete
         var deleted = await OutgoingPayments.Delete(createdId);
         Assert.That(deleted.IsSuccess, Is.True, deleted.ApiError?.Message);
     }

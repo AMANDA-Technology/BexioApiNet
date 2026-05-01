@@ -28,13 +28,15 @@ namespace BexioApiNet.E2eTests.Tests.Banking.BankAccount;
 /// <summary>
 /// Live E2E coverage for <c>GET /3.0/banking/accounts/{id}</c>. The test fetches
 /// the first bank account via the list endpoint and then re-fetches it by id,
-/// asserting the round-trip returns the same identifier.
+/// asserting the round-trip returns the same identifier and that the schema-defined
+/// fields deserialise into the C# model.
 /// </summary>
 public class TestGetById : BexioE2eTestBase
 {
     /// <summary>
     /// Retrieves the first bank account from the list endpoint, then verifies
-    /// that <c>GetById</c> returns the same record against the live API.
+    /// that <c>GetById</c> returns the same record against the live API and that
+    /// the structurally important schema fields are populated.
     /// </summary>
     [Test]
     public async Task GetById()
@@ -60,6 +62,8 @@ public class TestGetById : BexioE2eTestBase
             Assert.That(res.ApiError, Is.Null);
             Assert.That(res.Data, Is.Not.Null);
             Assert.That(res.Data!.Id, Is.EqualTo(firstId));
+            Assert.That(res.Data.Name, Is.Not.Null);
+            Assert.That(res.Data.Type, Is.Not.Null);
         });
     }
 }

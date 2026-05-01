@@ -80,7 +80,7 @@ public sealed class PaymentTypeServiceTests : ServiceTestBase
     [Test]
     public async Task Get_WithQueryParameter_PassesQueryParameterToConnectionHandler()
     {
-        var queryParameter = new QueryParameterPaymentType(20, 40);
+        var queryParameter = new QueryParameterPaymentType(Limit: 20, Offset: 40);
         ConnectionHandler
             .GetAsync<List<PaymentType>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ApiResult<List<PaymentType>> { IsSuccess = true, Data = [] }));
@@ -93,6 +93,52 @@ public sealed class PaymentTypeServiceTests : ServiceTestBase
             ExpectedListPath,
             queryParameter.QueryParameter,
             Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// A <see cref="QueryParameterPaymentType" /> with no values supplied must produce
+    /// a <see langword="null" /> <see cref="QueryParameter" /> so the request URI does
+    /// not get spurious empty query parameters appended.
+    /// </summary>
+    [Test]
+    public void QueryParameterPaymentType_WithNoValues_ProducesNullQueryParameter()
+    {
+        var queryParameter = new QueryParameterPaymentType();
+
+        Assert.That(queryParameter.QueryParameter, Is.Null);
+    }
+
+    /// <summary>
+    /// A <see cref="QueryParameterPaymentType" /> with all three values populated
+    /// emits all parameters under the keys expected by Bexio
+    /// (<c>limit</c>, <c>offset</c>, <c>order_by</c>).
+    /// </summary>
+    [Test]
+    public void QueryParameterPaymentType_WithAllValues_EmitsAll()
+    {
+        var queryParameter = new QueryParameterPaymentType(Limit: 100, Offset: 0, OrderBy: "name_asc");
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter!.Parameters, Has.Count.EqualTo(3));
+        Assert.That(queryParameter.QueryParameter.Parameters["limit"], Is.EqualTo(100));
+        Assert.That(queryParameter.QueryParameter.Parameters["offset"], Is.EqualTo(0));
+        Assert.That(queryParameter.QueryParameter.Parameters["order_by"], Is.EqualTo("name_asc"));
+    }
+
+    /// <summary>
+    /// A <see cref="QueryParameterPaymentType" /> with only <c>OrderBy</c> emits just
+    /// the <c>order_by</c> entry — pagination keys must not be added when the caller
+    /// did not supply them.
+    /// </summary>
+    [Test]
+    public void QueryParameterPaymentType_WithOnlyOrderBy_OmitsPagination()
+    {
+        var queryParameter = new QueryParameterPaymentType(OrderBy: "id_desc");
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter!.Parameters, Has.Count.EqualTo(1));
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("order_by"));
+        Assert.That(queryParameter.QueryParameter.Parameters["order_by"], Is.EqualTo("id_desc"));
     }
 
     /// <summary>
@@ -263,7 +309,7 @@ public sealed class PaymentTypeServiceTests : ServiceTestBase
         {
             new() { Field = "name", Value = "Bank", Criteria = "like" }
         };
-        var queryParameter = new QueryParameterPaymentType(10, 5);
+        var queryParameter = new QueryParameterPaymentType(Limit: 10, Offset: 5);
         ConnectionHandler
             .PostSearchAsync<PaymentType>(Arg.Any<List<SearchCriteria>>(), Arg.Any<string>(),
                 Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())

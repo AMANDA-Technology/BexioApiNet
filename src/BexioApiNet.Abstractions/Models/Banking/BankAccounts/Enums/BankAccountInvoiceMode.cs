@@ -23,39 +23,33 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace BexioApiNet.E2eTests.Tests.Banking.BankAccount;
+// ReSharper disable InconsistentNaming
+namespace BexioApiNet.Abstractions.Models.Banking.BankAccounts.Enums;
 
 /// <summary>
-/// Live E2E coverage for <c>GET /3.0/banking/accounts</c>. The test calls the live
-/// Bexio API and asserts the response matches the OpenAPI v3.0 schema shape — specifically
-/// that core identifying fields are populated for at least one bank account.
+/// Bexio QR invoice mode of a bank account, indicating which type of invoicing slip the account supports.
+/// <see href="https://docs.bexio.com/#tag/Bank-Accounts">Bank Accounts</see>
 /// </summary>
-public class TestGetAll : BexioE2eTestBase
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum BankAccountInvoiceMode
 {
     /// <summary>
-    /// Lists bank accounts and asserts the deserialised response is non-empty and the
-    /// first item carries the schema-required identifiers (<c>id</c>, <c>name</c>, <c>iban_nr</c>).
+    /// No QR invoice support.
     /// </summary>
-    [Test]
-    public async Task GetAll()
-    {
-        Assert.That(BexioApiClient, Is.Not.Null);
+    none,
 
-        var res = await BexioApiClient!.BankingBankAccounts.Get();
-        Assert.That(res, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(res.IsSuccess, Is.True);
-            Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data, Is.Not.Null.And.Not.Empty);
-        });
+    /// <summary>
+    /// QR-IBAN with QR reference.
+    /// </summary>
+    qr_iban,
 
-        var first = res.Data!.First();
-        Assert.Multiple(() =>
-        {
-            Assert.That(first.Id, Is.Not.Null);
-            Assert.That(first.Name, Is.Not.Null);
-            Assert.That(first.Type, Is.Not.Null);
-        });
-    }
+    /// <summary>
+    /// IBAN with creditor reference (SCOR).
+    /// </summary>
+    iban_with_creditor_reference,
+
+    /// <summary>
+    /// Plain IBAN, no structured reference.
+    /// </summary>
+    iban_only
 }
