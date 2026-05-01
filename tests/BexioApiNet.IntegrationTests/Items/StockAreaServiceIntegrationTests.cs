@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Models.Api;
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Items;
 
 namespace BexioApiNet.IntegrationTests.Items;
@@ -48,15 +49,16 @@ public sealed class StockAreaServiceIntegrationTests : IntegrationTestBase
 
     /// <summary>
     /// <c>StockAreaService.Get()</c> must issue a <c>GET</c> request against
-    /// <c>/2.0/stock_place</c> and return a successful <c>ApiResult</c> when the server
-    /// returns an empty array.
+    /// <c>/2.0/stock_place</c> and deserialize each returned
+    /// <see cref="Abstractions.Models.Items.StockAreas.StockArea" /> from the
+    /// OpenAPI-shaped JSON array returned by Bexio.
     /// </summary>
     [Test]
-    public async Task StockAreaService_Get_SendsGetRequest()
+    public async Task StockAreaService_Get_SendsGetRequest_AndDeserializesAllFields()
     {
         Server
             .Given(Request.Create().WithPath(StockPlacePath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{StockAreaResponse}]"));
 
         var service = new StockAreaService(ConnectionHandler);
 
@@ -69,16 +71,48 @@ public sealed class StockAreaServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(StockPlacePath));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data, Has.Count.EqualTo(1));
+            Assert.That(result.Data![0].Id, Is.EqualTo(1));
+            Assert.That(result.Data![0].Name, Is.EqualTo("Shelf A-06"));
+        });
+    }
+
+    /// <summary>
+    /// <c>StockAreaService.Get()</c> must forward typed query parameters (limit/offset/order_by)
+    /// onto the request URI when a <see cref="QueryParameterStockArea" /> is supplied.
+    /// </summary>
+    [Test]
+    public async Task StockAreaService_Get_WithQueryParameter_ForwardsLimitOffsetOrderBy()
+    {
+        Server
+            .Given(Request.Create().WithPath(StockPlacePath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+
+        var service = new StockAreaService(ConnectionHandler);
+
+        var queryParameter = new QueryParameterStockArea(Limit: 25, Offset: 10, OrderBy: "name_asc");
+
+        var result = await service.Get(queryParameter, cancellationToken: TestContext.CurrentContext.CancellationToken);
+
+        var request = Server.LogEntries.Last().RequestMessage!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(request.Url, Does.Contain("limit=25"));
+            Assert.That(request.Url, Does.Contain("offset=10"));
+            Assert.That(request.Url, Does.Contain("order_by=name_asc"));
         });
     }
 
     /// <summary>
     /// <c>StockAreaService.Search</c> must send a <c>POST</c> request against
     /// <c>/2.0/stock_place/search</c> with the <see cref="SearchCriteria" /> list as the JSON
-    /// body.
+    /// body and deserialize each returned stock area.
     /// </summary>
     [Test]
-    public async Task StockAreaService_Search_SendsPostRequest_ToSearchPath()
+    public async Task StockAreaService_Search_SendsPostRequest_ToSearchPath_AndDeserializesAllFields()
     {
         var expectedPath = $"{StockPlacePath}/search";
 
@@ -104,6 +138,10 @@ public sealed class StockAreaServiceIntegrationTests : IntegrationTestBase
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
             Assert.That(request.Body, Does.Contain("\"field\":\"name\""));
             Assert.That(request.Body, Does.Contain("\"criteria\":\"=\""));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data, Has.Count.EqualTo(1));
+            Assert.That(result.Data![0].Id, Is.EqualTo(1));
+            Assert.That(result.Data![0].Name, Is.EqualTo("Shelf A-06"));
         });
     }
 }

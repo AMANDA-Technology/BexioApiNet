@@ -26,19 +26,42 @@ SOFTWARE.
 namespace BexioApiNet.Models;
 
 /// <summary>
-///     Dictionary for optional query parameters for the units endpoint.
+///     Typed query parameter wrapper for the Bexio units endpoint
+///     (<c>GET /2.0/unit</c> and <c>POST /2.0/unit/search</c>).
+///     Each constructor argument is optional so callers can supply only the parameters they need;
+///     <see langword="null" /> values are skipped and not serialized onto the URL.
 /// </summary>
+/// <param name="Limit">Maximum number of results to return (Bexio default <c>500</c>, maximum <c>2000</c>).</param>
+/// <param name="Offset">Number of results to skip for pagination.</param>
+/// <param name="OrderBy">
+///     Sort clause — one of <c>id</c>, <c>name</c>, optionally with <c>_asc</c>/<c>_desc</c>
+///     suffixes.
+/// </param>
 public sealed record QueryParameterUnit(
-    int Limit,
-    int Offset
+    int? Limit = null,
+    int? Offset = null,
+    string? OrderBy = null
 )
 {
     /// <summary>
+    ///     The underlying <see cref="QueryParameter" /> passed to <see cref="Interfaces.IBexioConnectionHandler" />.
+    ///     <see langword="null" /> when every input is <see langword="null" /> so the handler appends no query string.
     /// </summary>
-    public QueryParameter? QueryParameter { get; } =
-        new(new Dictionary<string, object>
-        {
-            { "limit", Limit },
-            { "offset", Offset }
-        });
+    public QueryParameter? QueryParameter { get; } = BuildQueryParameter(Limit, Offset, OrderBy);
+
+    private static QueryParameter? BuildQueryParameter(int? limit, int? offset, string? orderBy)
+    {
+        var parameters = new Dictionary<string, object>();
+
+        if (limit is { } l)
+            parameters["limit"] = l;
+
+        if (offset is { } o)
+            parameters["offset"] = o;
+
+        if (!string.IsNullOrWhiteSpace(orderBy))
+            parameters["order_by"] = orderBy;
+
+        return parameters.Count is 0 ? null : new QueryParameter(parameters);
+    }
 }

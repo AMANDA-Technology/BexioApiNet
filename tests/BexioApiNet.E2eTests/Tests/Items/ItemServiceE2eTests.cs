@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Models.Api;
+using BexioApiNet.Abstractions.Models.Items.Items.Views;
 using BexioApiNet.Models;
 
 namespace BexioApiNet.E2eTests.Tests.Items;
@@ -32,9 +33,8 @@ namespace BexioApiNet.E2eTests.Tests.Items;
 /// Live end-to-end tests for the item connector exposed via
 /// <see cref="IBexioApiClient.Items"/>. Tests are skipped when the required environment
 /// variables (<c>BexioApiNet__BaseUri</c>, <c>BexioApiNet__JwtToken</c>) are not present.
-/// Mutating operations (create / update / delete) are intentionally omitted to avoid
-/// leaving orphaned items on the live tenant — they are covered offline by the
-/// integration suite.
+/// The CRUD lifecycle test creates and deletes its own item in <c>try</c>/<c>finally</c>
+/// so the live tenant is left in a clean state.
 /// </summary>
 [Category("E2E")]
 public sealed class ItemServiceE2eTests : BexioE2eTestBase
@@ -109,5 +109,61 @@ public sealed class ItemServiceE2eTests : BexioE2eTestBase
             Assert.That(result.ApiError, Is.Null);
             Assert.That(result.Data, Is.Not.Null);
         });
+    }
+
+    /// <summary>
+    /// Verifies the full Create → Read → Update → Delete lifecycle for a service-type item.
+    /// The item is deleted in <c>finally</c> so the tenant is left clean even when an
+    /// intermediate assertion fails.
+    /// </summary>
+    [Test]
+    public async Task Lifecycle_CreateReadUpdateDelete()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var internCode = $"E2E-{Guid.NewGuid():N}";
+        var create = new ItemCreate(
+            UserId: 1,
+            ArticleTypeId: 2,
+            InternCode: internCode,
+            InternName: $"E2E item {internCode}");
+
+        var created = await BexioApiClient!.Items.Create(create);
+
+        Assert.That(created, Is.Not.Null);
+        Assert.That(created.IsSuccess, Is.True, () => $"create failed: {created.ApiError?.Message}");
+        Assert.That(created.Data, Is.Not.Null);
+
+        var id = created.Data!.Id;
+
+        try
+        {
+            var fetched = await BexioApiClient.Items.GetById(id);
+            Assert.Multiple(() =>
+            {
+                Assert.That(fetched.IsSuccess, Is.True);
+                Assert.That(fetched.Data, Is.Not.Null);
+                Assert.That(fetched.Data!.Id, Is.EqualTo(id));
+                Assert.That(fetched.Data!.InternCode, Is.EqualTo(internCode));
+            });
+
+            var updatedName = $"E2E item updated {internCode}";
+            var update = new ItemUpdate(
+                UserId: 1,
+                InternCode: internCode,
+                InternName: updatedName);
+
+            var updated = await BexioApiClient.Items.Update(id, update);
+            Assert.Multiple(() =>
+            {
+                Assert.That(updated.IsSuccess, Is.True);
+                Assert.That(updated.Data, Is.Not.Null);
+                Assert.That(updated.Data!.InternName, Is.EqualTo(updatedName));
+            });
+        }
+        finally
+        {
+            await BexioApiClient.Items.Delete(id);
+        }
     }
 }

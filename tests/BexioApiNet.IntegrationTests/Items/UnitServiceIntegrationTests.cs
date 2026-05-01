@@ -33,8 +33,8 @@ namespace BexioApiNet.IntegrationTests.Items;
 /// Integration tests covering the CRUD entry points of <see cref="UnitService" /> against
 /// WireMock stubs. Verifies the path composed from <see cref="UnitConfiguration" />
 /// (<c>2.0/unit</c>) reaches the handler correctly, that the expected HTTP verbs are used
-/// (including the Bexio-specific <c>PUT</c> for edits), and that payloads are serialized with the
-/// expected snake_case field names.
+/// (Bexio's <c>v2EditUnit</c> is exposed as <c>POST /2.0/unit/{unit_id}</c>), and that
+/// payloads are serialized with the expected snake_case field names.
 /// </summary>
 public sealed class UnitServiceIntegrationTests : IntegrationTestBase
 {
@@ -49,15 +49,15 @@ public sealed class UnitServiceIntegrationTests : IntegrationTestBase
 
     /// <summary>
     /// <c>UnitService.Get()</c> must issue a <c>GET</c> request against
-    /// <c>/2.0/unit</c> and return a successful <c>ApiResult</c> when the server
-    /// returns an empty array.
+    /// <c>/2.0/unit</c> and deserialize each returned <see cref="Abstractions.Models.Items.Units.Unit"/>
+    /// from the OpenAPI-shaped JSON array returned by Bexio.
     /// </summary>
     [Test]
-    public async Task UnitService_Get_SendsGetRequest()
+    public async Task UnitService_Get_SendsGetRequest_AndDeserializesAllFields()
     {
         Server
             .Given(Request.Create().WithPath(UnitPath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{UnitResponse}]"));
 
         var service = new UnitService(ConnectionHandler);
 
@@ -70,15 +70,19 @@ public sealed class UnitServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(UnitPath));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data, Has.Count.EqualTo(1));
+            Assert.That(result.Data![0].Id, Is.EqualTo(1));
+            Assert.That(result.Data![0].Name, Is.EqualTo("kg"));
         });
     }
 
     /// <summary>
     /// <c>UnitService.GetById</c> must issue a <c>GET</c> request that includes the target
-    /// id in the URL path and surface the returned unit on success.
+    /// id in the URL path and deserialize every field defined in the OpenAPI <c>Unit</c> schema.
     /// </summary>
     [Test]
-    public async Task UnitService_GetById_SendsGetRequest()
+    public async Task UnitService_GetById_SendsGetRequest_AndDeserializesAllFields()
     {
         const int id = 1;
         var expectedPath = $"{UnitPath}/{id}";
@@ -98,6 +102,7 @@ public sealed class UnitServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Id, Is.EqualTo(id));
+            Assert.That(result.Data!.Name, Is.EqualTo("kg"));
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
         });
@@ -165,21 +170,26 @@ public sealed class UnitServiceIntegrationTests : IntegrationTestBase
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
             Assert.That(request.Body, Does.Contain("\"field\":\"name\""));
             Assert.That(request.Body, Does.Contain("\"criteria\":\"like\""));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data, Has.Count.EqualTo(1));
+            Assert.That(result.Data![0].Id, Is.EqualTo(1));
+            Assert.That(result.Data![0].Name, Is.EqualTo("kg"));
         });
     }
 
     /// <summary>
-    /// <c>UnitService.Update</c> must send a <c>PUT</c> request against
-    /// <c>/2.0/unit/{id}</c> — Bexio uses PUT for full-replacement edits on the units resource.
+    /// <c>UnitService.Update</c> must send a <c>POST</c> request against
+    /// <c>/2.0/unit/{id}</c>. Bexio's <c>v2EditUnit</c> operation is exposed as POST on this resource
+    /// in <c>doc/openapi/bexio-v3.json</c>, in line with the v2 convention of using POST for edits.
     /// </summary>
     [Test]
-    public async Task UnitService_Update_SendsPutRequest_WithIdInPath()
+    public async Task UnitService_Update_SendsPostRequest_WithIdInPath()
     {
         const int id = 1;
         var expectedPath = $"{UnitPath}/{id}";
 
         Server
-            .Given(Request.Create().WithPath(expectedPath).UsingPut())
+            .Given(Request.Create().WithPath(expectedPath).UsingPost())
             .RespondWith(Response.Create().WithStatusCode(200).WithBody(UnitResponse));
 
         var service = new UnitService(ConnectionHandler);
@@ -195,8 +205,9 @@ public sealed class UnitServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Id, Is.EqualTo(id));
-            Assert.That(request.Method, Is.EqualTo("PUT"));
+            Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
+            Assert.That(request.Body, Does.Contain("\"name\":\"kilogram\""));
         });
     }
 
