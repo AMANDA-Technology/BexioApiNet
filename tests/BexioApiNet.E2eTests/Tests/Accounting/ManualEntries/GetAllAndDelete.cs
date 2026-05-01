@@ -49,7 +49,7 @@ public class TestGetAllAndDelete : BexioE2eTestBase
             Assert.That(res.Data?.First().Id, Is.Not.Null);
         });
 
-        foreach (var entry in res.Data?.Where(x => x.Entries.Any(y => y.Description.Contains("Test entry"))) ?? new List<ManualEntry>())
+        foreach (var entry in res.Data?.Where(x => x.Entries.Any(y => y.Description?.Contains("Test entry") is true)) ?? new List<ManualEntry>())
         {
             var res2 = await BexioApiClient!.AccountingManualEntries.Delete(entry.Id);
 

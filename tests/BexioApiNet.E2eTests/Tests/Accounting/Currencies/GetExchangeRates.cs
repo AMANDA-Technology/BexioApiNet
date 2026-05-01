@@ -33,7 +33,9 @@ public class TestGetExchangeRates : BexioE2eTestBase
     /// <summary>
     /// Fetches the first currency returned by <c>Get()</c> and queries its configured
     /// exchange rates. Asserts on a successful response — the data list may be empty
-    /// when no rates are configured for the discovered currency.
+    /// when no rates are configured for the discovered currency. When entries are
+    /// returned, verifies every entry against the OpenAPI <c>v3ExchangeRate</c> schema:
+    /// <c>factor_nr</c> is required, <c>exchange_currency</c> is the embedded currency.
     /// </summary>
     [Test]
     public async Task GetExchangeRates()
@@ -54,5 +56,16 @@ public class TestGetExchangeRates : BexioE2eTestBase
             Assert.That(res.ApiError, Is.Null);
             Assert.That(res.Data, Is.Not.Null);
         });
+
+        foreach (var rate in res.Data!)
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(rate.FactorNr, Is.GreaterThan(0), "v3ExchangeRate.factor_nr must be a positive number");
+                Assert.That(rate.ExchangeCurrency, Is.Not.Null, "v3ExchangeRate.exchange_currency is required");
+                Assert.That(rate.ExchangeCurrency.Id, Is.GreaterThan(0));
+                Assert.That(rate.ExchangeCurrency.Name, Is.Not.Null.And.Not.Empty);
+            });
+        }
     }
 }

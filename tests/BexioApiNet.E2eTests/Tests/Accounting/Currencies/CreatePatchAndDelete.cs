@@ -28,16 +28,17 @@ using BexioApiNet.Abstractions.Models.Accounting.Currencies.Views;
 namespace BexioApiNet.E2eTests.Tests.Accounting.Currencies;
 
 /// <summary>
-/// E2E coverage for the full create / patch / delete cycle of <c>CurrencyService</c>
+/// E2E coverage for the full Create → Read → Update → Delete cycle of <c>CurrencyService</c>
 /// against the live Bexio API. The test cleans up after itself by deleting the
 /// currency it created so it can be re-run safely.
 /// </summary>
 public class TestCreatePatchAndDelete : BexioE2eTestBase
 {
     /// <summary>
-    /// Creates a unique throwaway currency code (<c>X??</c>), patches its round factor and
-    /// finally deletes it. Each step asserts a successful response and the test
-    /// guarantees the created currency is removed even when the assertion order changes.
+    /// Creates a unique throwaway currency code (<c>X??</c>), reads it back via
+    /// <c>GetById</c>, patches its round factor and finally deletes it. Each step asserts
+    /// a successful response and a schema-compliant payload, and the test guarantees the
+    /// created currency is removed via the <c>finally</c> block.
     /// </summary>
     [Test]
     public async Task CreatePatchAndDelete()
@@ -54,11 +55,22 @@ public class TestCreatePatchAndDelete : BexioE2eTestBase
             Assert.That(created.IsSuccess, Is.True);
             Assert.That(created.ApiError, Is.Null);
             Assert.That(created.Data, Is.Not.Null);
+            Assert.That(created.Data!.Id, Is.GreaterThan(0));
             Assert.That(created.Data!.Name, Is.EqualTo(name));
+            Assert.That(created.Data!.RoundFactor, Is.EqualTo(0.05));
         });
 
         try
         {
+            var read = await BexioApiClient!.Currencies.GetById(created.Data!.Id);
+            Assert.Multiple(() =>
+            {
+                Assert.That(read.IsSuccess, Is.True);
+                Assert.That(read.Data, Is.Not.Null);
+                Assert.That(read.Data!.Id, Is.EqualTo(created.Data!.Id));
+                Assert.That(read.Data!.Name, Is.EqualTo(name));
+            });
+
             var patched = await BexioApiClient!.Currencies.Patch(created.Data!.Id, new CurrencyPatch(0.10));
 
             Assert.That(patched, Is.Not.Null);

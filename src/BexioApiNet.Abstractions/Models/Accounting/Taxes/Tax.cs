@@ -28,33 +28,33 @@ namespace BexioApiNet.Abstractions.Models.Accounting.Taxes;
 /// <summary>
 /// Tax object. <see href="https://docs.bexio.com/#tag/Taxes"/>
 /// </summary>
-/// <param name="Id"></param>
-/// <param name="Uuid"></param>
-/// <param name="Name"></param>
-/// <param name="Code"></param>
-/// <param name="Digit"></param>
-/// <param name="Type"></param>
-/// <param name="AccountId"></param>
-/// <param name="TaxSettlementType"></param>
-/// <param name="Value"></param>
-/// <param name="NetTaxValue"></param>
-/// <param name="StartYear"></param>
-/// <param name="EndYear"></param>
-/// <param name="IsActive"></param>
-/// <param name="DisplayName"></param>
-/// <param name="StartMonth"></param>
-/// <param name="EndMonth"></param>
+/// <param name="Id">The id of the tax.</param>
+/// <param name="Uuid">The uuid of the tax.</param>
+/// <param name="Name">Internal name of the tax. Maximum 80 characters.</param>
+/// <param name="Code">Tax code (e.g. <c>UN77</c>). Maximum 80 characters.</param>
+/// <param name="Digit">Tax statement digit (e.g. <c>200</c>, <c>205.301</c>).</param>
+/// <param name="Type">Tax type (e.g. <c>sales_tax</c>, <c>pre_tax_material</c>).</param>
+/// <param name="AccountId">The id of the account associated with the tax.</param>
+/// <param name="TaxSettlementType">Tax settlement type. Maximum 80 characters.</param>
+/// <param name="Value">Tax percentage (e.g. 7.7).</param>
+/// <param name="NetTaxValue">Net tax value as a string. Used when <paramref name="Type"/> is <c>net_tax</c>; otherwise <see langword="null"/>.</param>
+/// <param name="StartYear">Year from which the tax becomes effective. <see langword="null"/> means no lower bound.</param>
+/// <param name="EndYear">Last year for which the tax is effective. <see langword="null"/> means no upper bound.</param>
+/// <param name="IsActive">Indicates whether the tax is currently active.</param>
+/// <param name="DisplayName">Localized display name. Maximum 255 characters.</param>
+/// <param name="StartMonth">Month within <paramref name="StartYear"/> from which the tax becomes effective.</param>
+/// <param name="EndMonth">Month within <paramref name="EndYear"/> through which the tax is effective.</param>
 public sealed record Tax(
     [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("uuid")] string Uuid,
+    [property: JsonPropertyName("uuid")] string? Uuid,
     [property: JsonPropertyName("name")] string Name,
     [property: JsonPropertyName("code")] string Code,
-    [property: JsonPropertyName("digit")] string Digit,
+    [property: JsonPropertyName("digit")] string? Digit,
     [property: JsonPropertyName("type")] string Type,
     [property: JsonPropertyName("account_id")] int? AccountId,
-    [property: JsonPropertyName("tax_settlement_type")] string TaxSettlementType,
+    [property: JsonPropertyName("tax_settlement_type")] string? TaxSettlementType,
     [property: JsonPropertyName("value")] decimal Value,
-    [property: JsonPropertyName("net_tax_value")] int? NetTaxValue,
+    [property: JsonPropertyName("net_tax_value")] string? NetTaxValue,
     [property: JsonPropertyName("start_year")] int? StartYear,
     [property: JsonPropertyName("end_year")] int? EndYear,
     [property: JsonPropertyName("is_active")] bool IsActive,

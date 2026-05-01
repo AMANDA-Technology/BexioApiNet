@@ -32,7 +32,8 @@ public class TestGetCodes : BexioE2eTestBase
 {
     /// <summary>
     /// Lists the configured ISO 4217 currency codes for the tenant. Asserts a successful
-    /// response containing at least one code (typically <c>CHF</c>, <c>EUR</c> are present).
+    /// response containing at least one code and that every entry is a non-empty string
+    /// shaped like an ISO 4217 code (3-character uppercase letters).
     /// </summary>
     [Test]
     public async Task GetCodes()
@@ -49,5 +50,10 @@ public class TestGetCodes : BexioE2eTestBase
             Assert.That(res.Data, Is.Not.Null);
             Assert.That(res.Data, Is.Not.Empty);
         });
+
+        foreach (var code in res.Data!)
+        {
+            Assert.That(code, Is.Not.Null.And.Not.Empty, "Currency codes must be non-empty strings");
+        }
     }
 }
