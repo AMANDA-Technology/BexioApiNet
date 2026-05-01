@@ -352,5 +352,36 @@ public sealed class ContactGroupServiceTests : ServiceTestBase
             cts.Token);
     }
 
+    /// <summary>
+    /// <see cref="QueryParameterContactGroup"/> serializes <c>limit</c>, <c>offset</c>
+    /// and <c>order_by</c> entries that match the Bexio OpenAPI spec parameter names.
+    /// </summary>
+    [Test]
+    public void QueryParameterContactGroup_SerializesLimitOffsetAndOrderBy()
+    {
+        var queryParameter = new QueryParameterContactGroup(Limit: 50, Offset: 100, OrderBy: "name_desc");
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter!.Parameters, Contains.Key("limit"));
+        Assert.That(queryParameter.QueryParameter.Parameters["limit"], Is.EqualTo(50));
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("offset"));
+        Assert.That(queryParameter.QueryParameter.Parameters["offset"], Is.EqualTo(100));
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("order_by"));
+        Assert.That(queryParameter.QueryParameter.Parameters["order_by"], Is.EqualTo("name_desc"));
+    }
+
+    /// <summary>
+    /// When all <see cref="QueryParameterContactGroup"/> arguments are <see langword="null"/>,
+    /// the inner <see cref="QueryParameter"/> is also <see langword="null"/> so the connection
+    /// handler does not append any query string.
+    /// </summary>
+    [Test]
+    public void QueryParameterContactGroup_AllNullProducesNullQueryParameter()
+    {
+        var queryParameter = new QueryParameterContactGroup();
+
+        Assert.That(queryParameter.QueryParameter, Is.Null);
+    }
+
     private static ContactGroup NewContactGroup(int id) => new(Id: id, Name: $"Group {id}");
 }

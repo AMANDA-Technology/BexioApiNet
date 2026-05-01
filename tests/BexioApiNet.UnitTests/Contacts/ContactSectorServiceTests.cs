@@ -101,6 +101,37 @@ public sealed class ContactSectorServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    /// <see cref="QueryParameterContactSector"/> serializes <c>limit</c>, <c>offset</c>
+    /// and <c>order_by</c> entries that match the Bexio OpenAPI spec parameter names.
+    /// </summary>
+    [Test]
+    public void QueryParameterContactSector_SerializesLimitOffsetAndOrderBy()
+    {
+        var queryParameter = new QueryParameterContactSector(Limit: 50, Offset: 25, OrderBy: "name_asc");
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter!.Parameters, Contains.Key("limit"));
+        Assert.That(queryParameter.QueryParameter.Parameters["limit"], Is.EqualTo(50));
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("offset"));
+        Assert.That(queryParameter.QueryParameter.Parameters["offset"], Is.EqualTo(25));
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("order_by"));
+        Assert.That(queryParameter.QueryParameter.Parameters["order_by"], Is.EqualTo("name_asc"));
+    }
+
+    /// <summary>
+    /// When all <see cref="QueryParameterContactSector"/> arguments are <see langword="null"/>,
+    /// the inner <see cref="QueryParameter"/> is also <see langword="null"/> so the connection
+    /// handler does not append any query string.
+    /// </summary>
+    [Test]
+    public void QueryParameterContactSector_AllNullProducesNullQueryParameter()
+    {
+        var queryParameter = new QueryParameterContactSector();
+
+        Assert.That(queryParameter.QueryParameter, Is.Null);
+    }
+
+    /// <summary>
     /// <c>Get(autoPage: true)</c> triggers <see cref="IBexioConnectionHandler.FetchAll{TResult}"/>
     /// when the <c>X-Total-Count</c> header is present and the first response only returned a page.
     /// </summary>

@@ -24,7 +24,9 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Models.Api;
+using BexioApiNet.Abstractions.Models.Contacts.ContactRelations;
 using BexioApiNet.Abstractions.Models.Contacts.ContactRelations.Views;
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Contacts;
 
 namespace BexioApiNet.IntegrationTests.Contacts;
@@ -34,15 +36,21 @@ namespace BexioApiNet.IntegrationTests.Contacts;
 /// WireMock stubs. Verifies the path composed from <see cref="ContactRelationConfiguration" />
 /// (<c>2.0/contact_relation</c>) reaches the handler correctly, that the expected HTTP verbs are
 /// used (including the Bexio-specific <c>POST</c> for edits), and that payloads are serialized with
-/// the expected snake_case field names.
+/// the expected snake_case field names. Each list / read response stub matches the OpenAPI
+/// <c>ContactRelation</c> shape (5 properties) and asserts deserialization on every property.
 /// </summary>
 public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
 {
     private const string ContactRelationPath = "/2.0/contact_relation";
 
+    /// <summary>
+    /// Fully-populated <c>ContactRelation</c> response body — covers every property in the
+    /// Bexio v3 OpenAPI <c>ContactRelation</c> schema (<c>id</c>, <c>contact_id</c>,
+    /// <c>contact_sub_id</c>, <c>description</c>, <c>updated_at</c>).
+    /// </summary>
     private const string ContactRelationResponse = """
                                                    {
-                                                       "id": 1,
+                                                       "id": 3,
                                                        "contact_id": 10,
                                                        "contact_sub_id": 20,
                                                        "description": "Partner",
@@ -52,15 +60,15 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
 
     /// <summary>
     /// <c>ContactRelationService.Get()</c> must issue a <c>GET</c> request against
-    /// <c>/2.0/contact_relation</c> and return a successful <c>ApiResult</c> when the server
-    /// returns an empty array.
+    /// <c>/2.0/contact_relation</c> and deserialize the array body into a list of fully-populated
+    /// <c>ContactRelation</c> records.
     /// </summary>
     [Test]
-    public async Task ContactRelationService_Get_SendsGetRequest()
+    public async Task ContactRelationService_Get_SendsGetRequest_AndDeserializesContactRelation()
     {
         Server
             .Given(Request.Create().WithPath(ContactRelationPath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{ContactRelationResponse}]"));
 
         var service = new ContactRelationService(ConnectionHandler);
 
@@ -73,17 +81,45 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(ContactRelationPath));
+            Assert.That(result.Data, Has.Count.EqualTo(1));
         });
+
+        AssertContactRelationFullyDeserialized(result.Data![0]);
+    }
+
+    /// <summary>
+    /// <c>ContactRelationService.Get()</c> serializes <c>limit</c>, <c>offset</c>, and
+    /// <c>order_by</c> onto the request URL when a populated <see cref="QueryParameterContactRelation"/>
+    /// is supplied. Verifies the query parameter names match the Bexio v3 spec.
+    /// </summary>
+    [Test]
+    public async Task ContactRelationService_Get_WithQueryParameters_SerializesQueryString()
+    {
+        Server
+            .Given(Request.Create().WithPath(ContactRelationPath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+
+        var service = new ContactRelationService(ConnectionHandler);
+
+        var queryParameter = new QueryParameterContactRelation(Limit: 25, Offset: 50, OrderBy: "contact_id");
+
+        await service.Get(queryParameter, cancellationToken: TestContext.CurrentContext.CancellationToken);
+
+        var request = Server.LogEntries.Last().RequestMessage!;
+
+        Assert.That(request.RawQuery, Does.Contain("limit=25"));
+        Assert.That(request.RawQuery, Does.Contain("offset=50"));
+        Assert.That(request.RawQuery, Does.Contain("order_by=contact_id"));
     }
 
     /// <summary>
     /// <c>ContactRelationService.GetById</c> must issue a <c>GET</c> request that includes the
-    /// target id in the URL path and surface the returned contact relation on success.
+    /// target id in the URL path and deserialize the returned <c>ContactRelation</c> body.
     /// </summary>
     [Test]
-    public async Task ContactRelationService_GetById_SendsGetRequest()
+    public async Task ContactRelationService_GetById_SendsGetRequest_AndDeserializesContactRelation()
     {
-        const int id = 1;
+        const int id = 3;
         var expectedPath = $"{ContactRelationPath}/{id}";
 
         Server
@@ -100,19 +136,20 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data!.Id, Is.EqualTo(id));
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
         });
+
+        AssertContactRelationFullyDeserialized(result.Data!);
     }
 
     /// <summary>
     /// <c>ContactRelationService.Create</c> must send a <c>POST</c> request whose body is the
     /// serialized <see cref="ContactRelationCreate" /> payload, and must surface the returned
-    /// contact relation on success.
+    /// contact relation on success with all properties populated.
     /// </summary>
     [Test]
-    public async Task ContactRelationService_Create_SendsPostRequest()
+    public async Task ContactRelationService_Create_SendsPostRequest_AndDeserializesContactRelation()
     {
         Server
             .Given(Request.Create().WithPath(ContactRelationPath).UsingPost())
@@ -121,9 +158,9 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
         var service = new ContactRelationService(ConnectionHandler);
 
         var payload = new ContactRelationCreate(
-            10,
-            20,
-            "Partner");
+            ContactId: 10,
+            ContactSubId: 20,
+            Description: "Partner");
 
         var result = await service.Create(payload, TestContext.CurrentContext.CancellationToken);
 
@@ -133,21 +170,23 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data!.Id, Is.EqualTo(1));
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(ContactRelationPath));
             Assert.That(request.Body, Does.Contain("\"contact_id\":10"));
             Assert.That(request.Body, Does.Contain("\"contact_sub_id\":20"));
+            Assert.That(request.Body, Does.Contain("\"description\":\"Partner\""));
         });
+
+        AssertContactRelationFullyDeserialized(result.Data!);
     }
 
     /// <summary>
     /// <c>ContactRelationService.Search</c> must send a <c>POST</c> request against
     /// <c>/2.0/contact_relation/search</c> with the <see cref="SearchCriteria" /> list as the
-    /// JSON body.
+    /// JSON body and deserialize the array response with full property coverage on every item.
     /// </summary>
     [Test]
-    public async Task ContactRelationService_Search_SendsPostRequest_ToSearchPath()
+    public async Task ContactRelationService_Search_SendsPostRequest_ToSearchPath_AndDeserializesArray()
     {
         var expectedPath = $"{ContactRelationPath}/search";
 
@@ -173,7 +212,11 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
             Assert.That(request.Body, Does.Contain("\"field\":\"contact_id\""));
             Assert.That(request.Body, Does.Contain("\"criteria\":\"=\""));
+            Assert.That(request.Body, Does.Contain("\"value\":\"10\""));
+            Assert.That(result.Data, Has.Count.EqualTo(1));
         });
+
+        AssertContactRelationFullyDeserialized(result.Data![0]);
     }
 
     /// <summary>
@@ -182,9 +225,9 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
     /// v2.0 resources.
     /// </summary>
     [Test]
-    public async Task ContactRelationService_Update_SendsPostRequest_WithIdInPath()
+    public async Task ContactRelationService_Update_SendsPostRequest_WithIdInPath_AndDeserializesContactRelation()
     {
-        const int id = 1;
+        const int id = 3;
         var expectedPath = $"{ContactRelationPath}/{id}";
 
         Server
@@ -194,9 +237,9 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
         var service = new ContactRelationService(ConnectionHandler);
 
         var payload = new ContactRelationUpdate(
-            10,
-            20,
-            "Partner");
+            ContactId: 10,
+            ContactSubId: 20,
+            Description: "Partner");
 
         var result = await service.Update(id, payload, TestContext.CurrentContext.CancellationToken);
 
@@ -206,10 +249,11 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data!.Id, Is.EqualTo(id));
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
         });
+
+        AssertContactRelationFullyDeserialized(result.Data!);
     }
 
     /// <summary>
@@ -219,7 +263,7 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
     [Test]
     public async Task ContactRelationService_Delete_SendsDeleteRequest()
     {
-        const int idToDelete = 1;
+        const int idToDelete = 3;
         var expectedPath = $"{ContactRelationPath}/{idToDelete}";
 
         Server
@@ -237,6 +281,22 @@ public sealed class ContactRelationServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("DELETE"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
+        });
+    }
+
+    /// <summary>
+    /// Verifies that every property in a <c>ContactRelation</c>-shaped JSON response is mapped onto
+    /// the corresponding C# property.
+    /// </summary>
+    private static void AssertContactRelationFullyDeserialized(ContactRelation contactRelation)
+    {
+        Assert.Multiple(() =>
+        {
+            Assert.That(contactRelation.Id, Is.EqualTo(3));
+            Assert.That(contactRelation.ContactId, Is.EqualTo(10));
+            Assert.That(contactRelation.ContactSubId, Is.EqualTo(20));
+            Assert.That(contactRelation.Description, Is.EqualTo("Partner"));
+            Assert.That(contactRelation.UpdatedAt, Is.EqualTo("2024-01-01 12:00:00"));
         });
     }
 }

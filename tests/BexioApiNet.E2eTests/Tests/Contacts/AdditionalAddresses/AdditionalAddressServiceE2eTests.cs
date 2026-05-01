@@ -26,42 +26,41 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Contacts.AdditionalAddresses.Views;
+using BexioApiNet.Abstractions.Models.Contacts.Contacts.Views;
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Contacts;
 
 namespace BexioApiNet.E2eTests.Tests.Contacts.AdditionalAddresses;
 
 /// <summary>
-/// Live end-to-end tests for <see cref="AdditionalAddressService"/>. Because the
-/// <c>BexioApiClient</c> aggregator does not yet expose the additional-address
-/// service (wired in a follow-up issue), these tests build the service directly
-/// from a <see cref="BexioConnectionHandler"/>. Tests are skipped automatically
-/// when the required environment variables (<c>BexioApiNet__BaseUri</c>,
-/// <c>BexioApiNet__JwtToken</c>, <c>BexioApiNet__ContactId</c>) are not configured.
+/// Live end-to-end tests for <see cref="AdditionalAddressService"/>. The tests are fully
+/// self-contained: they create a parent contact, exercise the additional address CRUD
+/// endpoints against it, and clean up both the additional address and the parent contact in
+/// <c>try/finally</c> blocks. Tests are skipped automatically when <c>BexioApiNet__BaseUri</c>
+/// or <c>BexioApiNet__JwtToken</c> are missing.
 /// </summary>
 [Category("E2E")]
 public sealed class AdditionalAddressServiceE2eTests
 {
+    private const int CompanyContactType = 1;
+
     private BexioConnectionHandler? _connectionHandler;
     private AdditionalAddressService? _service;
-    private int _contactId;
+    private ContactService? _contactService;
 
     /// <summary>
-    /// Reads credentials and a parent contact identifier from environment variables
-    /// and constructs the service under test. Calls <see cref="Assert.Ignore(string)"/>
-    /// when any value is missing so the suite stays green in environments without live
-    /// credentials.
+    /// Reads credentials from environment variables and constructs the services under test.
+    /// Calls <see cref="Assert.Ignore(string)"/> when any value is missing.
     /// </summary>
     [SetUp]
     public void Setup()
     {
         var baseUri = Environment.GetEnvironmentVariable("BexioApiNet__BaseUri");
         var jwtToken = Environment.GetEnvironmentVariable("BexioApiNet__JwtToken");
-        var contactIdRaw = Environment.GetEnvironmentVariable("BexioApiNet__ContactId");
 
-        if (string.IsNullOrWhiteSpace(baseUri) || string.IsNullOrWhiteSpace(jwtToken) || !int.TryParse(contactIdRaw, out _contactId))
+        if (string.IsNullOrWhiteSpace(baseUri) || string.IsNullOrWhiteSpace(jwtToken))
         {
-            Assert.Ignore("credentials or parent contact id not configured");
+            Assert.Ignore("credentials not configured");
             return;
         }
 
@@ -74,6 +73,7 @@ public sealed class AdditionalAddressServiceE2eTests
             });
 
         _service = new AdditionalAddressService(_connectionHandler);
+        _contactService = new ContactService(_connectionHandler);
     }
 
     /// <summary>
@@ -86,120 +86,102 @@ public sealed class AdditionalAddressServiceE2eTests
     }
 
     /// <summary>
-    /// Lists additional addresses attached to the configured parent contact.
+    /// Creates a parent contact, then lists, creates, reads, updates, searches, and deletes
+    /// an additional address against it — exercising the full CRUD lifecycle for the
+    /// nested resource. Both the additional address and the parent contact are cleaned up
+    /// in a nested <c>try/finally</c>.
     /// </summary>
     [Test]
-    public async Task Get_ListsAdditionalAddresses()
+    public async Task FullCrudLifecycle_OnNestedAdditionalAddress()
     {
-        var res = await _service!.Get(_contactId, new QueryParameterAdditionalAddress(Limit: 5, Offset: 0));
+        var ownerId = await ResolveOwnerIdAsync();
+        var contactName = $"E2E-AdditionalAddress-Parent-{DateTime.UtcNow:yyyyMMddHHmmssfff}";
 
-        Assert.That(res, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(res.IsSuccess, Is.True);
-            Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data, Is.Not.Null);
-        });
-    }
-
-    /// <summary>
-    /// Fetches the first listed additional address by identifier.
-    /// </summary>
-    [Test]
-    public async Task GetById_ReturnsAdditionalAddress()
-    {
-        var list = await _service!.Get(_contactId, new QueryParameterAdditionalAddress(Limit: 1, Offset: 0));
-        Assert.That(list.IsSuccess, Is.True);
-        Assert.That(list.Data, Is.Not.Null.And.Not.Empty);
-
-        var id = list.Data![0].Id;
-
-        var res = await _service!.GetById(_contactId, id);
-
-        Assert.That(res, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(res.IsSuccess, Is.True);
-            Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data?.Id, Is.EqualTo(id));
-        });
-    }
-
-    /// <summary>
-    /// Creates, updates, and deletes an additional address to exercise the full
-    /// write path in a single end-to-end scenario.
-    /// </summary>
-    [Test]
-    public async Task CreateUpdateDelete_RoundTripsAdditionalAddress()
-    {
-        var create = await _service!.Create(_contactId, new AdditionalAddressCreate(
-            Name: "E2E Additional Address",
-            NameAddition: null,
-            StreetName: "Test Street",
-            HouseNumber: "1",
-            AddressAddition: null,
-            Postcode: "8000",
-            City: "Zurich",
-            CountryId: 1,
-            Subject: "E2E",
-            Description: "Created by AdditionalAddressServiceE2eTests"));
-
-        Assert.That(create, Is.Not.Null);
-        Assert.That(create.IsSuccess, Is.True);
-        Assert.That(create.Data, Is.Not.Null);
-
-        var createdId = create.Data!.Id;
+        var contactResult = await _contactService!.Create(new ContactCreate(
+            ContactTypeId: CompanyContactType,
+            Name1: contactName,
+            UserId: ownerId,
+            OwnerId: ownerId));
+        Assert.That(contactResult.IsSuccess, Is.True, $"Parent contact create failed: {contactResult.ApiError?.Message}");
+        var parentContactId = contactResult.Data!.Id;
 
         try
         {
-            var update = await _service!.Update(_contactId, createdId, new AdditionalAddressUpdate(
-                Name: "E2E Additional Address (updated)",
+            // List (initially empty for a fresh contact).
+            var listEmpty = await _service!.Get(parentContactId);
+            Assert.That(listEmpty.IsSuccess, Is.True);
+            Assert.That(listEmpty.Data, Is.Not.Null);
+
+            // Create.
+            var create = await _service!.Create(parentContactId, new AdditionalAddressCreate(
+                Name: "E2E-Address",
                 NameAddition: null,
                 StreetName: "Test Street",
-                HouseNumber: "2",
+                HouseNumber: "1",
                 AddressAddition: null,
                 Postcode: "8000",
                 City: "Zurich",
                 CountryId: 1,
                 Subject: "E2E",
-                Description: "Updated by AdditionalAddressServiceE2eTests"));
+                Description: "Created by AdditionalAddressServiceE2eTests"));
+            Assert.That(create.IsSuccess, Is.True, $"Address create failed: {create.ApiError?.Message}");
+            Assert.That(create.Data, Is.Not.Null);
+            var addressId = create.Data!.Id;
 
-            Assert.That(update, Is.Not.Null);
-            Assert.Multiple(() =>
+            try
             {
+                // GetById.
+                var read = await _service.GetById(parentContactId, addressId);
+                Assert.That(read.IsSuccess, Is.True);
+                Assert.That(read.Data?.Id, Is.EqualTo(addressId));
+                Assert.That(read.Data?.Name, Is.EqualTo("E2E-Address"));
+
+                // Update.
+                var update = await _service.Update(parentContactId, addressId, new AdditionalAddressUpdate(
+                    Name: "E2E-Address-Updated",
+                    NameAddition: null,
+                    StreetName: "Test Street",
+                    HouseNumber: "2",
+                    AddressAddition: null,
+                    Postcode: "8000",
+                    City: "Zurich",
+                    CountryId: 1,
+                    Subject: "E2E",
+                    Description: "Updated by AdditionalAddressServiceE2eTests"));
                 Assert.That(update.IsSuccess, Is.True);
-                Assert.That(update.Data?.Id, Is.EqualTo(createdId));
-                Assert.That(update.Data?.Name, Does.Contain("updated"));
-            });
+                Assert.That(update.Data?.Name, Does.Contain("Updated"));
+
+                // Search.
+                var search = await _service.Search(
+                    parentContactId,
+                    new List<SearchCriteria>
+                    {
+                        new() { Field = "city", Value = "Zurich", Criteria = "=" }
+                    });
+                Assert.That(search.IsSuccess, Is.True);
+                Assert.That(search.Data, Is.Not.Null);
+            }
+            finally
+            {
+                var delete = await _service.Delete(parentContactId, addressId);
+                Assert.That(delete.IsSuccess, Is.True);
+            }
         }
         finally
         {
-            var delete = await _service!.Delete(_contactId, createdId);
-            Assert.That(delete.IsSuccess, Is.True);
+            await _contactService.Delete(parentContactId);
         }
     }
 
     /// <summary>
-    /// Searches additional addresses with a single criterion to confirm wire
-    /// compatibility with Bexio's search endpoint.
+    /// Probes the tenant for the first contact's owner id. Using an existing owner
+    /// keeps the test safe across tenants without hardcoding ids.
     /// </summary>
-    [Test]
-    public async Task Search_ReturnsMatchingAdditionalAddresses()
+    private async Task<int> ResolveOwnerIdAsync()
     {
-        var res = await _service!.Search(
-            _contactId,
-            new List<SearchCriteria>
-            {
-                new() { Field = "city", Value = "Zurich", Criteria = "=" }
-            },
-            new QueryParameterAdditionalAddress(Limit: 5, Offset: 0));
-
-        Assert.That(res, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(res.IsSuccess, Is.True);
-            Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data, Is.Not.Null);
-        });
+        var existing = await _contactService!.Get(new QueryParameterContact(Limit: 1));
+        return existing.IsSuccess && existing.Data is { Count: > 0 }
+            ? existing.Data[0].OwnerId
+            : 1;
     }
 }
