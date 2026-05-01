@@ -26,7 +26,7 @@ SOFTWARE.
 namespace BexioApiNet.Services.Connectors.Purchases;
 
 /// <summary>
-/// Purchase order endpoint configuration. Bexio <c>3.0/purchase/orders</c>.
+/// Purchase order endpoint configuration. Bexio <c>3.0/purchase_orders</c>.
 /// </summary>
 public static class PurchaseOrderConfiguration
 {
@@ -38,5 +38,5 @@ public static class PurchaseOrderConfiguration
     /// <summary>
     /// The request path for purchase order resources.
     /// </summary>
-    public const string EndpointRoot = "purchase/orders";
+    public const string EndpointRoot = "purchase_orders";
 }

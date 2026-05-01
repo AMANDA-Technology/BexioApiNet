@@ -73,7 +73,7 @@ public sealed class PurchaseOrderService : ConnectorService, IPurchaseOrderServi
     /// <inheritdoc />
     public async Task<ApiResult<PurchaseOrder>> Update(int id, PurchaseOrderUpdate purchaseOrder, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PostAsync<PurchaseOrder, PurchaseOrderUpdate>(purchaseOrder, $"{ApiVersion}/{EndpointRoot}/{id}", cancellationToken);
+        return await ConnectionHandler.PutAsync<PurchaseOrder, PurchaseOrderUpdate>(purchaseOrder, $"{ApiVersion}/{EndpointRoot}/{id}", cancellationToken);
     }
 
     /// <inheritdoc />

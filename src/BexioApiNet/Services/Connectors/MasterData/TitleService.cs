@@ -99,7 +99,7 @@ public sealed class TitleService : ConnectorService, ITitleService
     public async Task<ApiResult<Title>> Update(int id, TitleUpdate title,
         [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PutAsync<Title, TitleUpdate>(title, $"{ApiVersion}/{EndpointRoot}/{id}",
+        return await ConnectionHandler.PostAsync<Title, TitleUpdate>(title, $"{ApiVersion}/{EndpointRoot}/{id}",
             cancellationToken);
     }
 

@@ -103,7 +103,7 @@ public sealed class SalutationService : ConnectorService, ISalutationService
     public async Task<ApiResult<Salutation>> Update(int id, SalutationUpdate salutation,
         [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PutAsync<Salutation, SalutationUpdate>(salutation,
+        return await ConnectionHandler.PostAsync<Salutation, SalutationUpdate>(salutation,
             $"{ApiVersion}/{EndpointRoot}/{id}",
             cancellationToken);
     }

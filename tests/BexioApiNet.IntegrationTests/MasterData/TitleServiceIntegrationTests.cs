@@ -24,58 +24,60 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Models.Api;
-using BexioApiNet.Abstractions.Models.MasterData.Salutations.Views;
+using BexioApiNet.Abstractions.Models.MasterData.Titles.Views;
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.MasterData;
 
 namespace BexioApiNet.IntegrationTests.MasterData;
 
 /// <summary>
-///     Integration tests covering the CRUD entry points of <see cref="SalutationService" /> against
-///     WireMock stubs. Verifies the path composed from <see cref="SalutationConfiguration" />
-///     (<c>2.0/salutation</c>) reaches the handler correctly, that the expected HTTP verbs are used
-///     (the Bexio Salutations API uses <c>POST /2.0/salutation/{id}</c> for full-replacement edits per
+///     Integration tests covering the CRUD entry points of <see cref="TitleService" /> against
+///     WireMock stubs. Verifies the path composed from <see cref="TitleConfiguration" />
+///     (<c>2.0/title</c>) reaches the handler correctly, the expected HTTP verbs are used
+///     (the Bexio Titles API uses <c>POST /2.0/title/{id}</c> for full-replacement edits per
 ///     the v3.0.0 OpenAPI spec — see
-///     <see href="https://docs.bexio.com/#tag/Salutations/operation/v2EditSalutation" />),
-///     and that payloads round-trip through the canonical Salutation schema (<c>id</c> + <c>name</c>).
+///     <see href="https://docs.bexio.com/#tag/Titles/operation/v2EditTitle" />),
+///     pagination + ordering query parameters round-trip through
+///     <see cref="QueryParameterTitle" />, and payloads round-trip through the canonical Title
+///     schema (<c>id</c> + <c>name</c>).
 /// </summary>
-public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
+public sealed class TitleServiceIntegrationTests : IntegrationTestBase
 {
-    private const string SalutationPath = "/2.0/salutation";
+    private const string TitlePath = "/2.0/title";
 
-    private const string SalutationResponse = """
-                                              {
-                                                  "id": 1,
-                                                  "name": "Herr"
-                                              }
-                                              """;
+    private const string TitleResponse = """
+                                         {
+                                             "id": 1,
+                                             "name": "Dr."
+                                         }
+                                         """;
 
-    private const string SalutationListResponse = """
-                                                  [
-                                                      {
-                                                          "id": 1,
-                                                          "name": "Herr"
-                                                      },
-                                                      {
-                                                          "id": 2,
-                                                          "name": "Frau"
-                                                      }
-                                                  ]
-                                                  """;
+    private const string TitleListResponse = """
+                                             [
+                                                 {
+                                                     "id": 1,
+                                                     "name": "Dr."
+                                                 },
+                                                 {
+                                                     "id": 2,
+                                                     "name": "Prof."
+                                                 }
+                                             ]
+                                             """;
 
     /// <summary>
-    ///     <c>SalutationService.Get()</c> issues a <c>GET</c> request against
-    ///     <c>/2.0/salutation</c> and deserializes the array of salutations into the
-    ///     canonical <see cref="BexioApiNet.Abstractions.Models.MasterData.Salutations.Salutation" /> records.
+    ///     <c>TitleService.Get()</c> issues a <c>GET</c> request against
+    ///     <c>/2.0/title</c> and deserializes the array of titles into the canonical
+    ///     <see cref="BexioApiNet.Abstractions.Models.MasterData.Titles.Title" /> records.
     /// </summary>
     [Test]
-    public async Task SalutationService_Get_SendsGetRequest_DeserializesList()
+    public async Task TitleService_Get_SendsGetRequest_DeserializesList()
     {
         Server
-            .Given(Request.Create().WithPath(SalutationPath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody(SalutationListResponse));
+            .Given(Request.Create().WithPath(TitlePath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(TitleListResponse));
 
-        var service = new SalutationService(ConnectionHandler);
+        var service = new TitleService(ConnectionHandler);
 
         var result = await service.Get(cancellationToken: TestContext.CurrentContext.CancellationToken);
 
@@ -85,31 +87,32 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
-            Assert.That(request.AbsolutePath, Is.EqualTo(SalutationPath));
+            Assert.That(request.AbsolutePath, Is.EqualTo(TitlePath));
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data, Has.Count.EqualTo(2));
             Assert.That(result.Data![0].Id, Is.EqualTo(1));
-            Assert.That(result.Data[0].Name, Is.EqualTo("Herr"));
+            Assert.That(result.Data[0].Name, Is.EqualTo("Dr."));
             Assert.That(result.Data[1].Id, Is.EqualTo(2));
-            Assert.That(result.Data[1].Name, Is.EqualTo("Frau"));
+            Assert.That(result.Data[1].Name, Is.EqualTo("Prof."));
         });
     }
 
     /// <summary>
-    ///     <c>SalutationService.Get()</c> appends the supplied
-    ///     <see cref="QueryParameterSalutation" /> values (<c>limit</c>, <c>offset</c>) to the URL.
+    ///     <c>TitleService.Get()</c> appends the supplied <see cref="QueryParameterTitle" />
+    ///     values (<c>limit</c>, <c>offset</c>, <c>order_by</c>) to the URL exactly as named by
+    ///     the Bexio API.
     /// </summary>
     [Test]
-    public async Task SalutationService_Get_WithQueryParameter_AppendsLimitAndOffset()
+    public async Task TitleService_Get_WithQueryParameter_AppendsLimitOffsetOrderBy()
     {
         Server
-            .Given(Request.Create().WithPath(SalutationPath).UsingGet())
+            .Given(Request.Create().WithPath(TitlePath).UsingGet())
             .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
 
-        var service = new SalutationService(ConnectionHandler);
+        var service = new TitleService(ConnectionHandler);
 
         var result = await service.Get(
-            new QueryParameterSalutation(50, 100),
+            new QueryParameterTitle(limit: 50, offset: 100, orderBy: "name_desc"),
             cancellationToken: TestContext.CurrentContext.CancellationToken);
 
         var request = Server.LogEntries.Last().RequestMessage!;
@@ -119,24 +122,25 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Url, Does.Contain("limit=50"));
             Assert.That(request.Url, Does.Contain("offset=100"));
+            Assert.That(request.Url, Does.Contain("order_by=name_desc"));
         });
     }
 
     /// <summary>
-    ///     <c>SalutationService.GetById</c> issues a <c>GET</c> request that includes the target
-    ///     id in the URL path and surfaces the returned salutation on success.
+    ///     <c>TitleService.GetById</c> issues a <c>GET</c> request that includes the target
+    ///     id in the URL path and surfaces the returned title on success.
     /// </summary>
     [Test]
-    public async Task SalutationService_GetById_SendsGetRequest()
+    public async Task TitleService_GetById_SendsGetRequest()
     {
         const int id = 1;
-        var expectedPath = $"{SalutationPath}/{id}";
+        var expectedPath = $"{TitlePath}/{id}";
 
         Server
             .Given(Request.Create().WithPath(expectedPath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody(SalutationResponse));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(TitleResponse));
 
-        var service = new SalutationService(ConnectionHandler);
+        var service = new TitleService(ConnectionHandler);
 
         var result = await service.GetById(id, TestContext.CurrentContext.CancellationToken);
 
@@ -147,27 +151,27 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Id, Is.EqualTo(id));
-            Assert.That(result.Data.Name, Is.EqualTo("Herr"));
+            Assert.That(result.Data.Name, Is.EqualTo("Dr."));
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
         });
     }
 
     /// <summary>
-    ///     <c>SalutationService.Create</c> sends a <c>POST</c> request whose body is the
-    ///     serialized <see cref="SalutationCreate" /> payload and surfaces the returned salutation
+    ///     <c>TitleService.Create</c> sends a <c>POST</c> request whose body is the
+    ///     serialized <see cref="TitleCreate" /> payload and surfaces the returned title
     ///     on success.
     /// </summary>
     [Test]
-    public async Task SalutationService_Create_SendsPostRequest()
+    public async Task TitleService_Create_SendsPostRequest()
     {
         Server
-            .Given(Request.Create().WithPath(SalutationPath).UsingPost())
-            .RespondWith(Response.Create().WithStatusCode(201).WithBody(SalutationResponse));
+            .Given(Request.Create().WithPath(TitlePath).UsingPost())
+            .RespondWith(Response.Create().WithStatusCode(201).WithBody(TitleResponse));
 
-        var service = new SalutationService(ConnectionHandler);
+        var service = new TitleService(ConnectionHandler);
 
-        var payload = new SalutationCreate("Herr");
+        var payload = new TitleCreate("Dr.");
 
         var result = await service.Create(payload, TestContext.CurrentContext.CancellationToken);
 
@@ -178,32 +182,32 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Id, Is.EqualTo(1));
-            Assert.That(result.Data.Name, Is.EqualTo("Herr"));
+            Assert.That(result.Data.Name, Is.EqualTo("Dr."));
             Assert.That(request.Method, Is.EqualTo("POST"));
-            Assert.That(request.AbsolutePath, Is.EqualTo(SalutationPath));
-            Assert.That(request.Body, Does.Contain("\"name\":\"Herr\""));
+            Assert.That(request.AbsolutePath, Is.EqualTo(TitlePath));
+            Assert.That(request.Body, Does.Contain("\"name\":\"Dr.\""));
         });
     }
 
     /// <summary>
-    ///     <c>SalutationService.Search</c> sends a <c>POST</c> request against
-    ///     <c>/2.0/salutation/search</c> with the <see cref="SearchCriteria" /> list as the JSON body
+    ///     <c>TitleService.Search</c> sends a <c>POST</c> request against
+    ///     <c>/2.0/title/search</c> with the <see cref="SearchCriteria" /> list as the JSON body
     ///     and deserializes the returned array of matches.
     /// </summary>
     [Test]
-    public async Task SalutationService_Search_SendsPostRequest_ToSearchPath()
+    public async Task TitleService_Search_SendsPostRequest_ToSearchPath()
     {
-        var expectedPath = $"{SalutationPath}/search";
+        var expectedPath = $"{TitlePath}/search";
 
         Server
             .Given(Request.Create().WithPath(expectedPath).UsingPost())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody(SalutationListResponse));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(TitleListResponse));
 
-        var service = new SalutationService(ConnectionHandler);
+        var service = new TitleService(ConnectionHandler);
 
         var criteria = new List<SearchCriteria>
         {
-            new() { Field = "name", Value = "Herr", Criteria = "like" }
+            new() { Field = "name", Value = "Dr.", Criteria = "like" }
         };
 
         var result = await service.Search(criteria, cancellationToken: TestContext.CurrentContext.CancellationToken);
@@ -222,23 +226,23 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>SalutationService.Update</c> sends a <c>POST</c> request against
-    ///     <c>/2.0/salutation/{id}</c>. The Bexio Salutations API uses <c>POST</c> (not <c>PUT</c>)
+    ///     <c>TitleService.Update</c> sends a <c>POST</c> request against
+    ///     <c>/2.0/title/{id}</c>. The Bexio Titles API uses <c>POST</c> (not <c>PUT</c>)
     ///     for full-replacement edits per the v3.0.0 OpenAPI spec.
     /// </summary>
     [Test]
-    public async Task SalutationService_Update_SendsPostRequest_WithIdInPath()
+    public async Task TitleService_Update_SendsPostRequest_WithIdInPath()
     {
         const int id = 1;
-        var expectedPath = $"{SalutationPath}/{id}";
+        var expectedPath = $"{TitlePath}/{id}";
 
         Server
             .Given(Request.Create().WithPath(expectedPath).UsingPost())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody(SalutationResponse));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(TitleResponse));
 
-        var service = new SalutationService(ConnectionHandler);
+        var service = new TitleService(ConnectionHandler);
 
-        var payload = new SalutationUpdate("Frau");
+        var payload = new TitleUpdate("Prof.");
 
         var result = await service.Update(id, payload, TestContext.CurrentContext.CancellationToken);
 
@@ -251,25 +255,25 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.Data!.Id, Is.EqualTo(id));
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
-            Assert.That(request.Body, Does.Contain("\"name\":\"Frau\""));
+            Assert.That(request.Body, Does.Contain("\"name\":\"Prof.\""));
         });
     }
 
     /// <summary>
-    ///     <c>SalutationService.Delete</c> issues a <c>DELETE</c> request that includes the
+    ///     <c>TitleService.Delete</c> issues a <c>DELETE</c> request that includes the
     ///     target id in the URL path and parses the <c>{"success":true}</c> success body.
     /// </summary>
     [Test]
-    public async Task SalutationService_Delete_SendsDeleteRequest()
+    public async Task TitleService_Delete_SendsDeleteRequest()
     {
         const int idToDelete = 1;
-        var expectedPath = $"{SalutationPath}/{idToDelete}";
+        var expectedPath = $"{TitlePath}/{idToDelete}";
 
         Server
             .Given(Request.Create().WithPath(expectedPath).UsingDelete())
             .RespondWith(Response.Create().WithStatusCode(200).WithBody("{\"success\":true}"));
 
-        var service = new SalutationService(ConnectionHandler);
+        var service = new TitleService(ConnectionHandler);
 
         var result = await service.Delete(idToDelete, TestContext.CurrentContext.CancellationToken);
 
