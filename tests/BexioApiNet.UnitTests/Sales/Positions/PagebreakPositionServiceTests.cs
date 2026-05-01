@@ -34,13 +34,15 @@ namespace BexioApiNet.UnitTests.Sales.Positions;
 
 /// <summary>
 /// Offline unit tests for <see cref="PagebreakPositionService"/>. Each test verifies that the
-/// service forwards its calls to <see cref="IBexioConnectionHandler"/> with the expected path and
-/// arguments, and returns the handler's result unchanged. No network, no filesystem access.
+/// service forwards its calls to <see cref="IBexioConnectionHandler"/> with the expected path —
+/// including the <c>kb_position_pagebreak</c> URL segment — and arguments, and returns the
+/// handler's result unchanged. Includes parametrized cases over the three supported document
+/// types (<c>kb_offer</c>, <c>kb_order</c>, <c>kb_invoice</c>) per the OpenAPI spec. No network,
+/// no filesystem access.
 /// </summary>
 [TestFixture]
 public sealed class PagebreakPositionServiceTests : ServiceTestBase
 {
-    private const string DocumentType = KbDocumentType.Order;
     private const int DocumentId = 5;
     private const int PositionId = 9;
 
@@ -53,14 +55,14 @@ public sealed class PagebreakPositionServiceTests : ServiceTestBase
         _sut = new PagebreakPositionService(ConnectionHandler);
     }
 
-    private static string ExpectedBasePath => $"2.0/{DocumentType}/{DocumentId}/kb_position_pagebreak";
-
     /// <summary>
     /// Get calls <see cref="IBexioConnectionHandler.GetAsync{TResult}"/> once with the expected
-    /// position-list path and a null query parameter.
+    /// position-list path and a null query parameter, for each supported document type.
     /// </summary>
-    [Test]
-    public async Task Get_CallsGetAsync_WithExpectedPath()
+    [TestCase(KbDocumentType.Offer)]
+    [TestCase(KbDocumentType.Order)]
+    [TestCase(KbDocumentType.Invoice)]
+    public async Task Get_CallsGetAsync_WithExpectedPath(string documentType)
     {
         var response = new ApiResult<List<PositionPagebreak>> { IsSuccess = true, Data = [] };
         ConnectionHandler
@@ -70,10 +72,10 @@ public sealed class PagebreakPositionServiceTests : ServiceTestBase
                 Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Get(DocumentType, DocumentId);
+        await _sut.Get(documentType, DocumentId);
 
         await ConnectionHandler.Received(1).GetAsync<List<PositionPagebreak>>(
-            ExpectedBasePath,
+            $"2.0/{documentType}/{DocumentId}/kb_position_pagebreak",
             null,
             Arg.Any<CancellationToken>());
     }
@@ -92,7 +94,7 @@ public sealed class PagebreakPositionServiceTests : ServiceTestBase
                 Arg.Any<CancellationToken>())
             .Returns(response);
 
-        var result = await _sut.Get(DocumentType, DocumentId);
+        var result = await _sut.Get(KbDocumentType.Order, DocumentId);
 
         Assert.That(result, Is.SameAs(response));
     }
@@ -105,17 +107,38 @@ public sealed class PagebreakPositionServiceTests : ServiceTestBase
     public async Task GetById_CallsGetAsync_WithPositionIdInPath()
     {
         var response = new ApiResult<PositionPagebreak> { IsSuccess = true };
-        string? capturedPath = null;
         ConnectionHandler
             .GetAsync<PositionPagebreak>(
-                Arg.Do<string>(p => capturedPath = p),
+                Arg.Any<string>(),
                 Arg.Any<QueryParameter?>(),
                 Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.GetById(DocumentType, DocumentId, PositionId);
+        await _sut.GetById(KbDocumentType.Order, DocumentId, PositionId);
 
-        Assert.That(capturedPath, Is.EqualTo($"{ExpectedBasePath}/{PositionId}"));
+        await ConnectionHandler.Received(1).GetAsync<PositionPagebreak>(
+            $"2.0/{KbDocumentType.Order}/{DocumentId}/kb_position_pagebreak/{PositionId}",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// GetById returns the <see cref="ApiResult{T}"/> produced by the connection handler.
+    /// </summary>
+    [Test]
+    public async Task GetById_ReturnsApiResult()
+    {
+        var response = new ApiResult<PositionPagebreak> { IsSuccess = true };
+        ConnectionHandler
+            .GetAsync<PositionPagebreak>(
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.GetById(KbDocumentType.Order, DocumentId, PositionId);
+
+        Assert.That(result, Is.SameAs(response));
     }
 
     /// <summary>
@@ -127,22 +150,39 @@ public sealed class PagebreakPositionServiceTests : ServiceTestBase
     {
         var payload = new PositionPagebreakCreate(Pagebreak: true);
         var response = new ApiResult<PositionPagebreak> { IsSuccess = true };
-        PositionPagebreakCreate? capturedPayload = null;
-        string? capturedPath = null;
         ConnectionHandler
             .PostAsync<PositionPagebreak, PositionPagebreakCreate>(
-                Arg.Do<PositionPagebreakCreate>(p => capturedPayload = p),
-                Arg.Do<string>(p => capturedPath = p),
+                Arg.Any<PositionPagebreakCreate>(),
+                Arg.Any<string>(),
                 Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Create(DocumentType, DocumentId, payload);
+        await _sut.Create(KbDocumentType.Order, DocumentId, payload);
 
-        Assert.Multiple(() =>
-        {
-            Assert.That(capturedPath, Is.EqualTo(ExpectedBasePath));
-            Assert.That(capturedPayload, Is.SameAs(payload));
-        });
+        await ConnectionHandler.Received(1).PostAsync<PositionPagebreak, PositionPagebreakCreate>(
+            payload,
+            $"2.0/{KbDocumentType.Order}/{DocumentId}/kb_position_pagebreak",
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Create returns the <see cref="ApiResult{T}"/> produced by the connection handler.
+    /// </summary>
+    [Test]
+    public async Task Create_ReturnsApiResult()
+    {
+        var payload = new PositionPagebreakCreate(Pagebreak: true);
+        var response = new ApiResult<PositionPagebreak> { IsSuccess = true };
+        ConnectionHandler
+            .PostAsync<PositionPagebreak, PositionPagebreakCreate>(
+                Arg.Any<PositionPagebreakCreate>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Create(KbDocumentType.Order, DocumentId, payload);
+
+        Assert.That(result, Is.SameAs(response));
     }
 
     /// <summary>
@@ -154,17 +194,19 @@ public sealed class PagebreakPositionServiceTests : ServiceTestBase
     {
         var payload = new PositionPagebreakUpdate(Pagebreak: true);
         var response = new ApiResult<PositionPagebreak> { IsSuccess = true };
-        string? capturedPath = null;
         ConnectionHandler
             .PostAsync<PositionPagebreak, PositionPagebreakUpdate>(
                 Arg.Any<PositionPagebreakUpdate>(),
-                Arg.Do<string>(p => capturedPath = p),
+                Arg.Any<string>(),
                 Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Update(DocumentType, DocumentId, PositionId, payload);
+        await _sut.Update(KbDocumentType.Order, DocumentId, PositionId, payload);
 
-        Assert.That(capturedPath, Is.EqualTo($"{ExpectedBasePath}/{PositionId}"));
+        await ConnectionHandler.Received(1).PostAsync<PositionPagebreak, PositionPagebreakUpdate>(
+            payload,
+            $"2.0/{KbDocumentType.Order}/{DocumentId}/kb_position_pagebreak/{PositionId}",
+            Arg.Any<CancellationToken>());
     }
 
     /// <summary>
@@ -175,15 +217,34 @@ public sealed class PagebreakPositionServiceTests : ServiceTestBase
     public async Task Delete_CallsDelete_WithPositionIdInPath()
     {
         var response = new ApiResult<object> { IsSuccess = true };
-        string? capturedPath = null;
         ConnectionHandler
             .Delete(
-                Arg.Do<string>(p => capturedPath = p),
+                Arg.Any<string>(),
                 Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Delete(DocumentType, DocumentId, PositionId);
+        await _sut.Delete(KbDocumentType.Order, DocumentId, PositionId);
 
-        Assert.That(capturedPath, Is.EqualTo($"{ExpectedBasePath}/{PositionId}"));
+        await ConnectionHandler.Received(1).Delete(
+            $"2.0/{KbDocumentType.Order}/{DocumentId}/kb_position_pagebreak/{PositionId}",
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Delete returns the <see cref="ApiResult{T}"/> produced by the connection handler.
+    /// </summary>
+    [Test]
+    public async Task Delete_ReturnsApiResult()
+    {
+        var response = new ApiResult<object> { IsSuccess = true };
+        ConnectionHandler
+            .Delete(
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Delete(KbDocumentType.Order, DocumentId, PositionId);
+
+        Assert.That(result, Is.SameAs(response));
     }
 }

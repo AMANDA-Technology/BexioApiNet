@@ -26,11 +26,14 @@ SOFTWARE.
 using System.Runtime.InteropServices;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Positions;
+using BexioApiNet.Abstractions.Models.Sales.Positions.Views;
 
 namespace BexioApiNet.Interfaces.Connectors.Sales.Positions;
 
 /// <summary>
-///     Service for Bexio document discount positions.
+///     Service for Bexio document discount positions. Discount positions are accessed via
+///     <c>/2.0/{kb_document_type}/{document_id}/kb_position_discount</c>.
+///     Supported document types: <c>kb_invoice</c>, <c>kb_offer</c>, <c>kb_order</c>.
 ///     <see href="https://docs.bexio.com/#tag/Discount-positions" />
 /// </summary>
 public interface IDiscountPositionService
@@ -64,10 +67,10 @@ public interface IDiscountPositionService
     /// </summary>
     /// <param name="documentType">The Bexio document type segment.</param>
     /// <param name="documentId">The parent document identifier.</param>
-    /// <param name="position">The discount position to create.</param>
+    /// <param name="position">The discount position payload.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}" /> wrapping the created discount position.</returns>
-    public Task<ApiResult<PositionDiscount>> Create(string documentType, int documentId, PositionDiscount position,
+    public Task<ApiResult<PositionDiscount>> Create(string documentType, int documentId, PositionDiscountCreate position,
         [Optional] CancellationToken cancellationToken);
 
     /// <summary>
@@ -82,7 +85,7 @@ public interface IDiscountPositionService
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}" /> wrapping the updated discount position.</returns>
     public Task<ApiResult<PositionDiscount>> Update(string documentType, int documentId, int positionId,
-        PositionDiscount position, [Optional] CancellationToken cancellationToken);
+        PositionDiscountCreate position, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
     ///     Delete a discount position.

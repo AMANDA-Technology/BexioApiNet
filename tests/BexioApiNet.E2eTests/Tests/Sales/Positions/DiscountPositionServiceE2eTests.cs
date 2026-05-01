@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Enums.Sales;
+
 namespace BexioApiNet.E2eTests.Tests.Sales.Positions;
 
 /// <summary>
@@ -31,13 +33,14 @@ namespace BexioApiNet.E2eTests.Tests.Sales.Positions;
 /// environment variables (<c>BexioApiNet__BaseUri</c>, <c>BexioApiNet__JwtToken</c>) are absent.
 /// Mutating operations (create / update / delete) are intentionally omitted to avoid leaving
 /// orphaned positions on the live tenant — they are covered offline by the integration suite.
+/// Tests structurally validate the JSON payload deserializes into <c>PositionDiscount</c> per
+/// the OpenAPI <c>PositionDiscountExtended</c> schema.
 /// </summary>
 [Category("E2E")]
 public sealed class DiscountPositionServiceE2eTests : BexioE2eTestBase
 {
     /// <summary>
-    /// Verifies that <see cref="IBexioApiClient.SalesDiscountPositions"/> is non-null after
-    /// construction — confirms the service is wired up correctly via DI.
+    /// Verifies <see cref="IBexioApiClient.SalesDiscountPositions"/> is registered correctly via DI.
     /// </summary>
     [Test]
     public void SalesDiscountPositions_IsNotNull()
@@ -47,11 +50,12 @@ public sealed class DiscountPositionServiceE2eTests : BexioE2eTestBase
     }
 
     /// <summary>
-    /// Lists discount positions for the first available invoice and asserts the request round-trips
-    /// successfully. Skipped when no invoices exist on the tenant.
+    /// Lists discount positions for the first available invoice and asserts the request
+    /// round-trips successfully. Where positions exist, asserts each position has the
+    /// <c>KbPositionDiscount</c> discriminator per the OpenAPI schema.
     /// </summary>
     [Test]
-    public async Task GetAll_ReturnsDiscountPositions()
+    public async Task GetAll_ReturnsDiscountPositions_FromInvoice()
     {
         Assert.That(BexioApiClient, Is.Not.Null);
 
@@ -64,12 +68,81 @@ public sealed class DiscountPositionServiceE2eTests : BexioE2eTestBase
             return;
         }
 
-        var result = await BexioApiClient.SalesDiscountPositions.GetAll("kb_invoice", existingInvoices[0].Id!);
+        var result = await BexioApiClient.SalesDiscountPositions.GetAll(KbDocumentType.Invoice, existingInvoices[0].Id!);
 
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null);
+        });
+
+        if (result.Data is { Count: > 0 } positions)
+        {
+            Assert.Multiple(() =>
+            {
+                foreach (var position in positions)
+                {
+                    Assert.That(position.Type, Is.EqualTo("KbPositionDiscount"));
+                    Assert.That(position.Id, Is.Not.Null);
+                }
+            });
+        }
+    }
+
+    /// <summary>
+    /// Lists discount positions for the first available quote and verifies the OpenAPI schema
+    /// applies for the <c>kb_offer</c> document type as well.
+    /// </summary>
+    [Test]
+    public async Task GetAll_ReturnsDiscountPositions_FromQuote()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var quotes = await BexioApiClient!.Quotes.Get();
+        Assert.That(quotes.IsSuccess, Is.True);
+
+        if (quotes.Data is not { Count: > 0 } existing)
+        {
+            Assert.Ignore("no quotes available on this tenant");
+            return;
+        }
+
+        var result = await BexioApiClient.SalesDiscountPositions.GetAll(KbDocumentType.Offer, existing[0].Id);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null);
+        });
+    }
+
+    /// <summary>
+    /// Lists discount positions for the first available order and verifies the OpenAPI schema
+    /// applies for the <c>kb_order</c> document type as well.
+    /// </summary>
+    [Test]
+    public async Task GetAll_ReturnsDiscountPositions_FromOrder()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var orders = await BexioApiClient!.Orders.Get();
+        Assert.That(orders.IsSuccess, Is.True);
+
+        if (orders.Data is not { Count: > 0 } existing)
+        {
+            Assert.Ignore("no orders available on this tenant");
+            return;
+        }
+
+        var result = await BexioApiClient.SalesDiscountPositions.GetAll(KbDocumentType.Order, existing[0].Id);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null);
         });
     }
 }

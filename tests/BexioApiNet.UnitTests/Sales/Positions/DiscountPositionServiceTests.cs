@@ -23,8 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Enums.Sales;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Positions;
+using BexioApiNet.Abstractions.Models.Sales.Positions.Views;
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Sales.Positions;
 
@@ -33,16 +35,16 @@ namespace BexioApiNet.UnitTests.Sales.Positions;
 /// <summary>
 /// Offline unit tests for <see cref="DiscountPositionService"/>. Each test verifies that the
 /// service forwards its calls to <see cref="IBexioConnectionHandler"/> with the expected arguments
-/// and returns the handler's result unchanged. No network, no filesystem access.
+/// — in particular the <c>kb_position_discount</c> URL segment — and returns the handler's
+/// result unchanged. Includes parametrized cases over the three supported document types
+/// (<c>kb_offer</c>, <c>kb_order</c>, <c>kb_invoice</c>) per the OpenAPI spec. No network,
+/// no filesystem access.
 /// </summary>
 [TestFixture]
 public sealed class DiscountPositionServiceTests : ServiceTestBase
 {
-    private const string DocumentType = "kb_invoice";
     private const int DocumentId = 1;
     private const int PositionId = 10;
-    private const string ExpectedListPath = $"2.0/{DocumentType}/1/kb_position_discount";
-    private const string ExpectedSinglePath = $"2.0/{DocumentType}/1/kb_position_discount/10";
 
     private DiscountPositionService _sut = null!;
 
@@ -58,20 +60,22 @@ public sealed class DiscountPositionServiceTests : ServiceTestBase
 
     /// <summary>
     /// GetAll calls <see cref="IBexioConnectionHandler.GetAsync{TResult}"/> once with the
-    /// expected list endpoint path and a null query parameter.
+    /// expected list endpoint path and a null query parameter, for each supported document type.
     /// </summary>
-    [Test]
-    public async Task GetAll_CallsGetAsync_WithExpectedPath()
+    [TestCase(KbDocumentType.Offer)]
+    [TestCase(KbDocumentType.Order)]
+    [TestCase(KbDocumentType.Invoice)]
+    public async Task GetAll_CallsGetAsync_WithExpectedPath(string documentType)
     {
         var response = new ApiResult<List<PositionDiscount>> { IsSuccess = true, Data = [] };
         ConnectionHandler
             .GetAsync<List<PositionDiscount>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.GetAll(DocumentType, DocumentId);
+        await _sut.GetAll(documentType, DocumentId);
 
         await ConnectionHandler.Received(1).GetAsync<List<PositionDiscount>>(
-            ExpectedListPath,
+            $"2.0/{documentType}/{DocumentId}/kb_position_discount",
             null,
             Arg.Any<CancellationToken>());
     }
@@ -87,7 +91,7 @@ public sealed class DiscountPositionServiceTests : ServiceTestBase
             .GetAsync<List<PositionDiscount>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        var result = await _sut.GetAll(DocumentType, DocumentId);
+        var result = await _sut.GetAll(KbDocumentType.Invoice, DocumentId);
 
         Assert.That(result, Is.SameAs(response));
     }
@@ -100,14 +104,32 @@ public sealed class DiscountPositionServiceTests : ServiceTestBase
     public async Task GetById_CallsGetAsync_WithIdInPath()
     {
         var response = new ApiResult<PositionDiscount> { IsSuccess = true };
-        string? capturedPath = null;
         ConnectionHandler
-            .GetAsync<PositionDiscount>(Arg.Do<string>(p => capturedPath = p), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .GetAsync<PositionDiscount>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.GetById(DocumentType, DocumentId, PositionId);
+        await _sut.GetById(KbDocumentType.Invoice, DocumentId, PositionId);
 
-        Assert.That(capturedPath, Is.EqualTo(ExpectedSinglePath));
+        await ConnectionHandler.Received(1).GetAsync<PositionDiscount>(
+            $"2.0/{KbDocumentType.Invoice}/{DocumentId}/kb_position_discount/{PositionId}",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// GetById returns the <see cref="ApiResult{T}"/> produced by the connection handler.
+    /// </summary>
+    [Test]
+    public async Task GetById_ReturnsApiResult()
+    {
+        var response = new ApiResult<PositionDiscount> { IsSuccess = true };
+        ConnectionHandler
+            .GetAsync<PositionDiscount>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.GetById(KbDocumentType.Invoice, DocumentId, PositionId);
+
+        Assert.That(result, Is.SameAs(response));
     }
 
     /// <summary>
@@ -117,18 +139,35 @@ public sealed class DiscountPositionServiceTests : ServiceTestBase
     [Test]
     public async Task Create_CallsPostAsync_WithExpectedPath()
     {
-        var payload = new PositionDiscount { Text = "10% discount", IsPercentual = true, Value = "10.000000" };
+        var payload = new PositionDiscountCreate(Text: "10% discount", IsPercentual: true, Value: "10.000000");
         var response = new ApiResult<PositionDiscount> { IsSuccess = true };
         ConnectionHandler
-            .PostAsync<PositionDiscount, PositionDiscount>(Arg.Any<PositionDiscount>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .PostAsync<PositionDiscount, PositionDiscountCreate>(Arg.Any<PositionDiscountCreate>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Create(DocumentType, DocumentId, payload);
+        await _sut.Create(KbDocumentType.Invoice, DocumentId, payload);
 
-        await ConnectionHandler.Received(1).PostAsync<PositionDiscount, PositionDiscount>(
+        await ConnectionHandler.Received(1).PostAsync<PositionDiscount, PositionDiscountCreate>(
             payload,
-            ExpectedListPath,
+            $"2.0/{KbDocumentType.Invoice}/{DocumentId}/kb_position_discount",
             Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Create returns the <see cref="ApiResult{T}"/> produced by the connection handler.
+    /// </summary>
+    [Test]
+    public async Task Create_ReturnsApiResult()
+    {
+        var payload = new PositionDiscountCreate(Text: "5%", IsPercentual: true, Value: "5.000000");
+        var response = new ApiResult<PositionDiscount> { IsSuccess = true };
+        ConnectionHandler
+            .PostAsync<PositionDiscount, PositionDiscountCreate>(Arg.Any<PositionDiscountCreate>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Create(KbDocumentType.Invoice, DocumentId, payload);
+
+        Assert.That(result, Is.SameAs(response));
     }
 
     /// <summary>
@@ -138,16 +177,18 @@ public sealed class DiscountPositionServiceTests : ServiceTestBase
     [Test]
     public async Task Update_CallsPostAsync_WithIdInPath()
     {
-        var payload = new PositionDiscount { Text = "5% discount", IsPercentual = true, Value = "5.000000" };
+        var payload = new PositionDiscountCreate(Text: "5% discount", IsPercentual: true, Value: "5.000000");
         var response = new ApiResult<PositionDiscount> { IsSuccess = true };
-        string? capturedPath = null;
         ConnectionHandler
-            .PostAsync<PositionDiscount, PositionDiscount>(Arg.Any<PositionDiscount>(), Arg.Do<string>(p => capturedPath = p), Arg.Any<CancellationToken>())
+            .PostAsync<PositionDiscount, PositionDiscountCreate>(Arg.Any<PositionDiscountCreate>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Update(DocumentType, DocumentId, PositionId, payload);
+        await _sut.Update(KbDocumentType.Invoice, DocumentId, PositionId, payload);
 
-        Assert.That(capturedPath, Is.EqualTo(ExpectedSinglePath));
+        await ConnectionHandler.Received(1).PostAsync<PositionDiscount, PositionDiscountCreate>(
+            payload,
+            $"2.0/{KbDocumentType.Invoice}/{DocumentId}/kb_position_discount/{PositionId}",
+            Arg.Any<CancellationToken>());
     }
 
     /// <summary>
@@ -158,13 +199,30 @@ public sealed class DiscountPositionServiceTests : ServiceTestBase
     public async Task Delete_CallsDelete_WithIdInPath()
     {
         var response = new ApiResult<object> { IsSuccess = true };
-        string? capturedPath = null;
         ConnectionHandler
-            .Delete(Arg.Do<string>(p => capturedPath = p), Arg.Any<CancellationToken>())
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Delete(DocumentType, DocumentId, PositionId);
+        await _sut.Delete(KbDocumentType.Invoice, DocumentId, PositionId);
 
-        Assert.That(capturedPath, Is.EqualTo(ExpectedSinglePath));
+        await ConnectionHandler.Received(1).Delete(
+            $"2.0/{KbDocumentType.Invoice}/{DocumentId}/kb_position_discount/{PositionId}",
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Delete returns the <see cref="ApiResult{T}"/> produced by the connection handler.
+    /// </summary>
+    [Test]
+    public async Task Delete_ReturnsApiResult()
+    {
+        var response = new ApiResult<object> { IsSuccess = true };
+        ConnectionHandler
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Delete(KbDocumentType.Invoice, DocumentId, PositionId);
+
+        Assert.That(result, Is.SameAs(response));
     }
 }
