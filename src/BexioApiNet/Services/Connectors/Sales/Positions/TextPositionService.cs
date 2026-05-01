@@ -26,6 +26,7 @@ SOFTWARE.
 using System.Runtime.InteropServices;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Positions;
+using BexioApiNet.Abstractions.Models.Sales.Positions.Views;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 using BexioApiNet.Services.Connectors.Base;
@@ -35,6 +36,9 @@ namespace BexioApiNet.Services.Connectors.Sales.Positions;
 /// <inheritdoc cref="ITextPositionService" />
 public sealed class TextPositionService : PositionService, ITextPositionService
 {
+    /// <inheritdoc />
+    protected override string PositionType => "kb_position_text";
+
     /// <summary>
     ///     Initializes a new instance of the <see cref="TextPositionService" /> class.
     /// </summary>
@@ -45,41 +49,28 @@ public sealed class TextPositionService : PositionService, ITextPositionService
     }
 
     /// <inheritdoc />
-    protected override string PositionType => "kb_position_text";
-
-    /// <inheritdoc />
     public Task<ApiResult<List<PositionText>>> GetAll(string documentType, int documentId,
         [Optional] CancellationToken cancellationToken)
-    {
-        return GetAllPositionsAsync<PositionText>(documentType, documentId, cancellationToken);
-    }
+        => GetAllPositionsAsync<PositionText>(documentType, documentId, cancellationToken);
 
     /// <inheritdoc />
     public Task<ApiResult<PositionText>> GetById(string documentType, int documentId, int positionId,
         [Optional] CancellationToken cancellationToken)
-    {
-        return GetPositionAsync<PositionText>(documentType, documentId, positionId, cancellationToken);
-    }
+        => GetPositionAsync<PositionText>(documentType, documentId, positionId, cancellationToken);
 
     /// <inheritdoc />
-    public Task<ApiResult<PositionText>> Create(string documentType, int documentId, PositionText position,
+    public Task<ApiResult<PositionText>> Create(string documentType, int documentId, PositionTextCreate payload,
         [Optional] CancellationToken cancellationToken)
-    {
-        return CreatePositionAsync<PositionText, PositionText>(documentType, documentId, position, cancellationToken);
-    }
+        => CreatePositionAsync<PositionText, PositionTextCreate>(documentType, documentId, payload, cancellationToken);
 
     /// <inheritdoc />
     public Task<ApiResult<PositionText>> Update(string documentType, int documentId, int positionId,
-        PositionText position, [Optional] CancellationToken cancellationToken)
-    {
-        return UpdatePositionAsync<PositionText, PositionText>(documentType, documentId, positionId, position,
+        PositionTextCreate payload, [Optional] CancellationToken cancellationToken)
+        => UpdatePositionAsync<PositionText, PositionTextCreate>(documentType, documentId, positionId, payload,
             cancellationToken);
-    }
 
     /// <inheritdoc />
     public Task<ApiResult<object>> Delete(string documentType, int documentId, int positionId,
         [Optional] CancellationToken cancellationToken)
-    {
-        return DeletePositionAsync(documentType, documentId, positionId, cancellationToken);
-    }
+        => DeletePositionAsync(documentType, documentId, positionId, cancellationToken);
 }
