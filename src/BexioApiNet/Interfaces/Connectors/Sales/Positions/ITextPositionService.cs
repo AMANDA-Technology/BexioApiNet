@@ -24,22 +24,30 @@ SOFTWARE.
 */
 
 using System.Runtime.InteropServices;
+using BexioApiNet.Abstractions.Enums.Sales;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Positions;
+using BexioApiNet.Abstractions.Models.Sales.Positions.Views;
 
 namespace BexioApiNet.Interfaces.Connectors.Sales.Positions;
 
 /// <summary>
-///     Service for Bexio document text positions.
+///     Service for Bexio document text positions. Text positions inject a paragraph of free
+///     text into a document with no pricing or quantity. They are valid on quotes
+///     (<c>kb_offer</c>), orders (<c>kb_order</c>) and invoices (<c>kb_invoice</c>) — not
+///     deliveries.
 ///     <see href="https://docs.bexio.com/#tag/Text-positions" />
 /// </summary>
 public interface ITextPositionService
 {
     /// <summary>
     ///     List all text positions for the given document.
-    ///     <see href="https://docs.bexio.com/#tag/Text-positions/operation/v2ListKbPositionTexts" />
+    ///     <see href="https://docs.bexio.com/#tag/Text-positions/operation/v2ListTextPositions" />
     /// </summary>
-    /// <param name="documentType">The Bexio document type segment (e.g. <c>kb_invoice</c>, <c>kb_offer</c>).</param>
+    /// <param name="documentType">
+    ///     The Bexio document type segment. Use <see cref="KbDocumentType" /> constants
+    ///     (e.g. <see cref="KbDocumentType.Invoice" />).
+    /// </param>
     /// <param name="documentId">The parent document identifier.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}" /> wrapping the list of text positions.</returns>
@@ -48,7 +56,7 @@ public interface ITextPositionService
 
     /// <summary>
     ///     Fetch a single text position by identifier.
-    ///     <see href="https://docs.bexio.com/#tag/Text-positions/operation/v2ShowKbPositionText" />
+    ///     <see href="https://docs.bexio.com/#tag/Text-positions/operation/v2ShowTextPosition" />
     /// </summary>
     /// <param name="documentType">The Bexio document type segment.</param>
     /// <param name="documentId">The parent document identifier.</param>
@@ -60,33 +68,33 @@ public interface ITextPositionService
 
     /// <summary>
     ///     Create a new text position under the given document.
-    ///     <see href="https://docs.bexio.com/#tag/Text-positions/operation/v2CreateKbPositionText" />
+    ///     <see href="https://docs.bexio.com/#tag/Text-positions/operation/v2CreateTextPosition" />
     /// </summary>
     /// <param name="documentType">The Bexio document type segment.</param>
     /// <param name="documentId">The parent document identifier.</param>
-    /// <param name="position">The text position to create.</param>
+    /// <param name="payload">The create payload — only <c>text</c> and <c>show_pos_nr</c> are accepted.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}" /> wrapping the created text position.</returns>
-    public Task<ApiResult<PositionText>> Create(string documentType, int documentId, PositionText position,
+    public Task<ApiResult<PositionText>> Create(string documentType, int documentId, PositionTextCreate payload,
         [Optional] CancellationToken cancellationToken);
 
     /// <summary>
     ///     Update an existing text position. Bexio uses <c>POST</c> to the single-position path
     ///     (not <c>PUT</c>) for position updates.
-    ///     <see href="https://docs.bexio.com/#tag/Text-positions/operation/v2EditKbPositionText" />
+    ///     <see href="https://docs.bexio.com/#tag/Text-positions/operation/v2EditTextPosition" />
     /// </summary>
     /// <param name="documentType">The Bexio document type segment.</param>
     /// <param name="documentId">The parent document identifier.</param>
     /// <param name="positionId">The position identifier.</param>
-    /// <param name="position">The updated text position payload.</param>
+    /// <param name="payload">The update payload — only <c>text</c> and <c>show_pos_nr</c> are accepted.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}" /> wrapping the updated text position.</returns>
     public Task<ApiResult<PositionText>> Update(string documentType, int documentId, int positionId,
-        PositionText position, [Optional] CancellationToken cancellationToken);
+        PositionTextCreate payload, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
     ///     Delete a text position.
-    ///     <see href="https://docs.bexio.com/#tag/Text-positions/operation/v2DeleteKbPositionText" />
+    ///     <see href="https://docs.bexio.com/#tag/Text-positions/operation/v2DeleteTextPosition" />
     /// </summary>
     /// <param name="documentType">The Bexio document type segment.</param>
     /// <param name="documentId">The parent document identifier.</param>

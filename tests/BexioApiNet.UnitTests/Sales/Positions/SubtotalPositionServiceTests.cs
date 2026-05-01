@@ -23,8 +23,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Enums.Sales;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Positions;
+using BexioApiNet.Abstractions.Models.Sales.Positions.Views;
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Sales.Positions;
 
@@ -32,17 +34,18 @@ namespace BexioApiNet.UnitTests.Sales.Positions;
 
 /// <summary>
 /// Offline unit tests for <see cref="SubtotalPositionService"/>. Each test verifies that the
-/// service forwards its calls to <see cref="IBexioConnectionHandler"/> with the expected arguments
-/// and returns the handler's result unchanged. No network, no filesystem access.
+/// service forwards its calls to <see cref="IBexioConnectionHandler"/> with the expected path —
+/// including the <c>kb_position_subtotal</c> URL segment — and arguments, and returns the
+/// handler's result unchanged. Includes parametrized cases over the three OpenAPI-allowed
+/// document types (<c>kb_offer</c>, <c>kb_order</c>, <c>kb_invoice</c>); deliveries are
+/// excluded because subtotal positions are not supported on delivery documents per the spec.
+/// No network, no filesystem access.
 /// </summary>
 [TestFixture]
 public sealed class SubtotalPositionServiceTests : ServiceTestBase
 {
-    private const string DocumentType = "kb_offer";
     private const int DocumentId = 3;
     private const int PositionId = 30;
-    private const string ExpectedListPath = $"2.0/{DocumentType}/3/kb_position_subtotal";
-    private const string ExpectedSinglePath = $"2.0/{DocumentType}/3/kb_position_subtotal/30";
 
     private SubtotalPositionService _sut = null!;
 
@@ -58,20 +61,22 @@ public sealed class SubtotalPositionServiceTests : ServiceTestBase
 
     /// <summary>
     /// GetAll calls <see cref="IBexioConnectionHandler.GetAsync{TResult}"/> once with the
-    /// expected list endpoint path and a null query parameter.
+    /// expected list endpoint path and a null query parameter for each supported document type.
     /// </summary>
-    [Test]
-    public async Task GetAll_CallsGetAsync_WithExpectedPath()
+    [TestCase(KbDocumentType.Offer)]
+    [TestCase(KbDocumentType.Order)]
+    [TestCase(KbDocumentType.Invoice)]
+    public async Task GetAll_CallsGetAsync_WithExpectedPath(string documentType)
     {
         var response = new ApiResult<List<PositionSubtotal>> { IsSuccess = true, Data = [] };
         ConnectionHandler
             .GetAsync<List<PositionSubtotal>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.GetAll(DocumentType, DocumentId);
+        await _sut.GetAll(documentType, DocumentId);
 
         await ConnectionHandler.Received(1).GetAsync<List<PositionSubtotal>>(
-            ExpectedListPath,
+            $"2.0/{documentType}/{DocumentId}/kb_position_subtotal",
             null,
             Arg.Any<CancellationToken>());
     }
@@ -87,7 +92,7 @@ public sealed class SubtotalPositionServiceTests : ServiceTestBase
             .GetAsync<List<PositionSubtotal>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        var result = await _sut.GetAll(DocumentType, DocumentId);
+        var result = await _sut.GetAll(KbDocumentType.Offer, DocumentId);
 
         Assert.That(result, Is.SameAs(response));
     }
@@ -100,14 +105,32 @@ public sealed class SubtotalPositionServiceTests : ServiceTestBase
     public async Task GetById_CallsGetAsync_WithIdInPath()
     {
         var response = new ApiResult<PositionSubtotal> { IsSuccess = true };
-        string? capturedPath = null;
         ConnectionHandler
-            .GetAsync<PositionSubtotal>(Arg.Do<string>(p => capturedPath = p), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .GetAsync<PositionSubtotal>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.GetById(DocumentType, DocumentId, PositionId);
+        await _sut.GetById(KbDocumentType.Offer, DocumentId, PositionId);
 
-        Assert.That(capturedPath, Is.EqualTo(ExpectedSinglePath));
+        await ConnectionHandler.Received(1).GetAsync<PositionSubtotal>(
+            $"2.0/{KbDocumentType.Offer}/{DocumentId}/kb_position_subtotal/{PositionId}",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// GetById returns the <see cref="ApiResult{T}"/> produced by the connection handler.
+    /// </summary>
+    [Test]
+    public async Task GetById_ReturnsApiResult()
+    {
+        var response = new ApiResult<PositionSubtotal> { IsSuccess = true };
+        ConnectionHandler
+            .GetAsync<PositionSubtotal>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.GetById(KbDocumentType.Offer, DocumentId, PositionId);
+
+        Assert.That(result, Is.SameAs(response));
     }
 
     /// <summary>
@@ -117,18 +140,37 @@ public sealed class SubtotalPositionServiceTests : ServiceTestBase
     [Test]
     public async Task Create_CallsPostAsync_WithExpectedPath()
     {
-        var payload = new PositionSubtotal { Text = "Running total" };
+        var payload = new PositionSubtotalCreate(Text: "Running total");
         var response = new ApiResult<PositionSubtotal> { IsSuccess = true };
         ConnectionHandler
-            .PostAsync<PositionSubtotal, PositionSubtotal>(Arg.Any<PositionSubtotal>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .PostAsync<PositionSubtotal, PositionSubtotalCreate>(
+                Arg.Any<PositionSubtotalCreate>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Create(DocumentType, DocumentId, payload);
+        await _sut.Create(KbDocumentType.Offer, DocumentId, payload);
 
-        await ConnectionHandler.Received(1).PostAsync<PositionSubtotal, PositionSubtotal>(
+        await ConnectionHandler.Received(1).PostAsync<PositionSubtotal, PositionSubtotalCreate>(
             payload,
-            ExpectedListPath,
+            $"2.0/{KbDocumentType.Offer}/{DocumentId}/kb_position_subtotal",
             Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Create returns the <see cref="ApiResult{T}"/> produced by the connection handler.
+    /// </summary>
+    [Test]
+    public async Task Create_ReturnsApiResult()
+    {
+        var payload = new PositionSubtotalCreate(Text: "Running total");
+        var response = new ApiResult<PositionSubtotal> { IsSuccess = true };
+        ConnectionHandler
+            .PostAsync<PositionSubtotal, PositionSubtotalCreate>(
+                Arg.Any<PositionSubtotalCreate>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Create(KbDocumentType.Offer, DocumentId, payload);
+
+        Assert.That(result, Is.SameAs(response));
     }
 
     /// <summary>
@@ -138,16 +180,19 @@ public sealed class SubtotalPositionServiceTests : ServiceTestBase
     [Test]
     public async Task Update_CallsPostAsync_WithIdInPath()
     {
-        var payload = new PositionSubtotal { Text = "Updated total" };
+        var payload = new PositionSubtotalCreate(Text: "Updated total");
         var response = new ApiResult<PositionSubtotal> { IsSuccess = true };
-        string? capturedPath = null;
         ConnectionHandler
-            .PostAsync<PositionSubtotal, PositionSubtotal>(Arg.Any<PositionSubtotal>(), Arg.Do<string>(p => capturedPath = p), Arg.Any<CancellationToken>())
+            .PostAsync<PositionSubtotal, PositionSubtotalCreate>(
+                Arg.Any<PositionSubtotalCreate>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Update(DocumentType, DocumentId, PositionId, payload);
+        await _sut.Update(KbDocumentType.Offer, DocumentId, PositionId, payload);
 
-        Assert.That(capturedPath, Is.EqualTo(ExpectedSinglePath));
+        await ConnectionHandler.Received(1).PostAsync<PositionSubtotal, PositionSubtotalCreate>(
+            payload,
+            $"2.0/{KbDocumentType.Offer}/{DocumentId}/kb_position_subtotal/{PositionId}",
+            Arg.Any<CancellationToken>());
     }
 
     /// <summary>
@@ -158,13 +203,30 @@ public sealed class SubtotalPositionServiceTests : ServiceTestBase
     public async Task Delete_CallsDelete_WithIdInPath()
     {
         var response = new ApiResult<object> { IsSuccess = true };
-        string? capturedPath = null;
         ConnectionHandler
-            .Delete(Arg.Do<string>(p => capturedPath = p), Arg.Any<CancellationToken>())
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Delete(DocumentType, DocumentId, PositionId);
+        await _sut.Delete(KbDocumentType.Offer, DocumentId, PositionId);
 
-        Assert.That(capturedPath, Is.EqualTo(ExpectedSinglePath));
+        await ConnectionHandler.Received(1).Delete(
+            $"2.0/{KbDocumentType.Offer}/{DocumentId}/kb_position_subtotal/{PositionId}",
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Delete returns the <see cref="ApiResult{T}"/> produced by the connection handler.
+    /// </summary>
+    [Test]
+    public async Task Delete_ReturnsApiResult()
+    {
+        var response = new ApiResult<object> { IsSuccess = true };
+        ConnectionHandler
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Delete(KbDocumentType.Offer, DocumentId, PositionId);
+
+        Assert.That(result, Is.SameAs(response));
     }
 }
