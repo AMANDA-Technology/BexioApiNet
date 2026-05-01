@@ -28,6 +28,7 @@ using BexioApiNet.Abstractions.Models.Projects.Milestones;
 using BexioApiNet.Abstractions.Models.Projects.Milestones.Views;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Projects;
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Base;
 
 namespace BexioApiNet.Services.Connectors.Projects;
@@ -51,9 +52,9 @@ public sealed class MilestoneService : ConnectorService, IMilestoneService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<List<Milestone>?>> GetAsync(int projectId, CancellationToken cancellationToken = default)
+    public async Task<ApiResult<List<Milestone>?>> GetAsync(int projectId, QueryParameterMilestone? queryParameter = null, CancellationToken cancellationToken = default)
     {
-        return await ConnectionHandler.GetAsync<List<Milestone>?>($"{ApiVersion}/projects/{projectId}/{EndpointRoot}", null, cancellationToken);
+        return await ConnectionHandler.GetAsync<List<Milestone>?>($"{ApiVersion}/projects/{projectId}/{EndpointRoot}", queryParameter?.QueryParameter, cancellationToken);
     }
 
     /// <inheritdoc />
@@ -71,7 +72,7 @@ public sealed class MilestoneService : ConnectorService, IMilestoneService
     /// <inheritdoc />
     public async Task<ApiResult<Milestone>> UpdateAsync(int projectId, int id, MilestoneUpdate model, CancellationToken cancellationToken = default)
     {
-        return await ConnectionHandler.PutAsync<Milestone, MilestoneUpdate>(model, $"{ApiVersion}/projects/{projectId}/{EndpointRoot}/{id}", cancellationToken);
+        return await ConnectionHandler.PostAsync<Milestone, MilestoneUpdate>(model, $"{ApiVersion}/projects/{projectId}/{EndpointRoot}/{id}", cancellationToken);
     }
 
     /// <inheritdoc />

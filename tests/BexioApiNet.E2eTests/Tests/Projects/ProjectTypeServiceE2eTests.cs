@@ -23,23 +23,71 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Models;
+
 namespace BexioApiNet.E2eTests.Tests.Projects;
 
 /// <summary>
-///     Live E2E coverage for <c>GET /2.0/pr_project_type</c>. Currently skipped at runtime because
-///     the <c>ProjectTypes</c> accessor is not yet wired onto <see cref="IBexioApiClient" /> — DI
-///     wiring is tracked by sub-issue #84.
+///     Live E2E coverage for <c>GET /2.0/pr_project_type</c> via
+///     <see cref="IBexioApiClient.ProjectTypes" />. Skipped automatically when Bexio credentials
+///     are missing via <see cref="BexioE2eTestBase" />.
 /// </summary>
-public class ProjectTypeServiceE2eTests : BexioE2eTestBase
+public sealed class ProjectTypeServiceE2eTests : BexioE2eTestBase
 {
     /// <summary>
-    ///     Placeholder that yields a skipped result until <c>IBexioApiClient.ProjectTypes</c> is
-    ///     exposed by the DI wiring change in #84.
+    ///     Retrieves the project type list from the live Bexio API and asserts the response
+    ///     matches the OpenAPI <c>ProjectType</c> schema — every returned entry must carry a
+    ///     positive <c>id</c> and a non-empty <c>name</c>.
     /// </summary>
     [Test]
-    public Task GetAll()
+    public async Task GetAll_ReturnsProjectTypes()
     {
-        Assert.Ignore("Projects DI wiring pending #84");
-        return Task.CompletedTask;
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var result = await BexioApiClient!.ProjectTypes.Get();
+
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null);
+        });
+
+        if (result.Data is not { Count: > 0 } types)
+        {
+            Assert.Ignore("no project types available on this tenant");
+            return;
+        }
+
+        Assert.Multiple(() =>
+        {
+            foreach (var type in types)
+            {
+                Assert.That(type.Id, Is.GreaterThan(0));
+                Assert.That(type.Name, Is.Not.Null.And.Not.Empty);
+            }
+        });
+    }
+
+    /// <summary>
+    ///     Retrieves the project type list ordered by <c>name</c> via the
+    ///     <see cref="QueryParameterProjectType" /> wrapper — exercises the <c>order_by</c>
+    ///     query parameter the OpenAPI <c>v2ListProjectType</c> operation accepts.
+    /// </summary>
+    [Test]
+    public async Task GetAll_WithOrderByName_ReturnsProjectTypes()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var result = await BexioApiClient!.ProjectTypes.Get(new QueryParameterProjectType("name"));
+
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null);
+        });
     }
 }

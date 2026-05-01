@@ -76,6 +76,28 @@ public sealed class PackageServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    ///     When a <see cref="QueryParameterPackage" /> is supplied, <c>GetAsync</c> must forward
+    ///     its underlying <see cref="QueryParameter" /> so the connection handler renders the
+    ///     <c>limit</c>/<c>offset</c> parameters onto the URL exactly as the spec requires.
+    /// </summary>
+    [Test]
+    public async Task GetAsync_WithQueryParameter_PassesQueryParameterToConnectionHandler()
+    {
+        var queryParameter = new QueryParameterPackage(100, 50);
+        var response = new ApiResult<List<Package>?> { IsSuccess = true, Data = [] };
+        ConnectionHandler
+            .GetAsync<List<Package>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        await _sut.GetAsync(ProjectId, queryParameter);
+
+        await ConnectionHandler.Received(1).GetAsync<List<Package>?>(
+            ExpectedBaseEndpoint,
+            queryParameter.QueryParameter,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
     ///     <c>GetAsync</c> returns the <see cref="ApiResult{T}" /> produced by the connection handler
     ///     unchanged.
     /// </summary>
@@ -104,7 +126,7 @@ public sealed class PackageServiceTests : ServiceTestBase
             .GetAsync<List<Package>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ApiResult<List<Package>?> { IsSuccess = true, Data = [] }));
 
-        await _sut.GetAsync(ProjectId, cts.Token);
+        await _sut.GetAsync(ProjectId, cancellationToken: cts.Token);
 
         await ConnectionHandler.Received(1).GetAsync<List<Package>?>(
             ExpectedBaseEndpoint,

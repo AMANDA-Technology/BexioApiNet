@@ -23,25 +23,34 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Runtime.InteropServices;
-using BexioApiNet.Abstractions.Models.Api;
-using BexioApiNet.Abstractions.Models.Projects.ProjectType;
-using BexioApiNet.Models;
-
-namespace BexioApiNet.Interfaces.Connectors.Projects;
+namespace BexioApiNet.Models;
 
 /// <summary>
-/// Service for the Bexio project types lookup endpoint.
-/// <see href="https://docs.bexio.com/#tag/Projects/operation/v2ListProjectType">Project Types</see>
+///     Typed query parameter wrapper for <c>GET /2.0/pr_project_type</c>
+///     (<see href="https://docs.bexio.com/#tag/Projects/operation/v2ListProjectType">List Project Type</see>).
+///     The Bexio endpoint accepts a single optional <c>order_by</c> sort clause;
+///     <see langword="null" /> is skipped and not serialized onto the URL.
 /// </summary>
-public interface IProjectTypeService
+/// <param name="OrderBy">Sort clause — one of <c>id</c> or <c>name</c>, optionally with <c>_asc</c>/<c>_desc</c> suffixes.</param>
+public sealed record QueryParameterProjectType(
+    string? OrderBy = null
+)
 {
     /// <summary>
-    /// Fetch the list of available project types.
-    /// <see href="https://docs.bexio.com/#tag/Projects/operation/v2ListProjectType">List Project Types</see>
+    ///     The underlying <see cref="Models.QueryParameter" /> passed to
+    ///     <see cref="Interfaces.IBexioConnectionHandler" />. <see langword="null" /> when
+    ///     <see cref="OrderBy" /> is <see langword="null" /> so the handler appends no query string.
     /// </summary>
-    /// <param name="queryParameter">Optional query parameter (<c>order_by</c>).</param>
-    /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An <see cref="ApiResult{T}"/> containing every project type.</returns>
-    public Task<ApiResult<List<ProjectType>>> Get([Optional] QueryParameterProjectType? queryParameter, [Optional] CancellationToken cancellationToken);
-}
+    public QueryParameter? QueryParameter { get; } = BuildQueryParameter(OrderBy);
+
+    private static QueryParameter? BuildQueryParameter(string? orderBy)
+    {
+        if (string.IsNullOrWhiteSpace(orderBy))
+            return null;
+
+        return new QueryParameter(new Dictionary<string, object>
+        {
+            ["order_by"] = orderBy
+        });
+    }
+};

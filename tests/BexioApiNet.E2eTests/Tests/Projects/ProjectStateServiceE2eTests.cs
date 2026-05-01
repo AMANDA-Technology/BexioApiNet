@@ -26,20 +26,45 @@ SOFTWARE.
 namespace BexioApiNet.E2eTests.Tests.Projects;
 
 /// <summary>
-///     Live E2E coverage for <c>GET /2.0/pr_project_state</c>. Currently skipped at runtime because
-///     the <c>ProjectStates</c> accessor is not yet wired onto <see cref="IBexioApiClient" /> — DI
-///     wiring is tracked by sub-issue #84.
+///     Live E2E coverage for <c>GET /2.0/pr_project_state</c> via
+///     <see cref="IBexioApiClient.ProjectStates" />. Skipped automatically when Bexio credentials
+///     are missing via <see cref="BexioE2eTestBase" />.
 /// </summary>
-public class ProjectStateServiceE2eTests : BexioE2eTestBase
+public sealed class ProjectStateServiceE2eTests : BexioE2eTestBase
 {
     /// <summary>
-    ///     Placeholder that yields a skipped result until <c>IBexioApiClient.ProjectStates</c> is
-    ///     exposed by the DI wiring change in #84.
+    ///     Retrieves the project state list from the live Bexio API and asserts the response
+    ///     matches the OpenAPI <c>ProjectStatus</c> schema — every returned entry must carry a
+    ///     positive <c>id</c> and a non-empty <c>name</c>.
     /// </summary>
     [Test]
-    public Task GetAll()
+    public async Task GetAll_ReturnsProjectStates()
     {
-        Assert.Ignore("Projects DI wiring pending #84");
-        return Task.CompletedTask;
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var result = await BexioApiClient!.ProjectStates.Get();
+
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null);
+        });
+
+        if (result.Data is not { Count: > 0 } states)
+        {
+            Assert.Ignore("no project states available on this tenant");
+            return;
+        }
+
+        Assert.Multiple(() =>
+        {
+            foreach (var state in states)
+            {
+                Assert.That(state.Id, Is.GreaterThan(0));
+                Assert.That(state.Name, Is.Not.Null.And.Not.Empty);
+            }
+        });
     }
 }

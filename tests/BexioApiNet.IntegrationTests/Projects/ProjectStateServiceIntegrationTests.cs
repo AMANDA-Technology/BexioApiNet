@@ -30,18 +30,23 @@ namespace BexioApiNet.IntegrationTests.Projects;
 /// <summary>
 ///     Integration tests covering <see cref="ProjectStateService" />. The request path is composed
 ///     from <see cref="ProjectConfiguration" /> (<c>2.0/pr_project_state</c>) and must reach WireMock
-///     intact when the service is driven through the real connection handler.
+///     intact when the service is driven through the real connection handler. Response payloads
+///     mirror the
+///     <see href="https://docs.bexio.com/#tag/Projects/operation/v2ListProjectStatus">List Project Status</see>
+///     OpenAPI schema exactly.
 /// </summary>
 public sealed class ProjectStateServiceIntegrationTests : IntegrationTestBase
 {
     private const string ProjectStatesPath = "/2.0/pr_project_state";
 
     /// <summary>
-    ///     <c>ProjectStateService.Get()</c> must issue a <c>GET</c> against <c>/2.0/pr_project_state</c>
-    ///     and deserialize the returned project state entries.
+    ///     <c>ProjectStateService.Get()</c> must issue a <c>GET</c> against
+    ///     <c>/2.0/pr_project_state</c> and deserialize a fully populated <c>ProjectStatus</c>
+    ///     payload — the schema only defines <c>id</c> and <c>name</c>, both of which must
+    ///     round-trip into the <c>ProjectState</c> record.
     /// </summary>
     [Test]
-    public async Task ProjectStateService_Get_SendsGetRequestToCorrectPath()
+    public async Task ProjectStateService_Get_DeserializesFullProjectStatePayload()
     {
         const string responseBody = """
                                     [
@@ -65,9 +70,14 @@ public sealed class ProjectStateServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data, Has.Count.EqualTo(2));
-            Assert.That(result.Data![0].Name, Is.EqualTo("Active"));
+            Assert.That(result.Data![0].Id, Is.EqualTo(1));
+            Assert.That(result.Data[0].Name, Is.EqualTo("Active"));
+            Assert.That(result.Data[1].Id, Is.EqualTo(2));
+            Assert.That(result.Data[1].Name, Is.EqualTo("Archived"));
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(ProjectStatesPath));
+            Assert.That(request.RawQuery, Is.Empty.Or.Null,
+                "ProjectStateService.Get takes no query parameters per the OpenAPI spec.");
         });
     }
 }
