@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Enums.Sales;
+using BexioApiNet.Abstractions.Models.Sales.Positions;
 using BexioApiNet.Abstractions.Models.Sales.Positions.Views;
 using BexioApiNet.Services.Connectors.Sales.Positions;
 
