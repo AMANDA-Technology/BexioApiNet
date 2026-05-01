@@ -28,6 +28,7 @@ using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Projects.ProjectType;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Projects;
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Base;
 
 namespace BexioApiNet.Services.Connectors.Projects;
@@ -51,8 +52,8 @@ public sealed class ProjectTypeService : ConnectorService, IProjectTypeService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<List<ProjectType>>> Get([Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<List<ProjectType>>> Get([Optional] QueryParameterProjectType? queryParameter, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.GetAsync<List<ProjectType>>($"{ApiVersion}/{EndpointRoot}", null, cancellationToken);
+        return await ConnectionHandler.GetAsync<List<ProjectType>>($"{ApiVersion}/{EndpointRoot}", queryParameter?.QueryParameter, cancellationToken);
     }
 }

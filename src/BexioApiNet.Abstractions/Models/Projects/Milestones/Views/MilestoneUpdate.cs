@@ -26,7 +26,9 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Projects.Milestones.Views;
 
 /// <summary>
-///     Update view for a milestone — body of the edit milestone endpoint. The Bexio API requires
+///     Update view for a milestone — body of
+///     <c>POST /3.0/projects/{project_id}/milestones/{milestone_id}</c>. The Bexio API uses
+///     <c>POST</c> (not <c>PUT</c>) for full-replacement edits on this resource and requires
 ///     <c>name</c> to be supplied on every edit; the read-only <c>id</c> field is intentionally
 ///     omitted.
 ///     <see href="https://docs.bexio.com/#tag/Projects/operation/EditMilestone" />

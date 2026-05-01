@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Projects.Packages;
 using BexioApiNet.Abstractions.Models.Projects.Packages.Views;
+using BexioApiNet.Models;
 
 namespace BexioApiNet.Interfaces.Connectors.Projects;
 
@@ -41,9 +42,10 @@ public interface IPackageService
     ///     <see href="https://docs.bexio.com/#tag/Projects/operation/ListWorkPackages">List Work Packages</see>
     /// </summary>
     /// <param name="projectId">The parent project identifier.</param>
+    /// <param name="queryParameter">Optional query parameters (limit/offset).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}" /> wrapping the list of work packages for the project.</returns>
-    public Task<ApiResult<List<Package>?>> GetAsync(int projectId, CancellationToken cancellationToken = default);
+    public Task<ApiResult<List<Package>?>> GetAsync(int projectId, QueryParameterPackage? queryParameter = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Fetch a single work package by identifier for a given project.
