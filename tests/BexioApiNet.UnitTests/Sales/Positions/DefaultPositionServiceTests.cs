@@ -23,30 +23,30 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Enums.Sales;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Positions;
 using BexioApiNet.Abstractions.Models.Sales.Positions.Views;
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Sales.Positions;
 
-namespace BexioApiNet.UnitTests.Sales;
+namespace BexioApiNet.UnitTests.Sales.Positions;
 
 /// <summary>
 /// Offline unit tests for <see cref="DefaultPositionService" />. Each test verifies that the
 /// service delegates to <see cref="IBexioConnectionHandler" /> with the correct endpoint path
 /// — in particular that <c>kb_position_custom</c> appears in every path — and that the handler
-/// result is returned unchanged. No network, no filesystem access.
+/// result is returned unchanged. Includes parametrized cases over the three supported document
+/// types (<c>kb_offer</c>, <c>kb_order</c>, <c>kb_invoice</c>) per the OpenAPI spec. No network,
+/// no filesystem access.
 /// </summary>
 [TestFixture]
 public sealed class DefaultPositionServiceTests : ServiceTestBase
 {
     private DefaultPositionService _sut = null!;
 
-    private const string DocumentType = "kb_offer";
     private const int DocumentId = 99;
     private const int PositionId = 3;
-    private const string ExpectedCollectionPath = "2.0/kb_offer/99/kb_position_custom";
-    private const string ExpectedSinglePath = "2.0/kb_offer/99/kb_position_custom/3";
 
     /// <summary>
     /// Creates a fresh <see cref="DefaultPositionService" /> per test, bound to the
@@ -60,20 +60,23 @@ public sealed class DefaultPositionServiceTests : ServiceTestBase
 
     /// <summary>
     /// Get calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> once with the
-    /// expected collection path that includes <c>kb_position_custom</c>.
+    /// expected collection path that includes <c>kb_position_custom</c>, for each supported
+    /// document type per the OpenAPI <c>kb_document_type</c> enum.
     /// </summary>
-    [Test]
-    public async Task Get_CallsGetAsync_WithCorrectPositionTypePath()
+    [TestCase(KbDocumentType.Offer)]
+    [TestCase(KbDocumentType.Order)]
+    [TestCase(KbDocumentType.Invoice)]
+    public async Task Get_CallsGetAsync_WithCorrectPositionTypePath(string documentType)
     {
         var response = new ApiResult<List<PositionCustom>> { IsSuccess = true, Data = [] };
         ConnectionHandler
             .GetAsync<List<PositionCustom>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Get(DocumentType, DocumentId);
+        await _sut.Get(documentType, DocumentId);
 
         await ConnectionHandler.Received(1).GetAsync<List<PositionCustom>>(
-            ExpectedCollectionPath,
+            $"2.0/{documentType}/{DocumentId}/kb_position_custom",
             null,
             Arg.Any<CancellationToken>());
     }
@@ -89,7 +92,7 @@ public sealed class DefaultPositionServiceTests : ServiceTestBase
             .GetAsync<List<PositionCustom>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        var result = await _sut.Get(DocumentType, DocumentId);
+        var result = await _sut.Get(KbDocumentType.Offer, DocumentId);
 
         Assert.That(result, Is.SameAs(response));
     }
@@ -106,12 +109,28 @@ public sealed class DefaultPositionServiceTests : ServiceTestBase
             .GetAsync<PositionCustom>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.GetById(DocumentType, DocumentId, PositionId);
+        await _sut.GetById(KbDocumentType.Offer, DocumentId, PositionId);
 
         await ConnectionHandler.Received(1).GetAsync<PositionCustom>(
-            ExpectedSinglePath,
+            $"2.0/{KbDocumentType.Offer}/{DocumentId}/kb_position_custom/{PositionId}",
             null,
             Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// GetById returns the <see cref="ApiResult{T}" /> produced by the connection handler.
+    /// </summary>
+    [Test]
+    public async Task GetById_ReturnsApiResult()
+    {
+        var response = new ApiResult<PositionCustom> { IsSuccess = true };
+        ConnectionHandler
+            .GetAsync<PositionCustom>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.GetById(KbDocumentType.Offer, DocumentId, PositionId);
+
+        Assert.That(result, Is.SameAs(response));
     }
 
     /// <summary>
@@ -127,17 +146,35 @@ public sealed class DefaultPositionServiceTests : ServiceTestBase
             .PostAsync<PositionCustom, PositionCustomCreate>(Arg.Any<PositionCustomCreate>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Create(DocumentType, DocumentId, payload);
+        await _sut.Create(KbDocumentType.Offer, DocumentId, payload);
 
         await ConnectionHandler.Received(1).PostAsync<PositionCustom, PositionCustomCreate>(
             payload,
-            ExpectedCollectionPath,
+            $"2.0/{KbDocumentType.Offer}/{DocumentId}/kb_position_custom",
             Arg.Any<CancellationToken>());
     }
 
     /// <summary>
+    /// Create returns the <see cref="ApiResult{T}" /> produced by the connection handler.
+    /// </summary>
+    [Test]
+    public async Task Create_ReturnsApiResult()
+    {
+        var payload = new PositionCustomCreate(Amount: "1.000000", Text: "Service", UnitPrice: "100.00");
+        var response = new ApiResult<PositionCustom> { IsSuccess = true };
+        ConnectionHandler
+            .PostAsync<PositionCustom, PositionCustomCreate>(Arg.Any<PositionCustomCreate>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Create(KbDocumentType.Offer, DocumentId, payload);
+
+        Assert.That(result, Is.SameAs(response));
+    }
+
+    /// <summary>
     /// Update calls <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" /> with the
-    /// single-position path (including the position id) and the supplied payload.
+    /// single-position path (including the position id) and the supplied payload. Bexio uses
+    /// HTTP <c>POST</c> for position updates rather than <c>PUT</c>.
     /// </summary>
     [Test]
     public async Task Update_CallsPostAsync_WithSinglePathAndPayload()
@@ -148,11 +185,11 @@ public sealed class DefaultPositionServiceTests : ServiceTestBase
             .PostAsync<PositionCustom, PositionCustomCreate>(Arg.Any<PositionCustomCreate>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Update(DocumentType, DocumentId, PositionId, payload);
+        await _sut.Update(KbDocumentType.Offer, DocumentId, PositionId, payload);
 
         await ConnectionHandler.Received(1).PostAsync<PositionCustom, PositionCustomCreate>(
             payload,
-            ExpectedSinglePath,
+            $"2.0/{KbDocumentType.Offer}/{DocumentId}/kb_position_custom/{PositionId}",
             Arg.Any<CancellationToken>());
     }
 
@@ -167,10 +204,26 @@ public sealed class DefaultPositionServiceTests : ServiceTestBase
             .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
-        await _sut.Delete(DocumentType, DocumentId, PositionId);
+        await _sut.Delete(KbDocumentType.Offer, DocumentId, PositionId);
 
         await ConnectionHandler.Received(1).Delete(
-            ExpectedSinglePath,
+            $"2.0/{KbDocumentType.Offer}/{DocumentId}/kb_position_custom/{PositionId}",
             Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Delete returns the <see cref="ApiResult{T}" /> produced by the connection handler.
+    /// </summary>
+    [Test]
+    public async Task Delete_ReturnsApiResult()
+    {
+        var response = new ApiResult<object> { IsSuccess = true };
+        ConnectionHandler
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Delete(KbDocumentType.Offer, DocumentId, PositionId);
+
+        Assert.That(result, Is.SameAs(response));
     }
 }

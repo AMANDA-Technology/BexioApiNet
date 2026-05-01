@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Enums.Sales;
+
 namespace BexioApiNet.E2eTests.Tests.Sales.Positions;
 
 /// <summary>
@@ -31,28 +33,119 @@ namespace BexioApiNet.E2eTests.Tests.Sales.Positions;
 /// environment variables (<c>BexioApiNet__BaseUri</c>, <c>BexioApiNet__JwtToken</c>) are absent.
 /// Mutating operations (create / update / delete) are intentionally omitted to avoid leaving
 /// orphaned positions on the live tenant — they are covered offline by the integration suite.
+/// Tests structurally validate the JSON payload deserializes into <c>PositionCustom</c> per
+/// the OpenAPI <c>PositionCustomExtended</c> schema.
 /// </summary>
 [Category("E2E")]
 public sealed class DefaultPositionServiceE2eTests : BexioE2eTestBase
 {
     /// <summary>
-    /// Lists custom positions on the first invoice and asserts the request round-trips
-    /// successfully. Requires at least one invoice to exist on the live tenant; the test
-    /// asserts only that the API call succeeds, not that positions are present.
+    /// Verifies <see cref="IBexioApiClient.SalesDefaultPositions"/> is registered correctly via DI.
     /// </summary>
-    /// <remarks>
-    /// The document id <c>1</c> is a best-effort assumption. If no document exists with
-    /// that id the Bexio API returns a 404, which surfaces as <c>IsSuccess = false</c>
-    /// — the test will still pass because it only asserts a non-null result is returned.
-    /// </remarks>
     [Test]
-    public async Task Get_ReturnsCustomPositions()
+    public void SalesDefaultPositions_IsNotNull()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+        Assert.That(BexioApiClient!.SalesDefaultPositions, Is.Not.Null);
+    }
+
+    /// <summary>
+    /// Lists custom positions for the first available invoice and asserts the request round-trips
+    /// successfully. Where positions exist, asserts each position has the
+    /// <c>KbPositionCustom</c> discriminator per the OpenAPI schema.
+    /// </summary>
+    [Test]
+    public async Task Get_ReturnsCustomPositions_FromInvoice()
     {
         Assert.That(BexioApiClient, Is.Not.Null);
 
-        var result = await BexioApiClient!.SalesDefaultPositions.Get("kb_invoice", 1);
+        var invoices = await BexioApiClient!.Invoices.Get();
+        Assert.That(invoices.IsSuccess, Is.True);
+
+        if (invoices.Data is not { Count: > 0 } existing)
+        {
+            Assert.Ignore("no invoices available on this tenant");
+            return;
+        }
+
+        var result = await BexioApiClient.SalesDefaultPositions.Get(KbDocumentType.Invoice, existing[0].Id);
 
         Assert.That(result, Is.Not.Null);
-        Assert.That(result.ApiError is null || !result.IsSuccess, Is.True.Or.False);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null);
+        });
+
+        if (result.Data is { Count: > 0 } positions)
+        {
+            Assert.Multiple(() =>
+            {
+                foreach (var position in positions)
+                {
+                    Assert.That(position.Type, Is.EqualTo("KbPositionCustom"));
+                    Assert.That(position.Id, Is.Not.Null);
+                }
+            });
+        }
+    }
+
+    /// <summary>
+    /// Lists custom positions for the first available quote and verifies the OpenAPI schema
+    /// applies for the <c>kb_offer</c> document type as well.
+    /// </summary>
+    [Test]
+    public async Task Get_ReturnsCustomPositions_FromQuote()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var quotes = await BexioApiClient!.Quotes.Get();
+        Assert.That(quotes.IsSuccess, Is.True);
+
+        if (quotes.Data is not { Count: > 0 } existing)
+        {
+            Assert.Ignore("no quotes available on this tenant");
+            return;
+        }
+
+        var result = await BexioApiClient.SalesDefaultPositions.Get(KbDocumentType.Offer, existing[0].Id);
+
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null);
+        });
+    }
+
+    /// <summary>
+    /// Lists custom positions for the first available order and verifies the OpenAPI schema
+    /// applies for the <c>kb_order</c> document type as well.
+    /// </summary>
+    [Test]
+    public async Task Get_ReturnsCustomPositions_FromOrder()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var orders = await BexioApiClient!.Orders.Get();
+        Assert.That(orders.IsSuccess, Is.True);
+
+        if (orders.Data is not { Count: > 0 } existing)
+        {
+            Assert.Ignore("no orders available on this tenant");
+            return;
+        }
+
+        var result = await BexioApiClient.SalesDefaultPositions.Get(KbDocumentType.Order, existing[0].Id);
+
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null);
+        });
     }
 }
