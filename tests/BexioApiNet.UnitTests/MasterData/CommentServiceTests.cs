@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Enums.MasterData;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.MasterData.Comments;
@@ -35,8 +36,10 @@ namespace BexioApiNet.UnitTests.MasterData;
 /// <summary>
 /// Offline unit tests for <see cref="CommentService"/>. Each test verifies that the service
 /// forwards its calls to <see cref="IBexioConnectionHandler"/> with the expected route
-/// (composed from the polymorphic <c>kb_document_type</c> URL discriminator and the document id)
-/// and arguments. No network, no filesystem access.
+/// (composed from the polymorphic <c>kb_document_type</c> URL discriminator and the document id),
+/// honours the <c>limit</c> / <c>offset</c> query parameters from the OpenAPI spec, and
+/// supports the canonical <c>autoPage</c> + <c>X-Total-Count</c> pagination contract. No network,
+/// no filesystem access.
 /// </summary>
 [TestFixture]
 public sealed class CommentServiceTests : ServiceTestBase
@@ -67,7 +70,8 @@ public sealed class CommentServiceTests : ServiceTestBase
 
     /// <summary>
     /// Get composes the route from the polymorphic discriminator and document id and forwards
-    /// the call to <see cref="IBexioConnectionHandler.GetAsync{TResult}"/> with a null query parameter.
+    /// the call to <see cref="IBexioConnectionHandler.GetAsync{TResult}"/> with a null query parameter
+    /// when no caller parameters are supplied.
     /// </summary>
     [TestCase(KbDocumentType.Invoice, "kb_invoice")]
     [TestCase(KbDocumentType.Offer, "kb_offer")]
@@ -106,6 +110,95 @@ public sealed class CommentServiceTests : ServiceTestBase
         var result = await _sut.Get(KbDocumentType.Invoice, DocumentId);
 
         result.ShouldBeSameAs(response);
+    }
+
+    /// <summary>
+    /// When a <see cref="QueryParameterComment"/> is supplied, its inner
+    /// <see cref="QueryParameter"/> instance is forwarded to the connection
+    /// handler verbatim — the OpenAPI spec lists <c>limit</c> and <c>offset</c>
+    /// as supported query parameters on the comment list endpoint.
+    /// </summary>
+    [Test]
+    public async Task Get_WithQueryParameter_PassesQueryParameterToConnectionHandler()
+    {
+        var queryParameter = new QueryParameterComment(Limit: 50, Offset: 100);
+        ConnectionHandler
+            .GetAsync<List<Comment>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ApiResult<List<Comment>?> { IsSuccess = true, Data = [] }));
+
+        await _sut.Get(KbDocumentType.Invoice, DocumentId, queryParameter);
+
+        await ConnectionHandler.Received(1).GetAsync<List<Comment>?>(
+            $"2.0/kb_invoice/{DocumentId}/comment",
+            queryParameter.QueryParameter,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// When <c>autoPage</c> is on and the first response advertises a
+    /// <c>X-Total-Count</c> header, the service calls <c>FetchAll</c> with the
+    /// count of already-fetched items, the total, the same path, and the
+    /// same query parameter.
+    /// </summary>
+    [Test]
+    public async Task Get_WithAutoPage_WhenTotalResultsHeaderPresent_CallsFetchAll()
+    {
+        var firstComment = NewComment(1);
+        var firstPage = new ApiResult<List<Comment>?>
+        {
+            IsSuccess = true,
+            Data = [firstComment],
+            ResponseHeaders = new Dictionary<string, int?>
+            {
+                [ApiHeaderNames.TotalResults] = 3
+            }
+        };
+        ConnectionHandler
+            .GetAsync<List<Comment>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(firstPage));
+        var remaining = new List<Comment> { NewComment(2), NewComment(3) };
+        ConnectionHandler
+            .FetchAll<Comment>(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(remaining));
+
+        var result = await _sut.Get(KbDocumentType.Invoice, DocumentId, autoPage: true);
+
+        await ConnectionHandler.Received(1).FetchAll<Comment>(
+            1,
+            3,
+            $"2.0/kb_invoice/{DocumentId}/comment",
+            null,
+            Arg.Any<CancellationToken>());
+        result.Data.ShouldNotBeNull();
+        result.Data!.Count.ShouldBe(3);
+    }
+
+    /// <summary>
+    /// When <c>autoPage</c> is requested but the response carries no
+    /// <c>X-Total-Count</c> header, the service does not invoke <c>FetchAll</c>.
+    /// </summary>
+    [Test]
+    public async Task Get_WithAutoPage_WhenTotalResultsHeaderMissing_DoesNotCallFetchAll()
+    {
+        var response = new ApiResult<List<Comment>?>
+        {
+            IsSuccess = true,
+            Data = [NewComment(1)],
+            ResponseHeaders = new Dictionary<string, int?>()
+        };
+        ConnectionHandler
+            .GetAsync<List<Comment>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        var result = await _sut.Get(KbDocumentType.Invoice, DocumentId, autoPage: true);
+
+        result.ShouldBeSameAs(response);
+        await ConnectionHandler.DidNotReceive().FetchAll<Comment>(
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            Arg.Any<string>(),
+            Arg.Any<QueryParameter?>(),
+            Arg.Any<CancellationToken>());
     }
 
     /// <summary>
@@ -183,4 +276,32 @@ public sealed class CommentServiceTests : ServiceTestBase
 
         result.ShouldBeSameAs(response);
     }
+
+    /// <summary>
+    /// The cancellation token supplied by the caller must be forwarded to the
+    /// connection handler on <c>Get</c> so cooperative cancellation flows end-to-end.
+    /// </summary>
+    [Test]
+    public async Task Get_ForwardsCancellationTokenToConnectionHandler()
+    {
+        using var cts = new CancellationTokenSource();
+        ConnectionHandler
+            .GetAsync<List<Comment>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ApiResult<List<Comment>?> { IsSuccess = true, Data = [] }));
+
+        await _sut.Get(KbDocumentType.Invoice, DocumentId, cancellationToken: cts.Token);
+
+        await ConnectionHandler.Received(1).GetAsync<List<Comment>?>(
+            $"2.0/kb_invoice/{DocumentId}/comment",
+            null,
+            cts.Token);
+    }
+
+    private static Comment NewComment(int id) => new()
+    {
+        Id = id,
+        Text = $"Comment {id}",
+        UserId = 1,
+        UserName = "Peter Smith"
+    };
 }

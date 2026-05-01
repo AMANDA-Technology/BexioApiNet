@@ -26,6 +26,7 @@ SOFTWARE.
 using System.Runtime.InteropServices;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Projects.ProjectType;
+using BexioApiNet.Models;
 
 namespace BexioApiNet.Interfaces.Connectors.Projects;
 
@@ -39,7 +40,8 @@ public interface IProjectTypeService
     /// Fetch the list of available project types.
     /// <see href="https://docs.bexio.com/#tag/Projects/operation/v2ListProjectType">List Project Types</see>
     /// </summary>
+    /// <param name="queryParameter">Optional query parameter (<c>order_by</c>).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}"/> containing every project type.</returns>
-    public Task<ApiResult<List<ProjectType>>> Get([Optional] CancellationToken cancellationToken);
+    public Task<ApiResult<List<ProjectType>>> Get([Optional] QueryParameterProjectType? queryParameter, [Optional] CancellationToken cancellationToken);
 }

@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Enums.Api;
+using BexioApiNet.Abstractions.Models.Accounting.VatPeriods.Enums;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Services.Connectors.Accounting;
 
@@ -35,7 +36,8 @@ namespace BexioApiNet.E2eTests.Tests.Accounting.VatPeriods;
 /// follow-up wire-up issue — so these tests construct their own
 /// <see cref="BexioConnectionHandler"/> and <see cref="VatPeriodService"/> directly
 /// from the live credentials supplied via environment variables. The test is
-/// skipped automatically when credentials are missing.
+/// skipped automatically when credentials are missing. The Bexio v3 OpenAPI spec
+/// only exposes list and show operations for vat periods (no create/update/delete).
 /// </summary>
 [TestFixture]
 public class VatPeriodServiceE2eTests
@@ -83,7 +85,10 @@ public class VatPeriodServiceE2eTests
 
     /// <summary>
     /// Lists all vat periods in the test tenant. Expects a successful response
-    /// with a non-null data list and a valid id on the first returned period.
+    /// with a non-null data list and asserts every entry against the OpenAPI
+    /// <c>v3VatPeriod</c> schema: id, start, end, type (quarter/semester/annual),
+    /// status (open/closed/closed_with_message). <c>closed_at</c> is set when the
+    /// period status is closed or closed_with_message.
     /// </summary>
     [Test]
     [Category("E2E")]
@@ -100,12 +105,27 @@ public class VatPeriodServiceE2eTests
             Assert.That(res.ApiError, Is.Null);
             Assert.That(res.Data, Is.Not.Null);
         });
+
+        foreach (var period in res.Data!)
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(period.Id, Is.GreaterThan(0), "v3VatPeriod.id must be a positive integer");
+                Assert.That(period.End, Is.GreaterThanOrEqualTo(period.Start), "v3VatPeriod.end must be >= start");
+                Assert.That(period.Type, Is.AnyOf(VatPeriodType.quarter, VatPeriodType.semester, VatPeriodType.annual));
+                Assert.That(period.Status, Is.AnyOf(VatPeriodStatus.open, VatPeriodStatus.closed, VatPeriodStatus.closed_with_message));
+                if (period.Status is VatPeriodStatus.open)
+                {
+                    Assert.That(period.ClosedAt, Is.Null, "Open periods must not have a closed_at date");
+                }
+            });
+        }
     }
 
     /// <summary>
     /// Fetches a single vat period by id using the first id returned from the
     /// list endpoint. Expects a successful response and a matching id in the
-    /// payload.
+    /// payload, plus the same per-entry OpenAPI shape as the list endpoint.
     /// </summary>
     [Test]
     [Category("E2E")]
@@ -128,6 +148,9 @@ public class VatPeriodServiceE2eTests
             Assert.That(res.ApiError, Is.Null);
             Assert.That(res.Data, Is.Not.Null);
             Assert.That(res.Data!.Id, Is.EqualTo(firstId));
+            Assert.That(res.Data!.End, Is.GreaterThanOrEqualTo(res.Data!.Start));
+            Assert.That(res.Data!.Type, Is.AnyOf(VatPeriodType.quarter, VatPeriodType.semester, VatPeriodType.annual));
+            Assert.That(res.Data!.Status, Is.AnyOf(VatPeriodStatus.open, VatPeriodStatus.closed, VatPeriodStatus.closed_with_message));
         });
     }
 }

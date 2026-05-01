@@ -26,12 +26,15 @@ SOFTWARE.
 namespace BexioApiNet.E2eTests.Tests.Accounting.Currencies;
 
 /// <summary>
-///
+/// E2E coverage for <c>CurrencyService.Get</c> against the live Bexio API.
 /// </summary>
 public class TestGetAll : BexioE2eTestBase
 {
     /// <summary>
-    ///
+    /// Lists all currencies configured for the tenant. Asserts a successful response with
+    /// a non-empty data list and verifies each returned <c>v3CurrencyResponse</c> object
+    /// matches the OpenAPI schema: <c>id</c> integer, <c>name</c> non-empty string,
+    /// <c>round_factor</c> non-negative number.
     /// </summary>
     [Test]
     public async Task GetAll()
@@ -45,7 +48,18 @@ public class TestGetAll : BexioE2eTestBase
         {
             Assert.That(res.IsSuccess, Is.True);
             Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data?.First().Id, Is.Not.Null);
+            Assert.That(res.Data, Is.Not.Null.And.Not.Empty);
         });
+
+        foreach (var currency in res.Data!)
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(currency.Id, Is.GreaterThan(0), "v3CurrencyResponse.id must be a positive integer");
+                Assert.That(currency.Name, Is.Not.Null.And.Not.Empty, "v3CurrencyResponse.name is required and max 80 chars");
+                Assert.That(currency.Name.Length, Is.LessThanOrEqualTo(80));
+                Assert.That(currency.RoundFactor, Is.GreaterThan(0), "v3CurrencyResponse.round_factor must be a positive number");
+            });
+        }
     }
 }

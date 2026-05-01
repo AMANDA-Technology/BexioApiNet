@@ -87,7 +87,7 @@ public interface IExpenseService
 
     /// <summary>
     /// Update an existing expense. Bexio v4.0 uses PUT for full-replacement updates. When the
-    /// expense is not in <c>DRAFT</c> only <c>file_id</c> and <c>payment</c> are actually persisted.
+    /// expense is in <c>DONE</c> status only <c>attachment_ids</c> is actually persisted.
     /// <see href="https://docs.bexio.com/#tag/Expenses">Update Expense</see>
     /// </summary>
     /// <param name="id">Expense identifier to update.</param>
@@ -97,11 +97,11 @@ public interface IExpenseService
     public Task<ApiResult<Expense>> Update(Guid id, ExpenseUpdate expense, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
-    /// Transition an expense's booking status between <c>DRAFT</c> and <c>BOOKED</c>.
+    /// Transition an expense's booking status between <c>DRAFT</c> and <c>DONE</c>.
     /// <see href="https://docs.bexio.com/#tag/Expenses">Update Expense Status</see>
     /// </summary>
     /// <param name="id">Expense identifier.</param>
-    /// <param name="status">Target booking status (<see cref="ExpenseBookingStatus.DRAFT"/> or <see cref="ExpenseBookingStatus.BOOKED"/>).</param>
+    /// <param name="status">Target booking status (<see cref="ExpenseBookingStatus.DRAFT"/> or <see cref="ExpenseBookingStatus.DONE"/>).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}"/> wrapping the updated <see cref="Expense"/>.</returns>
     public Task<ApiResult<Expense>> UpdateBookings(Guid id, ExpenseBookingStatus status, [Optional] CancellationToken cancellationToken);

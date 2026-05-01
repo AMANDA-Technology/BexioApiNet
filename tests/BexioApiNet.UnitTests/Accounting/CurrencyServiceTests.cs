@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using System.Net;
+using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Accounting.Currencies;
 using BexioApiNet.Abstractions.Models.Accounting.Currencies.Views;
 using BexioApiNet.Abstractions.Models.Api;
@@ -329,6 +330,91 @@ public sealed class CurrencyServiceTests : ServiceTestBase
         Assert.That(capturedPath, Is.EqualTo($"{ExpectedPath}/{id}"));
         await ConnectionHandler.Received(1).Delete(
             Arg.Any<string>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// When <c>autoPage</c> is on and the first response advertises a
+    /// <c>X-Total-Count</c> header, the service must call <c>FetchAll</c> with
+    /// the count of already-fetched items, the total, the same path, and the
+    /// same query parameter so the rest of the result set is loaded.
+    /// </summary>
+    [Test]
+    public async Task Get_WithAutoPage_WhenTotalResultsHeaderPresent_CallsFetchAll()
+    {
+        var first = new Currency(1, "CHF", 0.05);
+        var firstPage = new ApiResult<List<Currency>>
+        {
+            IsSuccess = true,
+            Data = [first],
+            ResponseHeaders = new Dictionary<string, int?>
+            {
+                [ApiHeaderNames.TotalResults] = 3
+            }
+        };
+        ConnectionHandler
+            .GetAsync<List<Currency>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(firstPage));
+        var remaining = new List<Currency>
+        {
+            new(2, "EUR", 0.01),
+            new(3, "USD", 0.01)
+        };
+        ConnectionHandler
+            .FetchAll<Currency>(Arg.Any<int>(), Arg.Any<int>(), Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(remaining));
+
+        var result = await _sut.Get(autoPage: true);
+
+        await ConnectionHandler.Received(1).FetchAll<Currency>(
+            1,
+            3,
+            ExpectedPath,
+            null,
+            Arg.Any<CancellationToken>());
+        Assert.That(result.Data, Has.Count.EqualTo(3));
+    }
+
+    /// <summary>
+    /// When a <see cref="QueryParameterCurrency"/> is supplied, its inner <see cref="QueryParameter"/>
+    /// is forwarded to the connection handler verbatim — the service must not rewrap or substitute it.
+    /// </summary>
+    [Test]
+    public async Task Get_WithQueryParameter_PassesQueryParameterToConnectionHandler()
+    {
+        var query = new QueryParameterCurrency(Limit: 100, Offset: 0, Embed: "exchange_rate", Date: new DateOnly(2026, 4, 30));
+        ConnectionHandler
+            .GetAsync<List<Currency>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ApiResult<List<Currency>> { IsSuccess = true, Data = [] }));
+
+        await _sut.Get(query);
+
+        await ConnectionHandler.Received(1).GetAsync<List<Currency>>(
+            ExpectedPath,
+            query.QueryParameter,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// <c>Create</c> must call the connection handler's POST exactly once and forward the supplied
+    /// payload — the service should not mutate or wrap the payload.
+    /// </summary>
+    [Test]
+    public async Task Create_ForwardsPayloadVerbatim()
+    {
+        var payload = new CurrencyCreate("USD", 0.01);
+        ConnectionHandler
+            .PostAsync<Currency, CurrencyCreate>(
+                Arg.Any<CurrencyCreate>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<Currency> { IsSuccess = true });
+
+        await _sut.Create(payload);
+
+        await ConnectionHandler.Received(1).PostAsync<Currency, CurrencyCreate>(
+            payload,
+            ExpectedPath,
             Arg.Any<CancellationToken>());
     }
 }

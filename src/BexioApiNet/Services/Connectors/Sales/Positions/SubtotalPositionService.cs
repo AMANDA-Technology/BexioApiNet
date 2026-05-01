@@ -26,6 +26,7 @@ SOFTWARE.
 using System.Runtime.InteropServices;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Positions;
+using BexioApiNet.Abstractions.Models.Sales.Positions.Views;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 using BexioApiNet.Services.Connectors.Base;
@@ -35,6 +36,9 @@ namespace BexioApiNet.Services.Connectors.Sales.Positions;
 /// <inheritdoc cref="ISubtotalPositionService" />
 public sealed class SubtotalPositionService : PositionService, ISubtotalPositionService
 {
+    /// <inheritdoc />
+    protected override string PositionType => "kb_position_subtotal";
+
     /// <summary>
     ///     Initializes a new instance of the <see cref="SubtotalPositionService" /> class.
     /// </summary>
@@ -45,42 +49,29 @@ public sealed class SubtotalPositionService : PositionService, ISubtotalPosition
     }
 
     /// <inheritdoc />
-    protected override string PositionType => "kb_position_subtotal";
-
-    /// <inheritdoc />
     public Task<ApiResult<List<PositionSubtotal>>> GetAll(string documentType, int documentId,
         [Optional] CancellationToken cancellationToken)
-    {
-        return GetAllPositionsAsync<PositionSubtotal>(documentType, documentId, cancellationToken);
-    }
+        => GetAllPositionsAsync<PositionSubtotal>(documentType, documentId, cancellationToken);
 
     /// <inheritdoc />
     public Task<ApiResult<PositionSubtotal>> GetById(string documentType, int documentId, int positionId,
         [Optional] CancellationToken cancellationToken)
-    {
-        return GetPositionAsync<PositionSubtotal>(documentType, documentId, positionId, cancellationToken);
-    }
+        => GetPositionAsync<PositionSubtotal>(documentType, documentId, positionId, cancellationToken);
 
     /// <inheritdoc />
-    public Task<ApiResult<PositionSubtotal>> Create(string documentType, int documentId, PositionSubtotal position,
-        [Optional] CancellationToken cancellationToken)
-    {
-        return CreatePositionAsync<PositionSubtotal, PositionSubtotal>(documentType, documentId, position,
+    public Task<ApiResult<PositionSubtotal>> Create(string documentType, int documentId,
+        PositionSubtotalCreate payload, [Optional] CancellationToken cancellationToken)
+        => CreatePositionAsync<PositionSubtotal, PositionSubtotalCreate>(documentType, documentId, payload,
             cancellationToken);
-    }
 
     /// <inheritdoc />
     public Task<ApiResult<PositionSubtotal>> Update(string documentType, int documentId, int positionId,
-        PositionSubtotal position, [Optional] CancellationToken cancellationToken)
-    {
-        return UpdatePositionAsync<PositionSubtotal, PositionSubtotal>(documentType, documentId, positionId, position,
-            cancellationToken);
-    }
+        PositionSubtotalCreate payload, [Optional] CancellationToken cancellationToken)
+        => UpdatePositionAsync<PositionSubtotal, PositionSubtotalCreate>(documentType, documentId, positionId,
+            payload, cancellationToken);
 
     /// <inheritdoc />
     public Task<ApiResult<object>> Delete(string documentType, int documentId, int positionId,
         [Optional] CancellationToken cancellationToken)
-    {
-        return DeletePositionAsync(documentType, documentId, positionId, cancellationToken);
-    }
+        => DeletePositionAsync(documentType, documentId, positionId, cancellationToken);
 }

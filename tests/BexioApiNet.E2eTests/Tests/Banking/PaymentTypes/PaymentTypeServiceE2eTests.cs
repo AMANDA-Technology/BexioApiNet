@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Interfaces.Connectors.Banking;
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Banking;
 
 namespace BexioApiNet.E2eTests.Tests.Banking.PaymentTypes;
@@ -33,9 +34,9 @@ namespace BexioApiNet.E2eTests.Tests.Banking.PaymentTypes;
 /// <summary>
 /// Live end-to-end tests for <see cref="PaymentTypeService" />. Skipped
 /// automatically when <c>BexioApiNet__BaseUri</c> / <c>BexioApiNet__JwtToken</c>
-/// are missing. The service is instantiated directly here because wiring the
-/// connector into <see cref="IBexioApiClient" /> is deferred to the Wave 1
-/// aggregation issue (#49).
+/// are missing. The tests verify that the deserialised <see cref="Abstractions.Models.Banking.PaymentTypes.PaymentType"/>
+/// list matches the OpenAPI v2.0 schema shape (every item has a non-null <c>id</c>
+/// and <c>name</c>).
 /// </summary>
 [Category("E2E")]
 public sealed class PaymentTypeServiceE2eTests
@@ -82,11 +83,11 @@ public sealed class PaymentTypeServiceE2eTests
 
     /// <summary>
     /// <c>GET /2.0/payment_type</c> must return a non-null, non-empty list of
-    /// payment types for a provisioned Bexio tenant. Bexio ships default entries
-    /// (e.g., <c>Cash</c>, <c>Bank</c>) so the list is expected to be populated.
+    /// payment types for a provisioned Bexio tenant. Every returned item must
+    /// carry an <c>id</c> and a <c>name</c> per the v2 schema.
     /// </summary>
     [Test]
-    public async Task GetAll_ReturnsPaymentTypes()
+    public async Task GetAll_ReturnsPaymentTypesWithSchemaFields()
     {
         Assert.That(_paymentTypeService, Is.Not.Null);
 
@@ -97,8 +98,37 @@ public sealed class PaymentTypeServiceE2eTests
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null.And.Not.Empty);
+        });
+
+        Assert.Multiple(() =>
+        {
+            foreach (var item in result.Data!)
+            {
+                Assert.That(item.Id, Is.Not.Null, "id must be populated per schema");
+                Assert.That(item.Name, Is.Not.Null.And.Not.Empty, "name must be populated per schema");
+            }
+        });
+    }
+
+    /// <summary>
+    /// <c>GET /2.0/payment_type</c> with a <c>limit</c> + <c>order_by</c> query parameter
+    /// must succeed and return at most <c>limit</c> items in the requested order.
+    /// </summary>
+    [Test]
+    public async Task GetAll_WithQueryParameter_AppliesLimit()
+    {
+        Assert.That(_paymentTypeService, Is.Not.Null);
+
+        var result = await _paymentTypeService!.Get(new QueryParameterPaymentType(Limit: 1, OrderBy: "id_asc"));
+
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.ApiError, Is.Null);
             Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data!.First().Name, Is.Not.Null);
+            Assert.That(result.Data!.Count, Is.LessThanOrEqualTo(1));
         });
     }
 

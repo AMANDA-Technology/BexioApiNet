@@ -86,14 +86,15 @@ public sealed class ItemServiceIntegrationTests : IntegrationTestBase
 
     /// <summary>
     /// <c>ItemService.Get()</c> must issue a <c>GET</c> request against <c>/2.0/article</c>
-    /// and return a successful <c>ApiResult</c> when the server returns an empty array.
+    /// and deserialize each returned <see cref="BexioApiNet.Abstractions.Models.Items.Items.Item"/>
+    /// from the OpenAPI-shaped JSON array returned by Bexio.
     /// </summary>
     [Test]
-    public async Task ItemService_Get_SendsGetRequest()
+    public async Task ItemService_Get_SendsGetRequest_AndDeserializesAllFields()
     {
         Server
             .Given(Request.Create().WithPath(ItemsPath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{ItemResponse}]"));
 
         var service = new ItemService(ConnectionHandler);
 
@@ -106,15 +107,24 @@ public sealed class ItemServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(ItemsPath));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data, Has.Count.EqualTo(1));
+            Assert.That(result.Data![0].Id, Is.EqualTo(1));
+            Assert.That(result.Data![0].UserId, Is.EqualTo(1));
+            Assert.That(result.Data![0].ArticleTypeId, Is.EqualTo(2));
+            Assert.That(result.Data![0].InternCode, Is.EqualTo("wh-2019"));
+            Assert.That(result.Data![0].InternName, Is.EqualTo("Webhosting"));
+            Assert.That(result.Data![0].SalePrice, Is.EqualTo("49.90"));
+            Assert.That(result.Data![0].IsStock, Is.False);
         });
     }
 
     /// <summary>
     /// <c>ItemService.GetById(1)</c> must issue a <c>GET</c> request against <c>/2.0/article/1</c>
-    /// and deserialize the returned JSON into an <see cref="Item"/> with correct field values.
+    /// and deserialize every property defined on the OpenAPI Item schema.
     /// </summary>
     [Test]
-    public async Task ItemService_GetById_SendsGetRequestWithIdInPath()
+    public async Task ItemService_GetById_SendsGetRequestWithIdInPath_AndDeserializesAllFields()
     {
         Server
             .Given(Request.Create().WithPath($"{ItemsPath}/1").UsingGet())
@@ -131,8 +141,43 @@ public sealed class ItemServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo($"{ItemsPath}/1"));
-            Assert.That(result.Data?.Id, Is.EqualTo(1));
-            Assert.That(result.Data?.InternName, Is.EqualTo("Webhosting"));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!.Id, Is.EqualTo(1));
+            Assert.That(result.Data!.UserId, Is.EqualTo(1));
+            Assert.That(result.Data!.ArticleTypeId, Is.EqualTo(2));
+            Assert.That(result.Data!.ContactId, Is.Null);
+            Assert.That(result.Data!.DelivererCode, Is.Null);
+            Assert.That(result.Data!.InternCode, Is.EqualTo("wh-2019"));
+            Assert.That(result.Data!.InternName, Is.EqualTo("Webhosting"));
+            Assert.That(result.Data!.PurchasePrice, Is.Null);
+            Assert.That(result.Data!.SalePrice, Is.EqualTo("49.90"));
+            Assert.That(result.Data!.PurchaseTotal, Is.Null);
+            Assert.That(result.Data!.SaleTotal, Is.Null);
+            Assert.That(result.Data!.CurrencyId, Is.Null);
+            Assert.That(result.Data!.TaxIncomeId, Is.Null);
+            Assert.That(result.Data!.TaxId, Is.Null);
+            Assert.That(result.Data!.TaxExpenseId, Is.Null);
+            Assert.That(result.Data!.UnitId, Is.Null);
+            Assert.That(result.Data!.IsStock, Is.False);
+            Assert.That(result.Data!.StockId, Is.Null);
+            Assert.That(result.Data!.StockPlaceId, Is.Null);
+            Assert.That(result.Data!.StockNr, Is.EqualTo(0));
+            Assert.That(result.Data!.StockMinNr, Is.EqualTo(0));
+            Assert.That(result.Data!.StockReservedNr, Is.EqualTo(0));
+            Assert.That(result.Data!.StockAvailableNr, Is.EqualTo(0));
+            Assert.That(result.Data!.StockPickedNr, Is.EqualTo(0));
+            Assert.That(result.Data!.StockDisposedNr, Is.EqualTo(0));
+            Assert.That(result.Data!.StockOrderedNr, Is.EqualTo(0));
+            Assert.That(result.Data!.Width, Is.Null);
+            Assert.That(result.Data!.Height, Is.Null);
+            Assert.That(result.Data!.Weight, Is.Null);
+            Assert.That(result.Data!.Volume, Is.Null);
+            Assert.That(result.Data!.HtmlText, Is.Null);
+            Assert.That(result.Data!.Remarks, Is.Null);
+            Assert.That(result.Data!.DeliveryPrice, Is.Null);
+            Assert.That(result.Data!.ArticleGroupId, Is.Null);
+            Assert.That(result.Data!.AccountId, Is.Null);
+            Assert.That(result.Data!.ExpenseAccountId, Is.Null);
         });
     }
 
@@ -172,14 +217,15 @@ public sealed class ItemServiceIntegrationTests : IntegrationTestBase
 
     /// <summary>
     /// <c>ItemService.Search()</c> must issue a <c>POST</c> request against <c>/2.0/article/search</c>
-    /// with the search criteria serialized as the request body.
+    /// with the search criteria serialized as the request body and deserialize the populated
+    /// JSON array returned by Bexio.
     /// </summary>
     [Test]
-    public async Task ItemService_Search_SendsPostRequestToSearchPath()
+    public async Task ItemService_Search_SendsPostRequestToSearchPath_AndDeserializesAllFields()
     {
         Server
             .Given(Request.Create().WithPath($"{ItemsPath}/search").UsingPost())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{ItemResponse}]"));
 
         var service = new ItemService(ConnectionHandler);
         var criteria = new List<SearchCriteria>
@@ -196,6 +242,13 @@ public sealed class ItemServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo($"{ItemsPath}/search"));
+            Assert.That(request.Body, Does.Contain("\"field\":\"intern_name\""));
+            Assert.That(request.Body, Does.Contain("\"value\":\"Webhosting\""));
+            Assert.That(request.Body, Does.Contain("\"criteria\":\"like\""));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data, Has.Count.EqualTo(1));
+            Assert.That(result.Data![0].Id, Is.EqualTo(1));
+            Assert.That(result.Data![0].InternName, Is.EqualTo("Webhosting"));
         });
     }
 

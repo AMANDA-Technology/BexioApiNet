@@ -23,19 +23,16 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-namespace BexioApiNet.Abstractions.Models.Expenses.Expenses;
+namespace BexioApiNet.Abstractions.Models.Payroll.Absences;
 
 /// <summary>
-/// A discount entry on an expense. Shared by the create/update payloads and the
-/// responses. On update, callers must echo an existing <c>Id</c> to preserve a
-/// discount or pass <see langword="null"/> to create a new one.
-/// <see href="https://docs.bexio.com/#tag/Expenses">Expenses</see>
+/// Envelope response returned by
+/// <c>GET /4.0/payroll/employees/{employeeId}/absences</c>. The v4.0 list endpoint
+/// wraps the absences in a <c>{ data: [...] }</c> object instead of returning a raw
+/// array.
+/// <see href="https://docs.bexio.com/#tag/Absences">Absences</see>
 /// </summary>
-/// <param name="Position">Zero-based position of the discount within the expense.</param>
-/// <param name="Amount">Discount amount. Max 17 digits, 2 decimals. Must be greater than 0 when booking.</param>
-/// <param name="Id">Discount identifier. Server-generated on create; echoed on update.</param>
-public sealed record ExpenseDiscount(
-    [property: JsonPropertyName("position")] int Position,
-    [property: JsonPropertyName("amount")] decimal Amount,
-    [property: JsonPropertyName("id")] Guid? Id = null
+/// <param name="Data">Absences for the requested business year.</param>
+public sealed record AbsenceListResponse(
+    [property: JsonPropertyName("data")] IReadOnlyList<Absence> Data
 );

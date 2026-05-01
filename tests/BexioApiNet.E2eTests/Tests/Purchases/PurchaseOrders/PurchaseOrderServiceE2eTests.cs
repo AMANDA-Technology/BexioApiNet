@@ -27,14 +27,21 @@ namespace BexioApiNet.E2eTests.Tests.Purchases.PurchaseOrders;
 
 /// <summary>
 /// Live E2E tests for the <see cref="BexioApiNet.Services.Connectors.Purchases.PurchaseOrderService"/>.
-/// Read-only calls only: listing purchase orders and retrieving a purchase order by id.
+/// Read-only smoke tests against the live tenant: listing purchase orders and retrieving a
+/// purchase order by id, asserting payloads round-trip through the canonical
+/// <see cref="BexioApiNet.Abstractions.Models.Purchases.PurchaseOrders.PurchaseOrder"/> schema.
 /// Tests are auto-skipped when credentials are missing per <see cref="BexioE2eTestBase"/>.
+/// Mutating flows (Create / Update / Delete) are intentionally not exercised here — purchase
+/// orders affect supplier-facing accounting state and cannot be safely created and torn down
+/// inside an arbitrary test tenant.
 /// </summary>
 [Category("E2E")]
 public sealed class PurchaseOrderServiceE2eTests : BexioE2eTestBase
 {
     /// <summary>
-    /// Lists purchase orders and asserts the list response deserializes correctly.
+    /// Lists purchase orders and asserts the array response deserializes correctly —
+    /// the test tenant may have zero entries (in which case the assertion validates the
+    /// empty-array shape) or some, in which case <c>document_nr</c> must round-trip.
     /// </summary>
     [Test]
     public async Task Get_ReturnsListResponse()
@@ -76,12 +83,17 @@ public sealed class PurchaseOrderServiceE2eTests : BexioE2eTestBase
 
         var result = await BexioApiClient.PurchaseOrders.GetById(firstId);
 
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.ApiError, Is.Null);
+        Assert.That(result.Data, Is.Not.Null);
+
+        var po = result.Data!;
         Assert.Multiple(() =>
         {
-            Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.ApiError, Is.Null);
-            Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data!.Id, Is.EqualTo(firstId));
+            Assert.That(po.Id, Is.EqualTo(firstId));
+            Assert.That(po.ContactId, Is.GreaterThan(0));
+            Assert.That(po.UserId, Is.GreaterThan(0));
+            Assert.That(po.CurrencyId, Is.GreaterThan(0));
         });
     }
 }

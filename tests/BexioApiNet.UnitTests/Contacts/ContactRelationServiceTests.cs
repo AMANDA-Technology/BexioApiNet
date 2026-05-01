@@ -402,6 +402,37 @@ public sealed class ContactRelationServiceTests : ServiceTestBase
         Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{id}"));
     }
 
+    /// <summary>
+    /// <see cref="QueryParameterContactRelation"/> serializes <c>limit</c>, <c>offset</c>
+    /// and <c>order_by</c> entries that match the Bexio OpenAPI spec parameter names.
+    /// </summary>
+    [Test]
+    public void QueryParameterContactRelation_SerializesLimitOffsetAndOrderBy()
+    {
+        var queryParameter = new QueryParameterContactRelation(Limit: 25, Offset: 50, OrderBy: "contact_id_asc");
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter!.Parameters, Contains.Key("limit"));
+        Assert.That(queryParameter.QueryParameter.Parameters["limit"], Is.EqualTo(25));
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("offset"));
+        Assert.That(queryParameter.QueryParameter.Parameters["offset"], Is.EqualTo(50));
+        Assert.That(queryParameter.QueryParameter.Parameters, Contains.Key("order_by"));
+        Assert.That(queryParameter.QueryParameter.Parameters["order_by"], Is.EqualTo("contact_id_asc"));
+    }
+
+    /// <summary>
+    /// When all <see cref="QueryParameterContactRelation"/> arguments are <see langword="null"/>,
+    /// the inner <see cref="QueryParameter"/> is also <see langword="null"/> so the connection
+    /// handler does not append any query string.
+    /// </summary>
+    [Test]
+    public void QueryParameterContactRelation_AllNullProducesNullQueryParameter()
+    {
+        var queryParameter = new QueryParameterContactRelation();
+
+        Assert.That(queryParameter.QueryParameter, Is.Null);
+    }
+
     private static ContactRelationCreate BuildCreatePayload()
         => new(ContactId: 1, ContactSubId: 2, Description: "managed by");
 

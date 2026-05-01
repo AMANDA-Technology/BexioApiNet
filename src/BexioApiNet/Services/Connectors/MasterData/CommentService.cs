@@ -24,12 +24,14 @@ SOFTWARE.
 */
 
 using System.Runtime.InteropServices;
+using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Enums.MasterData;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.MasterData.Comments;
 using BexioApiNet.Abstractions.Models.MasterData.Comments.Views;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.MasterData;
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Base;
 
 namespace BexioApiNet.Services.Connectors.MasterData;
@@ -53,9 +55,23 @@ public sealed class CommentService : ConnectorService, ICommentService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<List<Comment>?>> Get(KbDocumentType kbDocumentType, int documentId, [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<List<Comment>?>> Get(KbDocumentType kbDocumentType, int documentId, [Optional] QueryParameterComment? queryParameterComment, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.GetAsync<List<Comment>?>($"{ApiVersion}/{kbDocumentType.ToBexioString()}/{documentId}/{EndpointLeaf}", null, cancellationToken);
+        var requestPath = $"{ApiVersion}/{kbDocumentType.ToBexioString()}/{documentId}/{EndpointLeaf}";
+
+        var res = await ConnectionHandler.GetAsync<List<Comment>?>(requestPath, queryParameterComment?.QueryParameter, cancellationToken);
+
+        if (!autoPage || !res.IsSuccess || res.Data is null || res.ResponseHeaders?.GetValueOrDefault(ApiHeaderNames.TotalResults) is not { } totalResults)
+            return res;
+
+        res.Data.AddRange(await ConnectionHandler.FetchAll<Comment>(
+            res.Data.Count,
+            totalResults,
+            requestPath,
+            queryParameterComment?.QueryParameter,
+            cancellationToken));
+
+        return res;
     }
 
     /// <inheritdoc />

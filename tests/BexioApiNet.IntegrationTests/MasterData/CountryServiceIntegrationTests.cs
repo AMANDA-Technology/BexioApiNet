@@ -33,8 +33,10 @@ namespace BexioApiNet.IntegrationTests.MasterData;
 /// Integration tests covering the CRUD entry points of <see cref="CountryService" /> against
 /// WireMock stubs. Verifies the path composed from <see cref="CountryConfiguration" />
 /// (<c>2.0/country</c>) reaches the handler correctly, that the expected HTTP verbs are used
-/// (including the PUT verb for edits), and that payloads are serialized with the expected
-/// snake_case field names.
+/// (including the Bexio-specific <c>POST</c> for edits — operationId <c>v2EditCountry</c>),
+/// that payloads are serialized with the expected snake_case field names, and that the response
+/// JSON deserialises into the <see cref="BexioApiNet.Abstractions.Models.MasterData.Countries.Country"/>
+/// record without loss.
 /// </summary>
 public sealed class CountryServiceIntegrationTests : IntegrationTestBase
 {
@@ -52,14 +54,14 @@ public sealed class CountryServiceIntegrationTests : IntegrationTestBase
     /// <summary>
     /// <c>CountryService.Get()</c> must issue a <c>GET</c> request against
     /// <c>/2.0/country</c> and return a successful <c>ApiResult</c> when the server
-    /// returns an empty array.
+    /// returns a fully populated array, deserialising every field on the country payload.
     /// </summary>
     [Test]
-    public async Task CountryService_Get_SendsGetRequest()
+    public async Task CountryService_Get_SendsGetRequest_AndDeserialisesEveryField()
     {
         Server
             .Given(Request.Create().WithPath(CountryPath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{CountryResponse}]"));
 
         var service = new CountryService(ConnectionHandler);
 
@@ -72,15 +74,21 @@ public sealed class CountryServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(CountryPath));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data, Has.Count.EqualTo(1));
+            Assert.That(result.Data![0].Id, Is.EqualTo(1));
+            Assert.That(result.Data[0].Name, Is.EqualTo("Kiribati"));
+            Assert.That(result.Data[0].NameShort, Is.EqualTo("KI"));
+            Assert.That(result.Data[0].Iso3166Alpha2, Is.EqualTo("KI"));
         });
     }
 
     /// <summary>
     /// <c>CountryService.GetById</c> must issue a <c>GET</c> request that includes the target
-    /// id in the URL path and surface the returned country on success.
+    /// id in the URL path and surface the returned country on success with all fields populated.
     /// </summary>
     [Test]
-    public async Task CountryService_GetById_SendsGetRequest()
+    public async Task CountryService_GetById_SendsGetRequest_AndDeserialisesEveryField()
     {
         const int id = 1;
         var expectedPath = $"{CountryPath}/{id}";
@@ -100,6 +108,7 @@ public sealed class CountryServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Id, Is.EqualTo(id));
+            Assert.That(result.Data.Name, Is.EqualTo("Kiribati"));
             Assert.That(result.Data.NameShort, Is.EqualTo("KI"));
             Assert.That(result.Data.Iso3166Alpha2, Is.EqualTo("KI"));
             Assert.That(request.Method, Is.EqualTo("GET"));
@@ -167,6 +176,9 @@ public sealed class CountryServiceIntegrationTests : IntegrationTestBase
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data, Has.Count.EqualTo(1));
+            Assert.That(result.Data![0].Iso3166Alpha2, Is.EqualTo("KI"));
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
             Assert.That(request.Body, Does.Contain("\"field\":\"name\""));
@@ -175,17 +187,19 @@ public sealed class CountryServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    /// <c>CountryService.Update</c> must send a <c>PUT</c> request against
-    /// <c>/2.0/country/{id}</c>.
+    /// <c>CountryService.Update</c> must send a <c>POST</c> (not <c>PUT</c>) request against
+    /// <c>/2.0/country/{id}</c>. Bexio's v2 country edit endpoint is documented as
+    /// <c>POST /2.0/country/{country_id}</c> (operationId <c>v2EditCountry</c>) and the body
+    /// is serialised with the same snake_case names as the create payload.
     /// </summary>
     [Test]
-    public async Task CountryService_Update_SendsPutRequest_WithIdInPath()
+    public async Task CountryService_Update_SendsPostRequest_WithIdInPath()
     {
         const int id = 1;
         var expectedPath = $"{CountryPath}/{id}";
 
         Server
-            .Given(Request.Create().WithPath(expectedPath).UsingPut())
+            .Given(Request.Create().WithPath(expectedPath).UsingPost())
             .RespondWith(Response.Create().WithStatusCode(200).WithBody(CountryResponse));
 
         var service = new CountryService(ConnectionHandler);
@@ -201,8 +215,11 @@ public sealed class CountryServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Id, Is.EqualTo(id));
-            Assert.That(request.Method, Is.EqualTo("PUT"));
+            Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
+            Assert.That(request.Body, Does.Contain("\"name\":\"Kiribati\""));
+            Assert.That(request.Body, Does.Contain("\"name_short\":\"KIR\""));
+            Assert.That(request.Body, Does.Contain("\"iso3166_alpha2\":\"KI\""));
         });
     }
 

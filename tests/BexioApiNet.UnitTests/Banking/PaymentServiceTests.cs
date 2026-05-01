@@ -83,7 +83,7 @@ public sealed class PaymentServiceTests : ServiceTestBase
     [Test]
     public async Task Get_WithQueryParameter_PassesQueryParameterThrough()
     {
-        var queryParameter = new QueryParameterPayment(Page: 2, PerPage: 50, FilterBy: "status=open");
+        var queryParameter = new QueryParameterPayment(Page: 2, PerPage: 50, FilterBy: "status:open");
         ConnectionHandler
             .GetAsync<List<Payment>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(new ApiResult<List<Payment>?> { IsSuccess = true, Data = [] });
@@ -94,6 +94,35 @@ public sealed class PaymentServiceTests : ServiceTestBase
             ExpectedEndpoint,
             queryParameter.QueryParameter,
             Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// <see cref="QueryParameterPayment"/> with no values supplied must yield a
+    /// <see langword="null"/> <see cref="QueryParameter"/> so the request URI does
+    /// not get spurious empty query parameters appended.
+    /// </summary>
+    [Test]
+    public void QueryParameterPayment_WithNoValues_ProducesNullQueryParameter()
+    {
+        var queryParameter = new QueryParameterPayment();
+
+        Assert.That(queryParameter.QueryParameter, Is.Null);
+    }
+
+    /// <summary>
+    /// <see cref="QueryParameterPayment"/> emits all three values under the keys
+    /// expected by Bexio v4.0 (<c>page</c>, <c>per-page</c>, <c>filter-by</c>).
+    /// </summary>
+    [Test]
+    public void QueryParameterPayment_WithAllValues_EmitsAll()
+    {
+        var queryParameter = new QueryParameterPayment(Page: 2, PerPage: 50, FilterBy: "status:open");
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter!.Parameters, Has.Count.EqualTo(3));
+        Assert.That(queryParameter.QueryParameter.Parameters["page"], Is.EqualTo(2));
+        Assert.That(queryParameter.QueryParameter.Parameters["per-page"], Is.EqualTo(50));
+        Assert.That(queryParameter.QueryParameter.Parameters["filter-by"], Is.EqualTo("status:open"));
     }
 
     /// <summary>
@@ -160,6 +189,26 @@ public sealed class PaymentServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    /// GetById forwards the caller-supplied cancellation token to the connection handler.
+    /// </summary>
+    [Test]
+    public async Task GetById_ForwardsCancellationToken()
+    {
+        using var cts = new CancellationTokenSource();
+        var paymentId = Guid.NewGuid();
+        ConnectionHandler
+            .GetAsync<Payment>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<Payment> { IsSuccess = true });
+
+        await _sut.GetById(paymentId, cts.Token);
+
+        await ConnectionHandler.Received(1).GetAsync<Payment>(
+            $"{ExpectedEndpoint}/{paymentId}",
+            null,
+            cts.Token);
+    }
+
+    /// <summary>
     /// Create forwards the payload and the expected endpoint path to
     /// <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}"/>.
     /// </summary>
@@ -185,6 +234,29 @@ public sealed class PaymentServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    /// Create forwards the caller-supplied cancellation token to the connection handler.
+    /// </summary>
+    [Test]
+    public async Task Create_ForwardsCancellationToken()
+    {
+        using var cts = new CancellationTokenSource();
+        var payload = BuildCreatePayload();
+        ConnectionHandler
+            .PostAsync<Payment, PaymentCreate>(
+                Arg.Any<PaymentCreate>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<Payment> { IsSuccess = true });
+
+        await _sut.Create(payload, cts.Token);
+
+        await ConnectionHandler.Received(1).PostAsync<Payment, PaymentCreate>(
+            payload,
+            ExpectedEndpoint,
+            cts.Token);
+    }
+
+    /// <summary>
     /// Cancel POSTs to <c>{id}/cancel</c> via
     /// <see cref="IBexioConnectionHandler.PostActionAsync{TResult}"/> — no request body is sent
     /// and the endpoint suffix must be <c>cancel</c>.
@@ -206,6 +278,23 @@ public sealed class PaymentServiceTests : ServiceTestBase
         await ConnectionHandler.Received(1).PostActionAsync<Payment>(
             Arg.Any<string>(),
             Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Cancel returns the <see cref="ApiResult{T}"/> from the connection handler unchanged.
+    /// </summary>
+    [Test]
+    public async Task Cancel_ReturnsApiResultFromConnectionHandler()
+    {
+        var paymentId = Guid.NewGuid();
+        var response = new ApiResult<Payment> { IsSuccess = true };
+        ConnectionHandler
+            .PostActionAsync<Payment>(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Cancel(paymentId);
+
+        Assert.That(result, Is.SameAs(response));
     }
 
     /// <summary>
@@ -235,6 +324,27 @@ public sealed class PaymentServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    /// Update returns the <see cref="ApiResult{T}"/> from the connection handler unchanged.
+    /// </summary>
+    [Test]
+    public async Task Update_ReturnsApiResultFromConnectionHandler()
+    {
+        var paymentId = Guid.NewGuid();
+        var payload = new PaymentUpdate(Amount: 100m);
+        var response = new ApiResult<Payment> { IsSuccess = true };
+        ConnectionHandler
+            .PutAsync<Payment, PaymentUpdate>(
+                Arg.Any<PaymentUpdate>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Update(paymentId, payload);
+
+        Assert.That(result, Is.SameAs(response));
+    }
+
+    /// <summary>
     /// Delete calls <see cref="IBexioConnectionHandler.Delete"/> with the path composed from
     /// the endpoint root and the payment UUID, and returns the handler's result unchanged.
     /// </summary>
@@ -254,6 +364,25 @@ public sealed class PaymentServiceTests : ServiceTestBase
 
         Assert.That(result, Is.SameAs(response));
         Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{paymentId}"));
+    }
+
+    /// <summary>
+    /// Delete forwards the caller-supplied cancellation token to the connection handler.
+    /// </summary>
+    [Test]
+    public async Task Delete_ForwardsCancellationToken()
+    {
+        using var cts = new CancellationTokenSource();
+        var paymentId = Guid.NewGuid();
+        ConnectionHandler
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<object> { IsSuccess = true });
+
+        await _sut.Delete(paymentId, cts.Token);
+
+        await ConnectionHandler.Received(1).Delete(
+            $"{ExpectedEndpoint}/{paymentId}",
+            cts.Token);
     }
 
     private static PaymentCreate BuildCreatePayload() =>

@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Enums.Api;
+using BexioApiNet.Abstractions.Models.Accounting.CalendarYears.Enums;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Models;
@@ -80,7 +81,10 @@ public class CalendarYearServiceE2eTests
     }
 
     /// <summary>
-    /// Fetches the paginated list of calendar years from the live tenant.
+    /// Fetches the paginated list of calendar years from the live tenant and asserts every
+    /// returned record structurally matches the <c>CalendarYear</c> OpenAPI schema (id,
+    /// start &lt;= end, vat_accounting_method ∈ {effective, net_tax}, vat_accounting_type ∈
+    /// {agreed, collected}).
     /// </summary>
     [Test]
     [Category("E2E")]
@@ -97,10 +101,22 @@ public class CalendarYearServiceE2eTests
             Assert.That(result.ApiError, Is.Null);
             Assert.That(result.Data, Is.Not.Null);
         });
+
+        foreach (var year in result.Data!)
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(year.Id, Is.GreaterThan(0), "id is required by the CalendarYear schema");
+                Assert.That(year.End, Is.GreaterThanOrEqualTo(year.Start), "end must not precede start");
+                Assert.That(year.VatAccountingMethod, Is.AnyOf(VatAccountingMethod.effective, VatAccountingMethod.net_tax));
+                Assert.That(year.VatAccountingType, Is.AnyOf(VatAccountingType.agreed, VatAccountingType.collected));
+            });
+        }
     }
 
     /// <summary>
-    /// Fetches a single calendar year by id, using the first id returned by <c>Get</c>.
+    /// Fetches a single calendar year by id, using the first id returned by <c>Get</c>, and
+    /// asserts round-trip equality on every schema field.
     /// </summary>
     [Test]
     [Category("E2E")]
@@ -111,9 +127,9 @@ public class CalendarYearServiceE2eTests
         var list = await _sut!.Get(new QueryParameterCalendarYear(Limit: 1, Offset: 0));
         Assert.That(list.Data, Is.Not.Null.And.Not.Empty, "tenant has no calendar years to fetch");
 
-        var id = list.Data![0].Id;
+        var listed = list.Data![0];
 
-        var result = await _sut.GetById(id);
+        var result = await _sut.GetById(listed.Id);
 
         Assert.That(result, Is.Not.Null);
         Assert.Multiple(() =>
@@ -121,12 +137,19 @@ public class CalendarYearServiceE2eTests
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.ApiError, Is.Null);
             Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data!.Id, Is.EqualTo(id));
+            Assert.That(result.Data!.Id, Is.EqualTo(listed.Id));
+            Assert.That(result.Data!.Start, Is.EqualTo(listed.Start));
+            Assert.That(result.Data!.End, Is.EqualTo(listed.End));
+            Assert.That(result.Data!.IsVatSubject, Is.EqualTo(listed.IsVatSubject));
+            Assert.That(result.Data!.IsAnnualReporting, Is.EqualTo(listed.IsAnnualReporting));
+            Assert.That(result.Data!.VatAccountingMethod, Is.EqualTo(listed.VatAccountingMethod));
+            Assert.That(result.Data!.VatAccountingType, Is.EqualTo(listed.VatAccountingType));
         });
     }
 
     /// <summary>
-    /// Searches calendar years matching a start date criterion against the live tenant.
+    /// Searches calendar years matching a start date criterion against the live tenant
+    /// and asserts the returned record's <c>start</c> field equals the criterion value.
     /// </summary>
     [Test]
     [Category("E2E")]
@@ -137,10 +160,10 @@ public class CalendarYearServiceE2eTests
         var list = await _sut!.Get(new QueryParameterCalendarYear(Limit: 1, Offset: 0));
         Assert.That(list.Data, Is.Not.Null.And.Not.Empty, "tenant has no calendar years to search");
 
-        var start = list.Data![0].Start.ToString("yyyy-MM-dd");
+        var start = list.Data![0].Start;
 
         var result = await _sut.Search([
-            new SearchCriteria { Field = "start", Value = start, Criteria = "=" }
+            new SearchCriteria { Field = "start", Value = start.ToString("yyyy-MM-dd"), Criteria = "=" }
         ]);
 
         Assert.That(result, Is.Not.Null);
@@ -148,8 +171,10 @@ public class CalendarYearServiceE2eTests
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.ApiError, Is.Null);
-            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data, Is.Not.Null.And.Not.Empty);
         });
+        foreach (var match in result.Data!)
+            Assert.That(match.Start, Is.EqualTo(start), "search results must match the supplied start criterion");
     }
 
     /// <summary>
@@ -171,8 +196,8 @@ public class CalendarYearServiceE2eTests
             Year: targetYear,
             IsVatSubject: true,
             IsAnnualReporting: false,
-            VatAccountingMethod: Abstractions.Models.Accounting.CalendarYears.Enums.VatAccountingMethod.effective,
-            VatAccountingType: Abstractions.Models.Accounting.CalendarYears.Enums.VatAccountingType.agreed,
+            VatAccountingMethod: VatAccountingMethod.effective,
+            VatAccountingType: VatAccountingType.agreed,
             DefaultTaxIncomeId: 1,
             DefaultTaxExpenseId: 2));
 
@@ -182,6 +207,17 @@ public class CalendarYearServiceE2eTests
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.ApiError, Is.Null);
             Assert.That(result.Data, Is.Not.Null.And.Not.Empty);
+        });
+
+        var created = result.Data!.Last();
+        Assert.Multiple(() =>
+        {
+            Assert.That(created.Id, Is.GreaterThan(0));
+            Assert.That(created.Start.Year.ToString(), Is.EqualTo(targetYear));
+            Assert.That(created.IsVatSubject, Is.True);
+            Assert.That(created.IsAnnualReporting, Is.False);
+            Assert.That(created.VatAccountingMethod, Is.EqualTo(VatAccountingMethod.effective));
+            Assert.That(created.VatAccountingType, Is.EqualTo(VatAccountingType.agreed));
         });
     }
 }

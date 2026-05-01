@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -26,20 +26,34 @@ SOFTWARE.
 namespace BexioApiNet.Models;
 
 /// <summary>
-/// Dictionary for optional query parameters
+/// Optional query parameters for the <c>3.0/currencies</c> endpoint.
+/// All parameters are optional per the Bexio v3 OpenAPI spec.
 /// </summary>
+/// <param name="Limit">Limit the number of results (max is 2000).</param>
+/// <param name="Offset">Skip over a number of elements by specifying an offset value.</param>
+/// <param name="Embed">Embeddable resource. Pass <c>exchange_rate</c> to embed exchange rate fields onto the response.</param>
+/// <param name="Date">Validity date of the embedded exchange rate.</param>
 public sealed record QueryParameterCurrency(
-    int Limit,
-    int Offset
+    int? Limit = null,
+    int? Offset = null,
+    string? Embed = null,
+    DateOnly? Date = null
 )
 {
     /// <summary>
-    ///
+    /// The wrapped <see cref="QueryParameter"/> built from the supplied options. Returns
+    /// <see langword="null"/> when no optional value was provided so the connection handler can
+    /// skip query string composition entirely.
     /// </summary>
-    public QueryParameter? QueryParameter { get; } =
-        new(Parameters: new()
-        {
-            {"limit", Limit},
-            {"offset", Offset}
-        });
-};
+    public QueryParameter? QueryParameter { get; } = Build(Limit, Offset, Embed, Date);
+
+    private static QueryParameter? Build(int? limit, int? offset, string? embed, DateOnly? date)
+    {
+        var parameters = new Dictionary<string, object>();
+        if (limit is { } l) parameters["limit"] = l;
+        if (offset is { } o) parameters["offset"] = o;
+        if (!string.IsNullOrWhiteSpace(embed)) parameters["embed"] = embed;
+        if (date is { } d) parameters["date"] = d.ToString("yyyy-MM-dd");
+        return parameters.Count is 0 ? null : new QueryParameter(parameters);
+    }
+}

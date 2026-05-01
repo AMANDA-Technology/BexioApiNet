@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -23,28 +23,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Models.Accounting.ManualEntries.Enums;
+
 namespace BexioApiNet.Abstractions.Models.Accounting.ManualEntries;
 
 /// <summary>
-/// Manual entry entry file. <see href="https://docs.bexio.com/#tag/Manual-Entries/operation/UploadManualEntryFile">Upload Manual Entry File</see>
+/// File metadata returned by the Bexio manual entry line file upload endpoint. Matches the
+/// shape of <c>FileResponse</c> in the Bexio v3 OpenAPI spec.
+/// <see href="https://docs.bexio.com/#tag/Manual-Entries/operation/UploadManualEntryFile">Upload Manual Entry File</see>
 /// </summary>
-/// <param name="Id"></param>
-/// <param name="IsPublic"></param>
-/// <param name="CreatedAt"></param>
-/// <param name="Extension"></param>
-/// <param name="SizeInBytes"></param>
-/// <param name="MimeType"></param>
-/// <param name="UserId"></param>
-/// <param name="Data"></param>
-/// <param name="Name"></param>
+/// <param name="Id">The id of the uploaded file.</param>
+/// <param name="Uuid">The uuid of the file.</param>
+/// <param name="Name">The display name of the file. Maximum 80 characters.</param>
+/// <param name="SizeInBytes">The file size in bytes.</param>
+/// <param name="Extension">The file extension. Maximum 10 characters.</param>
+/// <param name="MimeType">The mime type of the file. Maximum 80 characters.</param>
+/// <param name="UploaderEmail">Email of the uploader. Nullable.</param>
+/// <param name="UserId">The id of the user who uploaded the file.</param>
+/// <param name="IsArchived">Indicates whether the file is archived.</param>
+/// <param name="SourceType">The source where the file was uploaded from (web, email, mobile). Nullable.</param>
+/// <param name="IsReferenced">Indicates whether the file is referenced.</param>
+/// <param name="CreatedAt">Timestamp when the file was created.</param>
 public sealed record ManualEntryEntryFile(
     [property: JsonPropertyName("id")] int Id,
-    [property: JsonPropertyName("is_public")] bool IsPublic,
-    [property: JsonPropertyName("created_at")] DateTime CreatedAt,
+    [property: JsonPropertyName("uuid")] string Uuid,
+    [property: JsonPropertyName("name")] string Name,
+    [property: JsonPropertyName("size_in_bytes")] long SizeInBytes,
     [property: JsonPropertyName("extension")] string Extension,
-    [property: JsonPropertyName("size_in_bytes")] int SizeInBytes,
     [property: JsonPropertyName("mime_type")] string MimeType,
-    [property: JsonPropertyName("user_id")] int? UserId,
-    [property: JsonPropertyName("data")] string Data,
-    [property: JsonPropertyName("name")] string Name
+    [property: JsonPropertyName("uploader_email")] string? UploaderEmail,
+    [property: JsonPropertyName("user_id")] int UserId,
+    [property: JsonPropertyName("is_archived")] bool IsArchived,
+    [property: JsonPropertyName("source_type")] ManualEntryFileSourceType? SourceType,
+    [property: JsonPropertyName("is_referenced")] bool IsReferenced,
+    [property: JsonPropertyName("created_at")] DateTime CreatedAt
 );

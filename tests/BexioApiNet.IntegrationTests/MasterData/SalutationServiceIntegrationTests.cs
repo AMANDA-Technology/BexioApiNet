@@ -25,6 +25,7 @@ SOFTWARE.
 
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.MasterData.Salutations.Views;
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.MasterData;
 
 namespace BexioApiNet.IntegrationTests.MasterData;
@@ -33,8 +34,10 @@ namespace BexioApiNet.IntegrationTests.MasterData;
 ///     Integration tests covering the CRUD entry points of <see cref="SalutationService" /> against
 ///     WireMock stubs. Verifies the path composed from <see cref="SalutationConfiguration" />
 ///     (<c>2.0/salutation</c>) reaches the handler correctly, that the expected HTTP verbs are used
-///     (including the Bexio-specific <c>PUT</c> for edits), and that payloads are serialized with the
-///     expected snake_case field names.
+///     (the Bexio Salutations API uses <c>POST /2.0/salutation/{id}</c> for full-replacement edits per
+///     the v3.0.0 OpenAPI spec — see
+///     <see href="https://docs.bexio.com/#tag/Salutations/operation/v2EditSalutation" />),
+///     and that payloads round-trip through the canonical Salutation schema (<c>id</c> + <c>name</c>).
 /// </summary>
 public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
 {
@@ -47,17 +50,30 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
                                               }
                                               """;
 
+    private const string SalutationListResponse = """
+                                                  [
+                                                      {
+                                                          "id": 1,
+                                                          "name": "Herr"
+                                                      },
+                                                      {
+                                                          "id": 2,
+                                                          "name": "Frau"
+                                                      }
+                                                  ]
+                                                  """;
+
     /// <summary>
-    ///     <c>SalutationService.Get()</c> must issue a <c>GET</c> request against
-    ///     <c>/2.0/salutation</c> and return a successful <c>ApiResult</c> when the server
-    ///     returns an empty array.
+    ///     <c>SalutationService.Get()</c> issues a <c>GET</c> request against
+    ///     <c>/2.0/salutation</c> and deserializes the array of salutations into the
+    ///     canonical <see cref="BexioApiNet.Abstractions.Models.MasterData.Salutations.Salutation" /> records.
     /// </summary>
     [Test]
-    public async Task SalutationService_Get_SendsGetRequest()
+    public async Task SalutationService_Get_SendsGetRequest_DeserializesList()
     {
         Server
             .Given(Request.Create().WithPath(SalutationPath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(SalutationListResponse));
 
         var service = new SalutationService(ConnectionHandler);
 
@@ -70,12 +86,45 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(SalutationPath));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data, Has.Count.EqualTo(2));
+            Assert.That(result.Data![0].Id, Is.EqualTo(1));
+            Assert.That(result.Data[0].Name, Is.EqualTo("Herr"));
+            Assert.That(result.Data[1].Id, Is.EqualTo(2));
+            Assert.That(result.Data[1].Name, Is.EqualTo("Frau"));
         });
     }
 
     /// <summary>
-    ///     <c>SalutationService.GetById</c> must issue a <c>GET</c> request that includes the target
-    ///     id in the URL path and surface the returned salutation on success.
+    ///     <c>SalutationService.Get()</c> appends the supplied
+    ///     <see cref="QueryParameterSalutation" /> values (<c>limit</c>, <c>offset</c>) to the URL.
+    /// </summary>
+    [Test]
+    public async Task SalutationService_Get_WithQueryParameter_AppendsLimitAndOffset()
+    {
+        Server
+            .Given(Request.Create().WithPath(SalutationPath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+
+        var service = new SalutationService(ConnectionHandler);
+
+        var result = await service.Get(
+            new QueryParameterSalutation(50, 100),
+            cancellationToken: TestContext.CurrentContext.CancellationToken);
+
+        var request = Server.LogEntries.Last().RequestMessage!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(request.Url, Does.Contain("limit=50"));
+            Assert.That(request.Url, Does.Contain("offset=100"));
+        });
+    }
+
+    /// <summary>
+    ///     <c>SalutationService.GetById</c> issues a <c>GET</c> request that includes the target
+    ///     id in the URL path and surfaces the returned salutation on success.
     /// </summary>
     [Test]
     public async Task SalutationService_GetById_SendsGetRequest()
@@ -98,14 +147,15 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Id, Is.EqualTo(id));
+            Assert.That(result.Data.Name, Is.EqualTo("Herr"));
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
         });
     }
 
     /// <summary>
-    ///     <c>SalutationService.Create</c> must send a <c>POST</c> request whose body is the
-    ///     serialized <see cref="SalutationCreate" /> payload, and must surface the returned salutation
+    ///     <c>SalutationService.Create</c> sends a <c>POST</c> request whose body is the
+    ///     serialized <see cref="SalutationCreate" /> payload and surfaces the returned salutation
     ///     on success.
     /// </summary>
     [Test]
@@ -128,6 +178,7 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Id, Is.EqualTo(1));
+            Assert.That(result.Data.Name, Is.EqualTo("Herr"));
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(SalutationPath));
             Assert.That(request.Body, Does.Contain("\"name\":\"Herr\""));
@@ -135,8 +186,9 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>SalutationService.Search</c> must send a <c>POST</c> request against
-    ///     <c>/2.0/salutation/search</c> with the <see cref="SearchCriteria" /> list as the JSON body.
+    ///     <c>SalutationService.Search</c> sends a <c>POST</c> request against
+    ///     <c>/2.0/salutation/search</c> with the <see cref="SearchCriteria" /> list as the JSON body
+    ///     and deserializes the returned array of matches.
     /// </summary>
     [Test]
     public async Task SalutationService_Search_SendsPostRequest_ToSearchPath()
@@ -145,7 +197,7 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
 
         Server
             .Given(Request.Create().WithPath(expectedPath).UsingPost())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{SalutationResponse}]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(SalutationListResponse));
 
         var service = new SalutationService(ConnectionHandler);
 
@@ -161,6 +213,7 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Data, Has.Count.EqualTo(2));
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
             Assert.That(request.Body, Does.Contain("\"field\":\"name\""));
@@ -169,17 +222,18 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
     }
 
     /// <summary>
-    ///     <c>SalutationService.Update</c> must send a <c>PUT</c> request against
-    ///     <c>/2.0/salutation/{id}</c>.
+    ///     <c>SalutationService.Update</c> sends a <c>POST</c> request against
+    ///     <c>/2.0/salutation/{id}</c>. The Bexio Salutations API uses <c>POST</c> (not <c>PUT</c>)
+    ///     for full-replacement edits per the v3.0.0 OpenAPI spec.
     /// </summary>
     [Test]
-    public async Task SalutationService_Update_SendsPutRequest_WithIdInPath()
+    public async Task SalutationService_Update_SendsPostRequest_WithIdInPath()
     {
         const int id = 1;
         var expectedPath = $"{SalutationPath}/{id}";
 
         Server
-            .Given(Request.Create().WithPath(expectedPath).UsingPut())
+            .Given(Request.Create().WithPath(expectedPath).UsingPost())
             .RespondWith(Response.Create().WithStatusCode(200).WithBody(SalutationResponse));
 
         var service = new SalutationService(ConnectionHandler);
@@ -195,14 +249,15 @@ public sealed class SalutationServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Id, Is.EqualTo(id));
-            Assert.That(request.Method, Is.EqualTo("PUT"));
+            Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
+            Assert.That(request.Body, Does.Contain("\"name\":\"Frau\""));
         });
     }
 
     /// <summary>
-    ///     <c>SalutationService.Delete</c> must issue a <c>DELETE</c> request that includes the
-    ///     target id in the URL path.
+    ///     <c>SalutationService.Delete</c> issues a <c>DELETE</c> request that includes the
+    ///     target id in the URL path and parses the <c>{"success":true}</c> success body.
     /// </summary>
     [Test]
     public async Task SalutationService_Delete_SendsDeleteRequest()

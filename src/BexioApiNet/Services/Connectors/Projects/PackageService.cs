@@ -28,6 +28,7 @@ using BexioApiNet.Abstractions.Models.Projects.Packages;
 using BexioApiNet.Abstractions.Models.Projects.Packages.Views;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Projects;
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Base;
 
 namespace BexioApiNet.Services.Connectors.Projects;
@@ -51,9 +52,9 @@ public sealed class PackageService : ConnectorService, IPackageService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<List<Package>?>> GetAsync(int projectId, CancellationToken cancellationToken = default)
+    public async Task<ApiResult<List<Package>?>> GetAsync(int projectId, QueryParameterPackage? queryParameter = null, CancellationToken cancellationToken = default)
     {
-        return await ConnectionHandler.GetAsync<List<Package>?>($"{ApiVersion}/projects/{projectId}/{EndpointRoot}", null, cancellationToken);
+        return await ConnectionHandler.GetAsync<List<Package>?>($"{ApiVersion}/projects/{projectId}/{EndpointRoot}", queryParameter?.QueryParameter, cancellationToken);
     }
 
     /// <inheritdoc />

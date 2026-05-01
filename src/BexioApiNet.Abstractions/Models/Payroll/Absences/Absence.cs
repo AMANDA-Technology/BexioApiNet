@@ -32,18 +32,20 @@ namespace BexioApiNet.Abstractions.Models.Payroll.Absences;
 /// <see href="https://docs.bexio.com/#tag/Absences">Absences</see>
 /// </summary>
 /// <param name="Id">Unique absence identifier.</param>
-/// <param name="EmployeeId">Identifier of the employee the absence belongs to.</param>
-/// <param name="AbsenceType">Absence type (e.g. <c>SICK</c>, <c>VACATION</c>, <c>MATERNITY</c>).</param>
-/// <param name="StartDate">First day of the absence.</param>
+/// <param name="Reason">Absence reason. Currently supported: <c>Injury</c>, <c>Sickness</c>, <c>MaternityLeave</c>, <c>MilitaryLeave</c>, <c>Vacation</c>, <c>InterruptionOfWork</c>. New values may be added in the future.</param>
+/// <param name="StartDate">First day of the absence (required by spec).</param>
 /// <param name="EndDate">Last day of the absence.</param>
-/// <param name="Status">Approval status (e.g. <c>PENDING</c>, <c>APPROVED</c>, <c>REJECTED</c>).</param>
-/// <param name="CreatedAt">Creation timestamp.</param>
+/// <param name="HalfDay">Whether the absence covers half-days only. Default <see langword="false"/>.</param>
+/// <param name="ContinuedPay">Continued-pay percentage (decimal).</param>
+/// <param name="Disability">Disability percentage (decimal).</param>
+/// <param name="PaidHours">Paid hours associated with the absence (decimal).</param>
 public sealed record Absence(
     [property: JsonPropertyName("id")] Guid Id,
-    [property: JsonPropertyName("employee_id")] Guid? EmployeeId = null,
-    [property: JsonPropertyName("absence_type")] string? AbsenceType = null,
-    [property: JsonPropertyName("start_date")] DateTime? StartDate = null,
-    [property: JsonPropertyName("end_date")] DateTime? EndDate = null,
-    [property: JsonPropertyName("status")] string? Status = null,
-    [property: JsonPropertyName("created_at")] DateTime? CreatedAt = null
+    [property: JsonPropertyName("reason")] string Reason,
+    [property: JsonPropertyName("start_date")] DateOnly StartDate,
+    [property: JsonPropertyName("end_date")] DateOnly? EndDate = null,
+    [property: JsonPropertyName("half_day")] bool? HalfDay = null,
+    [property: JsonPropertyName("continued_pay")] decimal? ContinuedPay = null,
+    [property: JsonPropertyName("disability")] decimal? Disability = null,
+    [property: JsonPropertyName("paid_hours")] decimal? PaidHours = null
 );

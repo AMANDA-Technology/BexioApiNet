@@ -39,21 +39,24 @@ namespace BexioApiNet.Interfaces.Connectors.Payroll;
 public interface IEmployeeService
 {
     /// <summary>
-    /// List all payroll employees.
+    /// List all active payroll employees.
     /// <see href="https://docs.bexio.com/#tag/Employees">List Employees</see>
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An <see cref="ApiResult{T}"/> wrapping the list of <see cref="Employee"/>.</returns>
-    public Task<ApiResult<List<Employee>>> Get([Optional] CancellationToken cancellationToken);
+    /// <returns>An <see cref="ApiResult{T}"/> wrapping the <see cref="EmployeeListResponse"/> envelope.</returns>
+    public Task<ApiResult<EmployeeListResponse>> Get([Optional] CancellationToken cancellationToken);
 
     /// <summary>
-    /// Get a single payroll employee by id.
-    /// <see href="https://docs.bexio.com/#tag/Employees">Get Employee</see>
+    /// Get a single payroll employee by id on a specific date. The Bexio v4.0 spec
+    /// requires the <c>date</c> query parameter — employee state is time-sliced
+    /// because of mid-year transfers, role changes and similar events.
+    /// <see href="https://docs.bexio.com/#tag/Employees">Get Employee On Date</see>
     /// </summary>
     /// <param name="id">Employee identifier.</param>
+    /// <param name="date">Date to retrieve the employee snapshot on.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}"/> wrapping the <see cref="Employee"/>.</returns>
-    public Task<ApiResult<Employee>> GetById(Guid id, [Optional] CancellationToken cancellationToken);
+    public Task<ApiResult<Employee>> GetById(Guid id, DateOnly date, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
     /// Create a new payroll employee.

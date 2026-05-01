@@ -36,7 +36,9 @@ public class TestGetById : OutgoingPaymentE2eTestBase
 {
     /// <summary>
     /// Lists existing payments to discover an id, then fetches that payment by id and asserts
-    /// the full model deserialises with a matching <c>Id</c>.
+    /// the full model deserialises with a matching <c>Id</c> and the schema-required fields
+    /// (<c>created_at</c>, <c>currency_code</c>, <c>exchange_rate</c>, <c>is_salary_payment</c>)
+    /// are populated.
     /// </summary>
     [Test]
     public async Task GetById()
@@ -64,6 +66,11 @@ public class TestGetById : OutgoingPaymentE2eTestBase
             Assert.That(res.ApiError, Is.Null);
             Assert.That(res.Data, Is.Not.Null);
             Assert.That(res.Data!.Id, Is.EqualTo(firstId));
+            Assert.That(res.Data.CreatedAt, Is.Not.EqualTo(default(DateTimeOffset)));
+            Assert.That(res.Data.BillId, Is.Not.EqualTo(Guid.Empty));
+            Assert.That(res.Data.CurrencyCode, Is.Not.Null.And.Not.Empty);
+            Assert.That(res.Data.ExchangeRate, Is.GreaterThan(0));
+            Assert.That(res.Data.ExecutionDate, Is.Not.EqualTo(default(DateOnly)));
         });
     }
 }

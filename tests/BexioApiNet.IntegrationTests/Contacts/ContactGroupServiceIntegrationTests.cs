@@ -25,6 +25,7 @@ SOFTWARE.
 
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Contacts.ContactGroups.Views;
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Contacts;
 
 namespace BexioApiNet.IntegrationTests.Contacts;
@@ -34,30 +35,35 @@ namespace BexioApiNet.IntegrationTests.Contacts;
 /// WireMock stubs. Verifies the path composed from <see cref="ContactGroupConfiguration" />
 /// (<c>2.0/contact_group</c>) reaches the handler correctly, that the expected HTTP verbs are used
 /// (including the Bexio-specific <c>POST</c> for edits), and that payloads are serialized with the
-/// expected snake_case field names.
+/// expected snake_case field names. Each list / read response stub carries the exact OpenAPI
+/// shape (id + name) so deserialization is asserted on every property.
 /// </summary>
 public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
 {
     private const string ContactGroupPath = "/2.0/contact_group";
 
+    /// <summary>
+    /// Fully-populated <c>ContactGroup</c> response body — covers every property in the
+    /// Bexio v3 OpenAPI <c>ContactGroup</c> schema (read-only <c>id</c> and required <c>name</c>).
+    /// </summary>
     private const string ContactGroupResponse = """
                                                 {
-                                                    "id": 1,
+                                                    "id": 7,
                                                     "name": "VIP Customers"
                                                 }
                                                 """;
 
     /// <summary>
     /// <c>ContactGroupService.Get()</c> must issue a <c>GET</c> request against
-    /// <c>/2.0/contact_group</c> and return a successful <c>ApiResult</c> when the server
-    /// returns an empty array.
+    /// <c>/2.0/contact_group</c> and deserialize the array body into a list of fully-populated
+    /// <c>ContactGroup</c> records.
     /// </summary>
     [Test]
-    public async Task ContactGroupService_Get_SendsGetRequest()
+    public async Task ContactGroupService_Get_SendsGetRequest_AndDeserializesContactGroup()
     {
         Server
             .Given(Request.Create().WithPath(ContactGroupPath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{ContactGroupResponse}]"));
 
         var service = new ContactGroupService(ConnectionHandler);
 
@@ -70,17 +76,45 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(ContactGroupPath));
+            Assert.That(result.Data, Has.Count.EqualTo(1));
+            Assert.That(result.Data![0].Id, Is.EqualTo(7));
+            Assert.That(result.Data[0].Name, Is.EqualTo("VIP Customers"));
         });
     }
 
     /// <summary>
-    /// <c>ContactGroupService.GetById</c> must issue a <c>GET</c> request that includes the target
-    /// id in the URL path and surface the returned contact group on success.
+    /// <c>ContactGroupService.Get()</c> serializes <c>limit</c>, <c>offset</c>, and <c>order_by</c>
+    /// onto the request URL when a populated <see cref="QueryParameterContactGroup"/> is supplied.
+    /// Verifies the query parameter names match the Bexio v3 spec.
     /// </summary>
     [Test]
-    public async Task ContactGroupService_GetById_SendsGetRequest()
+    public async Task ContactGroupService_Get_WithQueryParameters_SerializesQueryString()
     {
-        const int id = 1;
+        Server
+            .Given(Request.Create().WithPath(ContactGroupPath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+
+        var service = new ContactGroupService(ConnectionHandler);
+
+        var queryParameter = new QueryParameterContactGroup(Limit: 50, Offset: 100, OrderBy: "name");
+
+        await service.Get(queryParameter, cancellationToken: TestContext.CurrentContext.CancellationToken);
+
+        var request = Server.LogEntries.Last().RequestMessage!;
+
+        Assert.That(request.RawQuery, Does.Contain("limit=50"));
+        Assert.That(request.RawQuery, Does.Contain("offset=100"));
+        Assert.That(request.RawQuery, Does.Contain("order_by=name"));
+    }
+
+    /// <summary>
+    /// <c>ContactGroupService.GetById</c> must issue a <c>GET</c> request that includes the target
+    /// id in the URL path and deserialize the returned <c>ContactGroup</c> body.
+    /// </summary>
+    [Test]
+    public async Task ContactGroupService_GetById_SendsGetRequest_AndDeserializesContactGroup()
+    {
+        const int id = 7;
         var expectedPath = $"{ContactGroupPath}/{id}";
 
         Server
@@ -98,6 +132,7 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Id, Is.EqualTo(id));
+            Assert.That(result.Data.Name, Is.EqualTo("VIP Customers"));
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
         });
@@ -105,11 +140,11 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
 
     /// <summary>
     /// <c>ContactGroupService.Create</c> must send a <c>POST</c> request whose body is the
-    /// serialized <see cref="ContactGroupCreate" /> payload, and must surface the returned contact
-    /// group on success.
+    /// serialized <see cref="ContactGroupCreate" /> payload (with the snake_case <c>name</c> field),
+    /// and must surface the returned contact group on success with all properties populated.
     /// </summary>
     [Test]
-    public async Task ContactGroupService_Create_SendsPostRequest()
+    public async Task ContactGroupService_Create_SendsPostRequest_AndDeserializesContactGroup()
     {
         Server
             .Given(Request.Create().WithPath(ContactGroupPath).UsingPost())
@@ -127,7 +162,8 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data!.Id, Is.EqualTo(1));
+            Assert.That(result.Data!.Id, Is.EqualTo(7));
+            Assert.That(result.Data.Name, Is.EqualTo("VIP Customers"));
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(ContactGroupPath));
             Assert.That(request.Body, Does.Contain("\"name\":\"VIP Customers\""));
@@ -136,10 +172,11 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
 
     /// <summary>
     /// <c>ContactGroupService.Search</c> must send a <c>POST</c> request against
-    /// <c>/2.0/contact_group/search</c> with the <see cref="SearchCriteria" /> list as the JSON body.
+    /// <c>/2.0/contact_group/search</c> with the <see cref="SearchCriteria" /> list as the JSON
+    /// body and deserialize the array response with full property coverage on every item.
     /// </summary>
     [Test]
-    public async Task ContactGroupService_Search_SendsPostRequest_ToSearchPath()
+    public async Task ContactGroupService_Search_SendsPostRequest_ToSearchPath_AndDeserializesArray()
     {
         var expectedPath = $"{ContactGroupPath}/search";
 
@@ -165,6 +202,10 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
             Assert.That(request.Body, Does.Contain("\"field\":\"name\""));
             Assert.That(request.Body, Does.Contain("\"criteria\":\"like\""));
+            Assert.That(request.Body, Does.Contain("\"value\":\"VIP\""));
+            Assert.That(result.Data, Has.Count.EqualTo(1));
+            Assert.That(result.Data![0].Id, Is.EqualTo(7));
+            Assert.That(result.Data[0].Name, Is.EqualTo("VIP Customers"));
         });
     }
 
@@ -173,9 +214,9 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
     /// <c>/2.0/contact_group/{id}</c> — Bexio uses POST for full-replacement edits on v2.0 resources.
     /// </summary>
     [Test]
-    public async Task ContactGroupService_Update_SendsPostRequest_WithIdInPath()
+    public async Task ContactGroupService_Update_SendsPostRequest_WithIdInPath_AndDeserializesContactGroup()
     {
-        const int id = 1;
+        const int id = 7;
         var expectedPath = $"{ContactGroupPath}/{id}";
 
         Server
@@ -195,19 +236,21 @@ public sealed class ContactGroupServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Id, Is.EqualTo(id));
+            Assert.That(result.Data.Name, Is.EqualTo("VIP Customers"));
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
+            Assert.That(request.Body, Does.Contain("\"name\":\"VIP Customers\""));
         });
     }
 
     /// <summary>
     /// <c>ContactGroupService.Delete</c> must issue a <c>DELETE</c> request that includes the
-    /// target id in the URL path.
+    /// target id in the URL path and surface Bexio's <c>EntryDeleted</c> envelope.
     /// </summary>
     [Test]
     public async Task ContactGroupService_Delete_SendsDeleteRequest()
     {
-        const int idToDelete = 1;
+        const int idToDelete = 7;
         var expectedPath = $"{ContactGroupPath}/{idToDelete}";
 
         Server

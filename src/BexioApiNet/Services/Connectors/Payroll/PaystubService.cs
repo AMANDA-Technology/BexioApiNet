@@ -25,6 +25,7 @@ SOFTWARE.
 
 using System.Runtime.InteropServices;
 using BexioApiNet.Abstractions.Models.Api;
+using BexioApiNet.Abstractions.Models.Payroll.Paystubs;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Payroll;
 using BexioApiNet.Services.Connectors.Base;
@@ -50,11 +51,12 @@ public sealed class PaystubService : ConnectorService, IPaystubService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<byte[]>> GetPdf(int employeeId, int year, int month,
+    public async Task<ApiResult<Paystub>> GetPdf(Guid employeeId, int year, int month,
         [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.GetBinaryAsync(
+        return await ConnectionHandler.GetAsync<Paystub>(
             $"{ApiVersion}/{EndpointRoot}/{employeeId}/paystub-pdf/{year}/{month}",
+            null,
             cancellationToken);
     }
 }

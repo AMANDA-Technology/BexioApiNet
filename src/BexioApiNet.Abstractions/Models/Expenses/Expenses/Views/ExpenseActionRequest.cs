@@ -28,7 +28,7 @@ using BexioApiNet.Abstractions.Models.Expenses.Expenses.Enums;
 namespace BexioApiNet.Abstractions.Models.Expenses.Expenses.Views;
 
 /// <summary>
-/// Request body for <c>POST /4.0/expenses/expenses/{id}/actions</c>.
+/// Request body for <c>POST /4.0/expenses/{id}/actions</c>.
 /// <see href="https://docs.bexio.com/#tag/Expenses">Expenses</see>
 /// </summary>
 /// <param name="Action">Action to execute.</param>

@@ -26,12 +26,15 @@ SOFTWARE.
 namespace BexioApiNet.E2eTests.Tests.Banking.BankAccount;
 
 /// <summary>
-///
+/// Live E2E coverage for <c>GET /3.0/banking/accounts</c>. The test calls the live
+/// Bexio API and asserts the response matches the OpenAPI v3.0 schema shape — specifically
+/// that core identifying fields are populated for at least one bank account.
 /// </summary>
 public class TestGetAll : BexioE2eTestBase
 {
     /// <summary>
-    ///
+    /// Lists bank accounts and asserts the deserialised response is non-empty and the
+    /// first item carries the schema-required identifiers (<c>id</c>, <c>name</c>, <c>iban_nr</c>).
     /// </summary>
     [Test]
     public async Task GetAll()
@@ -44,7 +47,15 @@ public class TestGetAll : BexioE2eTestBase
         {
             Assert.That(res.IsSuccess, Is.True);
             Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data?.First().Name, Is.Not.Null);
+            Assert.That(res.Data, Is.Not.Null.And.Not.Empty);
+        });
+
+        var first = res.Data!.First();
+        Assert.Multiple(() =>
+        {
+            Assert.That(first.Id, Is.Not.Null);
+            Assert.That(first.Name, Is.Not.Null);
+            Assert.That(first.Type, Is.Not.Null);
         });
     }
 }

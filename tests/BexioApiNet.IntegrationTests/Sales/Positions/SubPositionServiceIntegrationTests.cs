@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Enums.Sales;
+using BexioApiNet.Abstractions.Models.Sales.Positions;
 using BexioApiNet.Abstractions.Models.Sales.Positions.Views;
 using BexioApiNet.Services.Connectors.Sales.Positions;
 
@@ -32,8 +33,9 @@ namespace BexioApiNet.IntegrationTests.Sales.Positions;
 /// <summary>
 /// Offline integration tests for <see cref="SubPositionService"/> against a
 /// <see cref="WireMockServer"/> stub. Verifies that the correct HTTP verbs and URL paths are
-/// used for all five CRUD operations and that request bodies are serialized with the expected
-/// snake_case field names.
+/// used for all five CRUD operations, that request bodies are serialized with the expected
+/// snake_case field names, and that the full <c>PositionSubpositionExtended</c> response
+/// payload deserializes per the OpenAPI schema.
 /// </summary>
 public sealed class SubPositionServiceIntegrationTests : IntegrationTestBase
 {
@@ -42,7 +44,15 @@ public sealed class SubPositionServiceIntegrationTests : IntegrationTestBase
     private const int PositionId = 7;
 
     private static string BasePath => $"/2.0/{DocumentType}/{DocumentId}/kb_position_subposition";
+    private static string SinglePath => $"{BasePath}/{PositionId}";
 
+    /// <summary>
+    /// Fully-populated <c>PositionSubpositionExtended</c> response payload modelled on the
+    /// OpenAPI schema. All read-only fields (<c>id</c>, <c>pos</c>, <c>internal_pos</c>,
+    /// <c>is_optional</c>, <c>total_sum</c>, <c>show_pos_prices</c>) are present; <c>type</c>
+    /// is the <c>KbPositionSubposition</c> discriminator and <c>parent_id</c> is the optional
+    /// nullable nesting pointer.
+    /// </summary>
     private const string SubpositionResponse = """
         {
             "id": 7,
@@ -53,21 +63,21 @@ public sealed class SubPositionServiceIntegrationTests : IntegrationTestBase
             "internal_pos": 1,
             "show_pos_nr": true,
             "is_optional": false,
-            "total_sum": "0.00",
-            "show_pos_prices": false
+            "total_sum": "17.800000",
+            "show_pos_prices": true
         }
         """;
 
     /// <summary>
     /// <c>SubPositionService.Get()</c> must issue a <c>GET</c> request against the expected path
-    /// and return a successful <c>ApiResult</c> when the server returns an empty array.
+    /// and deserialize a list with full field coverage per the OpenAPI schema.
     /// </summary>
     [Test]
-    public async Task SubPositionService_Get_SendsGetRequest()
+    public async Task SubPositionService_Get_SendsGetRequest_AndDeserializesAllFields()
     {
         Server
             .Given(Request.Create().WithPath(BasePath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{SubpositionResponse}]"));
 
         var service = new SubPositionService(ConnectionHandler);
 
@@ -80,20 +90,35 @@ public sealed class SubPositionServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(BasePath));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!, Has.Count.EqualTo(1));
+        });
+
+        var position = result.Data![0];
+        Assert.Multiple(() =>
+        {
+            Assert.That(position.Id, Is.EqualTo(7));
+            Assert.That(position.Type, Is.EqualTo("KbPositionSubposition"));
+            Assert.That(position.ParentId, Is.Null);
+            Assert.That(position.Text, Is.EqualTo("Group heading"));
+            Assert.That(position.Pos, Is.EqualTo("1"));
+            Assert.That(position.InternalPos, Is.EqualTo(1));
+            Assert.That(position.ShowPosNr, Is.True);
+            Assert.That(position.IsOptional, Is.False);
+            Assert.That(position.TotalSum, Is.EqualTo("17.800000"));
+            Assert.That(position.ShowPosPrices, Is.True);
         });
     }
 
     /// <summary>
     /// <c>SubPositionService.GetById()</c> must issue a <c>GET</c> request that includes the
-    /// position id in the URL path and surface the returned position on success.
+    /// position id in the URL path and deserialize the full sub-position payload.
     /// </summary>
     [Test]
-    public async Task SubPositionService_GetById_SendsGetRequest_WithPositionIdInPath()
+    public async Task SubPositionService_GetById_SendsGetRequest_AndDeserializesAllFields()
     {
-        var expectedPath = $"{BasePath}/{PositionId}";
-
         Server
-            .Given(Request.Create().WithPath(expectedPath).UsingGet())
+            .Given(Request.Create().WithPath(SinglePath).UsingGet())
             .RespondWith(Response.Create().WithStatusCode(200).WithBody(SubpositionResponse));
 
         var service = new SubPositionService(ConnectionHandler);
@@ -106,9 +131,21 @@ public sealed class SubPositionServiceIntegrationTests : IntegrationTestBase
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data!.Id, Is.EqualTo(PositionId));
             Assert.That(request.Method, Is.EqualTo("GET"));
-            Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
+            Assert.That(request.AbsolutePath, Is.EqualTo(SinglePath));
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Data!.Id, Is.EqualTo(PositionId));
+            Assert.That(result.Data.Type, Is.EqualTo("KbPositionSubposition"));
+            Assert.That(result.Data.Text, Is.EqualTo("Group heading"));
+            Assert.That(result.Data.Pos, Is.EqualTo("1"));
+            Assert.That(result.Data.InternalPos, Is.EqualTo(1));
+            Assert.That(result.Data.ShowPosNr, Is.True);
+            Assert.That(result.Data.IsOptional, Is.False);
+            Assert.That(result.Data.TotalSum, Is.EqualTo("17.800000"));
+            Assert.That(result.Data.ShowPosPrices, Is.True);
         });
     }
 
@@ -151,10 +188,8 @@ public sealed class SubPositionServiceIntegrationTests : IntegrationTestBase
     [Test]
     public async Task SubPositionService_Update_SendsPostRequest_WithPositionIdInPath()
     {
-        var expectedPath = $"{BasePath}/{PositionId}";
-
         Server
-            .Given(Request.Create().WithPath(expectedPath).UsingPost())
+            .Given(Request.Create().WithPath(SinglePath).UsingPost())
             .RespondWith(Response.Create().WithStatusCode(200).WithBody(SubpositionResponse));
 
         var service = new SubPositionService(ConnectionHandler);
@@ -170,22 +205,20 @@ public sealed class SubPositionServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(request.Method, Is.EqualTo("POST"));
-            Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
+            Assert.That(request.AbsolutePath, Is.EqualTo(SinglePath));
             Assert.That(request.Body, Does.Contain("\"text\":\"Updated heading\""));
         });
     }
 
     /// <summary>
     /// <c>SubPositionService.Delete()</c> must issue a <c>DELETE</c> request that includes the
-    /// position id in the URL path.
+    /// position id in the URL path and surface the <c>{"success":true}</c> payload.
     /// </summary>
     [Test]
     public async Task SubPositionService_Delete_SendsDeleteRequest_WithPositionIdInPath()
     {
-        var expectedPath = $"{BasePath}/{PositionId}";
-
         Server
-            .Given(Request.Create().WithPath(expectedPath).UsingDelete())
+            .Given(Request.Create().WithPath(SinglePath).UsingDelete())
             .RespondWith(Response.Create().WithStatusCode(200).WithBody("{\"success\":true}"));
 
         var service = new SubPositionService(ConnectionHandler);
@@ -198,7 +231,80 @@ public sealed class SubPositionServiceIntegrationTests : IntegrationTestBase
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("DELETE"));
-            Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
+            Assert.That(request.AbsolutePath, Is.EqualTo(SinglePath));
+        });
+    }
+
+    /// <summary>
+    /// Smoke test verifying the path is correctly composed for each of the three OpenAPI-allowed
+    /// document types (<c>kb_offer</c>, <c>kb_order</c>, <c>kb_invoice</c>). Sub-positions are
+    /// not valid on deliveries per the spec.
+    /// </summary>
+    [TestCase(KbDocumentType.Offer)]
+    [TestCase(KbDocumentType.Order)]
+    [TestCase(KbDocumentType.Invoice)]
+    public async Task SubPositionService_Get_UsesCorrectPathForEachDocumentType(string documentType)
+    {
+        var path = $"/2.0/{documentType}/{DocumentId}/kb_position_subposition";
+
+        Server
+            .Given(Request.Create().WithPath(path).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+
+        var service = new SubPositionService(ConnectionHandler);
+
+        var result = await service.Get(documentType, DocumentId, TestContext.CurrentContext.CancellationToken);
+
+        var request = Server.LogEntries.Last().RequestMessage!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(request.AbsolutePath, Is.EqualTo(path));
+        });
+    }
+
+    /// <summary>
+    /// Verifies that nested grouping via <c>parent_id</c> is round-tripped: the create payload
+    /// serializes <c>parent_id</c> in snake_case and the response deserializes a non-null
+    /// <c>parent_id</c> into <see cref="PositionSubposition.ParentId"/>.
+    /// </summary>
+    [Test]
+    public async Task SubPositionService_Create_WithParentId_SerializesParentIdInBody()
+    {
+        const string nestedResponse = """
+            {
+                "id": 8,
+                "type": "KbPositionSubposition",
+                "parent_id": 7,
+                "text": "Nested heading",
+                "pos": "1.1",
+                "internal_pos": 2,
+                "show_pos_nr": true,
+                "is_optional": false,
+                "total_sum": "10.000000",
+                "show_pos_prices": true
+            }
+            """;
+
+        Server
+            .Given(Request.Create().WithPath(BasePath).UsingPost())
+            .RespondWith(Response.Create().WithStatusCode(201).WithBody(nestedResponse));
+
+        var service = new SubPositionService(ConnectionHandler);
+
+        var payload = new PositionSubpositionCreate(Text: "Nested heading", ShowPosNr: true, ParentId: 7);
+
+        var result = await service.Create(DocumentType, DocumentId, payload, TestContext.CurrentContext.CancellationToken);
+
+        var request = Server.LogEntries.Last().RequestMessage!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!.ParentId, Is.EqualTo(7));
+            Assert.That(request.Body, Does.Contain("\"parent_id\":7"));
         });
     }
 }

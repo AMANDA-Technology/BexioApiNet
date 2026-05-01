@@ -24,7 +24,9 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Models.Api;
+using BexioApiNet.Abstractions.Models.Contacts.AdditionalAddresses;
 using BexioApiNet.Abstractions.Models.Contacts.AdditionalAddresses.Views;
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Contacts;
 
 namespace BexioApiNet.IntegrationTests.Contacts;
@@ -35,41 +37,50 @@ namespace BexioApiNet.IntegrationTests.Contacts;
 /// pattern <c>2.0/contact/{contactId}/additional_address</c> (see
 /// <see cref="AdditionalAddressConfiguration" />). Verifies URL construction with the parent contact
 /// id, that the expected HTTP verbs are used (including the Bexio-specific <c>POST</c> for edits),
-/// and that payloads are serialized with the expected snake_case field names.
+/// and that payloads are serialized with the expected snake_case field names. Each list / read
+/// response stub is fully populated so the tests assert deserialization of every property in the
+/// OpenAPI <c>ContactRelation</c>-titled additional-address schema.
 /// </summary>
 public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBase
 {
     private const int TestContactId = 42;
     private const string AdditionalAddressPath = "/2.0/contact/42/additional_address";
 
+    /// <summary>
+    /// Fully-populated additional address response body — covers every property exposed by the
+    /// (mistitled <c>ContactRelation</c>) additional-address schema in the Bexio v3 OpenAPI spec.
+    /// 12 properties: <c>id</c>, <c>name</c>, <c>name_addition</c>, <c>address</c>, <c>street_name</c>,
+    /// <c>house_number</c>, <c>address_addition</c>, <c>postcode</c>, <c>city</c>, <c>country_id</c>,
+    /// <c>subject</c>, <c>description</c>.
+    /// </summary>
     private const string AdditionalAddressResponse = """
                                                      {
-                                                         "id": 1,
+                                                         "id": 5,
                                                          "name": "Warehouse",
-                                                         "name_addition": null,
+                                                         "name_addition": "North wing",
                                                          "address": "Walter Street 22",
                                                          "street_name": "Walter Street",
                                                          "house_number": "22",
-                                                         "address_addition": null,
+                                                         "address_addition": "Building C",
                                                          "postcode": "8000",
                                                          "city": "Zurich",
                                                          "country_id": 1,
                                                          "subject": "Delivery address",
-                                                         "description": null
+                                                         "description": "Backup site"
                                                      }
                                                      """;
 
     /// <summary>
     /// <c>AdditionalAddressService.Get()</c> must issue a <c>GET</c> request against
-    /// <c>/2.0/contact/{contactId}/additional_address</c> and return a successful <c>ApiResult</c>
-    /// when the server returns an empty array.
+    /// <c>/2.0/contact/{contactId}/additional_address</c> and deserialize the array body into a
+    /// list of fully-populated <c>AdditionalAddress</c> records.
     /// </summary>
     [Test]
-    public async Task AdditionalAddressService_Get_SendsGetRequest()
+    public async Task AdditionalAddressService_Get_SendsGetRequest_AndDeserializesAdditionalAddress()
     {
         Server
             .Given(Request.Create().WithPath(AdditionalAddressPath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{AdditionalAddressResponse}]"));
 
         var service = new AdditionalAddressService(ConnectionHandler);
 
@@ -82,17 +93,45 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(AdditionalAddressPath));
+            Assert.That(result.Data, Has.Count.EqualTo(1));
         });
+
+        AssertAdditionalAddressFullyDeserialized(result.Data![0]);
+    }
+
+    /// <summary>
+    /// <c>AdditionalAddressService.Get()</c> serializes <c>limit</c>, <c>offset</c> and
+    /// <c>order_by</c> onto the request URL when a populated <see cref="QueryParameterAdditionalAddress"/>
+    /// is supplied. Verifies the query parameter names match the Bexio v3 spec.
+    /// </summary>
+    [Test]
+    public async Task AdditionalAddressService_Get_WithQueryParameters_SerializesQueryString()
+    {
+        Server
+            .Given(Request.Create().WithPath(AdditionalAddressPath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+
+        var service = new AdditionalAddressService(ConnectionHandler);
+
+        var queryParameter = new QueryParameterAdditionalAddress(Limit: 25, Offset: 50, OrderBy: "name");
+
+        await service.Get(TestContactId, queryParameter, cancellationToken: TestContext.CurrentContext.CancellationToken);
+
+        var request = Server.LogEntries.Last().RequestMessage!;
+
+        Assert.That(request.RawQuery, Does.Contain("limit=25"));
+        Assert.That(request.RawQuery, Does.Contain("offset=50"));
+        Assert.That(request.RawQuery, Does.Contain("order_by=name"));
     }
 
     /// <summary>
     /// <c>AdditionalAddressService.GetById</c> must issue a <c>GET</c> request that includes both
-    /// the parent contact id and the address id in the URL path.
+    /// the parent contact id and the address id in the URL path and deserialize the returned body.
     /// </summary>
     [Test]
-    public async Task AdditionalAddressService_GetById_SendsGetRequest()
+    public async Task AdditionalAddressService_GetById_SendsGetRequest_AndDeserializesAdditionalAddress()
     {
-        const int id = 1;
+        const int id = 5;
         var expectedPath = $"{AdditionalAddressPath}/{id}";
 
         Server
@@ -109,19 +148,20 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data!.Id, Is.EqualTo(id));
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
         });
+
+        AssertAdditionalAddressFullyDeserialized(result.Data!);
     }
 
     /// <summary>
     /// <c>AdditionalAddressService.Create</c> must send a <c>POST</c> request whose body is the
     /// serialized <see cref="AdditionalAddressCreate" /> payload, and must surface the returned
-    /// additional address on success.
+    /// additional address on success with all properties populated.
     /// </summary>
     [Test]
-    public async Task AdditionalAddressService_Create_SendsPostRequest()
+    public async Task AdditionalAddressService_Create_SendsPostRequest_AndDeserializesAdditionalAddress()
     {
         Server
             .Given(Request.Create().WithPath(AdditionalAddressPath).UsingPost())
@@ -131,15 +171,15 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
 
         var payload = new AdditionalAddressCreate(
             "Warehouse",
-            null,
+            "North wing",
             "Walter Street",
             "22",
-            null,
+            "Building C",
             "8000",
             "Zurich",
             1,
             "Delivery address",
-            null);
+            "Backup site");
 
         var result = await service.Create(TestContactId, payload, TestContext.CurrentContext.CancellationToken);
 
@@ -149,21 +189,30 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data!.Id, Is.EqualTo(1));
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(AdditionalAddressPath));
             Assert.That(request.Body, Does.Contain("\"name\":\"Warehouse\""));
+            Assert.That(request.Body, Does.Contain("\"name_addition\":\"North wing\""));
             Assert.That(request.Body, Does.Contain("\"street_name\":\"Walter Street\""));
+            Assert.That(request.Body, Does.Contain("\"house_number\":\"22\""));
+            Assert.That(request.Body, Does.Contain("\"address_addition\":\"Building C\""));
+            Assert.That(request.Body, Does.Contain("\"postcode\":\"8000\""));
+            Assert.That(request.Body, Does.Contain("\"city\":\"Zurich\""));
+            Assert.That(request.Body, Does.Contain("\"country_id\":1"));
+            Assert.That(request.Body, Does.Contain("\"subject\":\"Delivery address\""));
+            Assert.That(request.Body, Does.Contain("\"description\":\"Backup site\""));
         });
+
+        AssertAdditionalAddressFullyDeserialized(result.Data!);
     }
 
     /// <summary>
     /// <c>AdditionalAddressService.Search</c> must send a <c>POST</c> request against
     /// <c>/2.0/contact/{contactId}/additional_address/search</c> with the <see cref="SearchCriteria" />
-    /// list as the JSON body.
+    /// list as the JSON body and deserialize the array response with full property coverage on every item.
     /// </summary>
     [Test]
-    public async Task AdditionalAddressService_Search_SendsPostRequest_ToSearchPath()
+    public async Task AdditionalAddressService_Search_SendsPostRequest_ToSearchPath_AndDeserializesArray()
     {
         var expectedPath = $"{AdditionalAddressPath}/search";
 
@@ -190,7 +239,11 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
             Assert.That(request.Body, Does.Contain("\"field\":\"name\""));
             Assert.That(request.Body, Does.Contain("\"criteria\":\"=\""));
+            Assert.That(request.Body, Does.Contain("\"value\":\"Warehouse\""));
+            Assert.That(result.Data, Has.Count.EqualTo(1));
         });
+
+        AssertAdditionalAddressFullyDeserialized(result.Data![0]);
     }
 
     /// <summary>
@@ -199,9 +252,9 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
     /// full-replacement edits on v2.0 resources.
     /// </summary>
     [Test]
-    public async Task AdditionalAddressService_Update_SendsPostRequest_WithIdInPath()
+    public async Task AdditionalAddressService_Update_SendsPostRequest_WithIdInPath_AndDeserializesAdditionalAddress()
     {
-        const int id = 1;
+        const int id = 5;
         var expectedPath = $"{AdditionalAddressPath}/{id}";
 
         Server
@@ -212,15 +265,15 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
 
         var payload = new AdditionalAddressUpdate(
             "Warehouse",
-            null,
+            "North wing",
             "Walter Street",
             "22",
-            null,
+            "Building C",
             "8000",
             "Zurich",
             1,
             "Delivery address",
-            null);
+            "Backup site");
 
         var result = await service.Update(TestContactId, id, payload, TestContext.CurrentContext.CancellationToken);
 
@@ -230,10 +283,11 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data!.Id, Is.EqualTo(id));
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
         });
+
+        AssertAdditionalAddressFullyDeserialized(result.Data!);
     }
 
     /// <summary>
@@ -243,7 +297,7 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
     [Test]
     public async Task AdditionalAddressService_Delete_SendsDeleteRequest()
     {
-        const int idToDelete = 1;
+        const int idToDelete = 5;
         var expectedPath = $"{AdditionalAddressPath}/{idToDelete}";
 
         Server
@@ -261,6 +315,29 @@ public sealed class AdditionalAddressServiceIntegrationTests : IntegrationTestBa
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("DELETE"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
+        });
+    }
+
+    /// <summary>
+    /// Verifies that every property in an <c>AdditionalAddress</c>-shaped JSON response is mapped
+    /// onto the corresponding C# property.
+    /// </summary>
+    private static void AssertAdditionalAddressFullyDeserialized(AdditionalAddress address)
+    {
+        Assert.Multiple(() =>
+        {
+            Assert.That(address.Id, Is.EqualTo(5));
+            Assert.That(address.Name, Is.EqualTo("Warehouse"));
+            Assert.That(address.NameAddition, Is.EqualTo("North wing"));
+            Assert.That(address.Address, Is.EqualTo("Walter Street 22"));
+            Assert.That(address.StreetName, Is.EqualTo("Walter Street"));
+            Assert.That(address.HouseNumber, Is.EqualTo("22"));
+            Assert.That(address.AddressAddition, Is.EqualTo("Building C"));
+            Assert.That(address.Postcode, Is.EqualTo("8000"));
+            Assert.That(address.City, Is.EqualTo("Zurich"));
+            Assert.That(address.CountryId, Is.EqualTo(1));
+            Assert.That(address.Subject, Is.EqualTo("Delivery address"));
+            Assert.That(address.Description, Is.EqualTo("Backup site"));
         });
     }
 }

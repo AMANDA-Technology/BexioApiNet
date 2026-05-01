@@ -76,6 +76,28 @@ public sealed class MilestoneServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    ///     When a <see cref="QueryParameterMilestone" /> is supplied, <c>GetAsync</c> must forward
+    ///     its underlying <see cref="QueryParameter" /> so the connection handler renders the
+    ///     <c>limit</c>/<c>offset</c> parameters onto the URL exactly as the spec requires.
+    /// </summary>
+    [Test]
+    public async Task GetAsync_WithQueryParameter_PassesQueryParameterToConnectionHandler()
+    {
+        var queryParameter = new QueryParameterMilestone(100, 50);
+        var response = new ApiResult<List<Milestone>?> { IsSuccess = true, Data = [] };
+        ConnectionHandler
+            .GetAsync<List<Milestone>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(response));
+
+        await _sut.GetAsync(ProjectId, queryParameter);
+
+        await ConnectionHandler.Received(1).GetAsync<List<Milestone>?>(
+            ExpectedBaseEndpoint,
+            queryParameter.QueryParameter,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
     ///     <c>GetAsync</c> returns the <see cref="ApiResult{T}" /> produced by the connection handler
     ///     unchanged.
     /// </summary>
@@ -104,7 +126,7 @@ public sealed class MilestoneServiceTests : ServiceTestBase
             .GetAsync<List<Milestone>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ApiResult<List<Milestone>?> { IsSuccess = true, Data = [] }));
 
-        await _sut.GetAsync(ProjectId, cts.Token);
+        await _sut.GetAsync(ProjectId, cancellationToken: cts.Token);
 
         await ConnectionHandler.Received(1).GetAsync<List<Milestone>?>(
             ExpectedBaseEndpoint,
@@ -197,16 +219,17 @@ public sealed class MilestoneServiceTests : ServiceTestBase
 
     /// <summary>
     ///     <c>UpdateAsync</c> forwards the supplied <see cref="MilestoneUpdate" /> payload via
-    ///     <see cref="IBexioConnectionHandler.PutAsync{TResult,TUpdate}" /> against the per-id path.
+    ///     <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" /> against the per-id path
+    ///     — Bexio edits milestones via <c>POST</c> (operation <c>EditMilestone</c>), not <c>PUT</c>.
     /// </summary>
     [Test]
-    public async Task UpdateAsync_CallsPutAsync_WithIdInPath()
+    public async Task UpdateAsync_CallsPostAsync_WithIdInPath()
     {
         const int id = 7;
         var payload = new MilestoneUpdate("Milestone Updated");
         var response = new ApiResult<Milestone> { IsSuccess = true };
         ConnectionHandler
-            .PutAsync<Milestone, MilestoneUpdate>(
+            .PostAsync<Milestone, MilestoneUpdate>(
                 Arg.Any<MilestoneUpdate>(),
                 Arg.Any<string>(),
                 Arg.Any<CancellationToken>())
@@ -214,9 +237,34 @@ public sealed class MilestoneServiceTests : ServiceTestBase
 
         await _sut.UpdateAsync(ProjectId, id, payload);
 
-        await ConnectionHandler.Received(1).PutAsync<Milestone, MilestoneUpdate>(
+        await ConnectionHandler.Received(1).PostAsync<Milestone, MilestoneUpdate>(
             payload,
             $"{ExpectedBaseEndpoint}/{id}",
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     <c>UpdateAsync</c> must NOT route through <c>PutAsync</c>; the spec
+    ///     (<c>EditMilestone</c>) defines this edit as <c>POST</c>. A regression here would mean
+    ///     edits are silently routed to a method the API does not accept.
+    /// </summary>
+    [Test]
+    public async Task UpdateAsync_DoesNotCallPutAsync()
+    {
+        const int id = 7;
+        var payload = new MilestoneUpdate("Milestone Updated");
+        ConnectionHandler
+            .PostAsync<Milestone, MilestoneUpdate>(
+                Arg.Any<MilestoneUpdate>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(Task.FromResult(new ApiResult<Milestone> { IsSuccess = true }));
+
+        await _sut.UpdateAsync(ProjectId, id, payload);
+
+        await ConnectionHandler.DidNotReceive().PutAsync<Milestone, MilestoneUpdate>(
+            Arg.Any<MilestoneUpdate>(),
+            Arg.Any<string>(),
             Arg.Any<CancellationToken>());
     }
 

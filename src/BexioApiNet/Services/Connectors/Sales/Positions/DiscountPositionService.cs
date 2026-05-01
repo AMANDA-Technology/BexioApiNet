@@ -26,6 +26,7 @@ SOFTWARE.
 using System.Runtime.InteropServices;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Positions;
+using BexioApiNet.Abstractions.Models.Sales.Positions.Views;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Sales.Positions;
 using BexioApiNet.Services.Connectors.Base;
@@ -62,18 +63,18 @@ public sealed class DiscountPositionService : PositionService, IDiscountPosition
     }
 
     /// <inheritdoc />
-    public Task<ApiResult<PositionDiscount>> Create(string documentType, int documentId, PositionDiscount position,
+    public Task<ApiResult<PositionDiscount>> Create(string documentType, int documentId, PositionDiscountCreate position,
         [Optional] CancellationToken cancellationToken)
     {
-        return CreatePositionAsync<PositionDiscount, PositionDiscount>(documentType, documentId, position,
+        return CreatePositionAsync<PositionDiscount, PositionDiscountCreate>(documentType, documentId, position,
             cancellationToken);
     }
 
     /// <inheritdoc />
     public Task<ApiResult<PositionDiscount>> Update(string documentType, int documentId, int positionId,
-        PositionDiscount position, [Optional] CancellationToken cancellationToken)
+        PositionDiscountCreate position, [Optional] CancellationToken cancellationToken)
     {
-        return UpdatePositionAsync<PositionDiscount, PositionDiscount>(documentType, documentId, positionId, position,
+        return UpdatePositionAsync<PositionDiscount, PositionDiscountCreate>(documentType, documentId, positionId, position,
             cancellationToken);
     }
 

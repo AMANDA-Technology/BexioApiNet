@@ -23,43 +23,55 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using BexioApiNet.Abstractions.Models.Sales.Positions;
+using BexioApiNet.Abstractions.Enums.Sales;
+using BexioApiNet.Abstractions.Models.Sales.Positions.Views;
 using BexioApiNet.Services.Connectors.Sales.Positions;
 
 namespace BexioApiNet.IntegrationTests.Sales.Positions;
 
 /// <summary>
-/// Smoke-level integration tests for <see cref="SubtotalPositionService"/> against WireMock stubs.
-/// Verifies that the correct HTTP method and URL path are used for each of the 5 operations.
+/// Offline integration tests for <see cref="SubtotalPositionService"/> against a
+/// <see cref="WireMockServer"/> stub. Verifies that the correct HTTP verbs and URL paths are
+/// used for all five CRUD operations, that request bodies are serialized with the expected
+/// snake_case field names, and that the full <c>PositionSubtotalExtended</c> response payload
+/// deserializes per the OpenAPI schema.
 /// </summary>
 public sealed class SubtotalPositionServiceIntegrationTests : IntegrationTestBase
 {
-    private const string DocumentType = "kb_order";
+    private const string DocumentType = KbDocumentType.Order;
     private const int DocumentId = 3;
     private const int PositionId = 30;
-    private static readonly string ListPath = $"/2.0/{DocumentType}/{DocumentId}/kb_position_subtotal";
-    private static readonly string SinglePath = $"/2.0/{DocumentType}/{DocumentId}/kb_position_subtotal/{PositionId}";
 
-    private const string SubtotalPositionResponse = """
+    private static string BasePath => $"/2.0/{DocumentType}/{DocumentId}/kb_position_subtotal";
+    private static string SinglePath => $"{BasePath}/{PositionId}";
+
+    /// <summary>
+    /// Fully-populated <c>PositionSubtotalExtended</c> response payload modelled on the OpenAPI
+    /// schema. Includes the read-only <c>value</c>, <c>internal_pos</c>, <c>is_optional</c> and
+    /// <c>parent_id</c> fields and the <c>type</c> discriminator.
+    /// </summary>
+    private const string SubtotalResponse = """
         {
             "id": 30,
             "type": "KbPositionSubtotal",
+            "parent_id": null,
             "text": "Running total",
-            "value": "500.00",
+            "value": "17.800000",
             "internal_pos": 3,
             "is_optional": false
         }
         """;
 
     /// <summary>
-    /// GetAll must issue a <c>GET</c> request to the list path and return a successful result.
+    /// <c>SubtotalPositionService.GetAll()</c> must issue a <c>GET</c> request against the list
+    /// path and deserialize a list with full field coverage per the OpenAPI schema.
     /// </summary>
     [Test]
-    public async Task SubtotalPositionService_GetAll_SendsGetRequest()
+    public async Task SubtotalPositionService_GetAll_SendsGetRequest_AndDeserializesAllFields()
     {
         Server
-            .Given(Request.Create().WithPath(ListPath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+            .Given(Request.Create().WithPath(BasePath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody($"[{SubtotalResponse}]"));
 
         var service = new SubtotalPositionService(ConnectionHandler);
 
@@ -70,19 +82,34 @@ public sealed class SubtotalPositionServiceIntegrationTests : IntegrationTestBas
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("GET"));
-            Assert.That(request.AbsolutePath, Is.EqualTo(ListPath));
+            Assert.That(request.AbsolutePath, Is.EqualTo(BasePath));
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!, Has.Count.EqualTo(1));
+        });
+
+        var position = result.Data![0];
+        Assert.Multiple(() =>
+        {
+            Assert.That(position.Id, Is.EqualTo(30));
+            Assert.That(position.Type, Is.EqualTo("KbPositionSubtotal"));
+            Assert.That(position.ParentId, Is.Null);
+            Assert.That(position.Text, Is.EqualTo("Running total"));
+            Assert.That(position.Value, Is.EqualTo("17.800000"));
+            Assert.That(position.InternalPos, Is.EqualTo(3));
+            Assert.That(position.IsOptional, Is.False);
         });
     }
 
     /// <summary>
-    /// GetById must issue a <c>GET</c> request that includes the position id in the path.
+    /// <c>SubtotalPositionService.GetById()</c> must issue a <c>GET</c> request that includes the
+    /// position id in the URL path and deserialize the full subtotal payload.
     /// </summary>
     [Test]
-    public async Task SubtotalPositionService_GetById_SendsGetRequest()
+    public async Task SubtotalPositionService_GetById_SendsGetRequest_AndDeserializesAllFields()
     {
         Server
             .Given(Request.Create().WithPath(SinglePath).UsingGet())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody(SubtotalPositionResponse));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(SubtotalResponse));
 
         var service = new SubtotalPositionService(ConnectionHandler);
 
@@ -93,24 +120,35 @@ public sealed class SubtotalPositionServiceIntegrationTests : IntegrationTestBas
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data, Is.InstanceOf<PositionSubtotal>());
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(SinglePath));
+        });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.Data!.Id, Is.EqualTo(PositionId));
+            Assert.That(result.Data.Type, Is.EqualTo("KbPositionSubtotal"));
+            Assert.That(result.Data.Text, Is.EqualTo("Running total"));
+            Assert.That(result.Data.Value, Is.EqualTo("17.800000"));
+            Assert.That(result.Data.InternalPos, Is.EqualTo(3));
+            Assert.That(result.Data.IsOptional, Is.False);
         });
     }
 
     /// <summary>
-    /// Create must issue a <c>POST</c> request to the list path and return the created position.
+    /// <c>SubtotalPositionService.Create()</c> must send a <c>POST</c> request whose body
+    /// contains the serialized <see cref="PositionSubtotalCreate"/> payload as
+    /// <c>{"text":...}</c> per the OpenAPI request schema.
     /// </summary>
     [Test]
-    public async Task SubtotalPositionService_Create_SendsPostRequest()
+    public async Task SubtotalPositionService_Create_SendsPostRequest_WithSnakeCaseBody()
     {
         Server
-            .Given(Request.Create().WithPath(ListPath).UsingPost())
-            .RespondWith(Response.Create().WithStatusCode(201).WithBody(SubtotalPositionResponse));
+            .Given(Request.Create().WithPath(BasePath).UsingPost())
+            .RespondWith(Response.Create().WithStatusCode(201).WithBody(SubtotalResponse));
 
         var service = new SubtotalPositionService(ConnectionHandler);
-        var payload = new PositionSubtotal { Text = "Running total" };
+        var payload = new PositionSubtotalCreate(Text: "Running total");
 
         var result = await service.Create(DocumentType, DocumentId, payload, TestContext.CurrentContext.CancellationToken);
         var request = Server.LogEntries.Last().RequestMessage!;
@@ -118,24 +156,28 @@ public sealed class SubtotalPositionServiceIntegrationTests : IntegrationTestBas
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!.Id, Is.EqualTo(PositionId));
             Assert.That(request.Method, Is.EqualTo("POST"));
-            Assert.That(request.AbsolutePath, Is.EqualTo(ListPath));
+            Assert.That(request.AbsolutePath, Is.EqualTo(BasePath));
+            Assert.That(request.Body, Does.Contain("\"text\":\"Running total\""));
         });
     }
 
     /// <summary>
-    /// Update must issue a <c>POST</c> request to the single-position path — Bexio uses POST
-    /// for position updates rather than PUT.
+    /// <c>SubtotalPositionService.Update()</c> must send a <c>POST</c> (not <c>PUT</c>) request
+    /// against the path including the position id with a <see cref="PositionSubtotalCreate"/>
+    /// body and surface the updated position on success.
     /// </summary>
     [Test]
-    public async Task SubtotalPositionService_Update_SendsPostRequest()
+    public async Task SubtotalPositionService_Update_SendsPostRequest_WithPositionIdInPath()
     {
         Server
             .Given(Request.Create().WithPath(SinglePath).UsingPost())
-            .RespondWith(Response.Create().WithStatusCode(200).WithBody(SubtotalPositionResponse));
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(SubtotalResponse));
 
         var service = new SubtotalPositionService(ConnectionHandler);
-        var payload = new PositionSubtotal { Text = "Updated total" };
+        var payload = new PositionSubtotalCreate(Text: "Updated total");
 
         var result = await service.Update(DocumentType, DocumentId, PositionId, payload, TestContext.CurrentContext.CancellationToken);
         var request = Server.LogEntries.Last().RequestMessage!;
@@ -143,13 +185,16 @@ public sealed class SubtotalPositionServiceIntegrationTests : IntegrationTestBas
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.Data, Is.Not.Null);
             Assert.That(request.Method, Is.EqualTo("POST"));
             Assert.That(request.AbsolutePath, Is.EqualTo(SinglePath));
+            Assert.That(request.Body, Does.Contain("\"text\":\"Updated total\""));
         });
     }
 
     /// <summary>
-    /// Delete must issue a <c>DELETE</c> request to the single-position path.
+    /// <c>SubtotalPositionService.Delete()</c> must issue a <c>DELETE</c> request to the
+    /// single-position path and surface the <c>{"success":true}</c> payload.
     /// </summary>
     [Test]
     public async Task SubtotalPositionService_Delete_SendsDeleteRequest()
@@ -168,6 +213,34 @@ public sealed class SubtotalPositionServiceIntegrationTests : IntegrationTestBas
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("DELETE"));
             Assert.That(request.AbsolutePath, Is.EqualTo(SinglePath));
+        });
+    }
+
+    /// <summary>
+    /// Smoke test verifying the path is correctly composed for each of the three OpenAPI-allowed
+    /// document types (<c>kb_offer</c>, <c>kb_order</c>, <c>kb_invoice</c>). Subtotal positions
+    /// are not valid on deliveries per the spec.
+    /// </summary>
+    [TestCase(KbDocumentType.Offer)]
+    [TestCase(KbDocumentType.Order)]
+    [TestCase(KbDocumentType.Invoice)]
+    public async Task SubtotalPositionService_GetAll_UsesCorrectPathForEachDocumentType(string documentType)
+    {
+        var path = $"/2.0/{documentType}/{DocumentId}/kb_position_subtotal";
+
+        Server
+            .Given(Request.Create().WithPath(path).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+
+        var service = new SubtotalPositionService(ConnectionHandler);
+
+        var result = await service.GetAll(documentType, DocumentId, TestContext.CurrentContext.CancellationToken);
+        var request = Server.LogEntries.Last().RequestMessage!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(request.AbsolutePath, Is.EqualTo(path));
         });
     }
 }

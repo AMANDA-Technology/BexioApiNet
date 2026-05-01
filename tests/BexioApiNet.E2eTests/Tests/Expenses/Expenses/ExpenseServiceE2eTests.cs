@@ -28,17 +28,24 @@ using BexioApiNet.Models;
 namespace BexioApiNet.E2eTests.Tests.Expenses.Expenses;
 
 /// <summary>
-/// Live E2E tests for the <see cref="BexioApiNet.Services.Connectors.Expenses.ExpenseService"/>.
-/// Read-only calls only: listing expenses, retrieving an expense by id, and validating a
-/// document number. Tests are auto-skipped when credentials are missing per
-/// <see cref="BexioE2eTestBase"/>.
+/// Live E2E tests for the <see cref="BexioApiNet.Services.Connectors.Expenses.ExpenseService"/>
+/// against Bexio v3 OpenAPI <c>/4.0/expenses</c>. Tests are auto-skipped when credentials
+/// are missing per <see cref="BexioE2eTestBase"/>.
+/// <para>
+/// Read-only flows: list, get-by-id, document-number validation. Write flows
+/// (Create/Update/UpdateBookings/Delete/Actions) are not run live because the spec
+/// requires <c>attachment_ids</c> on Create — uploading a file end-to-end is out of scope
+/// for this fixture and would leave artifacts in the tenant. Those code paths are covered
+/// in the unit and integration test suites against WireMock stubs.
+/// </para>
 /// </summary>
 [Category("E2E")]
 public sealed class ExpenseServiceE2eTests : BexioE2eTestBase
 {
     /// <summary>
     /// Lists expenses and asserts the response envelope deserializes correctly —
-    /// <c>data</c> and <c>paging</c> must both be populated.
+    /// <c>data</c> and <c>paging</c> must both be populated and each list item must
+    /// satisfy the schema-required fields.
     /// </summary>
     [Test]
     public async Task Get_ReturnsListResponse()
@@ -55,6 +62,38 @@ public sealed class ExpenseServiceE2eTests : BexioE2eTestBase
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Data, Is.Not.Null);
             Assert.That(result.Data.Paging, Is.Not.Null);
+        });
+
+        if (result.Data is { Data.Count: > 0 })
+        {
+            foreach (var item in result.Data.Data)
+            {
+                Assert.That(item.Id, Is.Not.EqualTo(Guid.Empty));
+                Assert.That(item.DocumentNo, Is.Not.Null.And.Not.Empty);
+                Assert.That(item.CurrencyCode, Is.Not.Null.And.Not.Empty);
+                Assert.That(item.AttachmentIds, Is.Not.Null);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Verifies that paging query parameters reach the URL and the response envelope
+    /// reflects the requested page size (when expenses exist).
+    /// </summary>
+    [Test]
+    public async Task Get_WithPagingParameters_ReturnsRequestedPageSize()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var result = await BexioApiClient!.Expenses.Get(new QueryParameterExpense(limit: 5, page: 1));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null);
+            Assert.That(result.Data!.Paging.Page, Is.EqualTo(1));
+            Assert.That(result.Data.Paging.PageSize, Is.LessThanOrEqualTo(5));
         });
     }
 
@@ -88,6 +127,9 @@ public sealed class ExpenseServiceE2eTests : BexioE2eTestBase
             Assert.That(result.ApiError, Is.Null);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data!.Id, Is.EqualTo(firstId));
+            Assert.That(result.Data.CurrencyCode, Is.Not.Null.And.Not.Empty);
+            Assert.That(result.Data.BaseCurrencyCode, Is.Not.Null.And.Not.Empty);
+            Assert.That(result.Data.AttachmentIds, Is.Not.Null);
         });
     }
 

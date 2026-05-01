@@ -281,6 +281,30 @@ public sealed class ProjectServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    ///     Search returns the <see cref="ApiResult{T}" /> produced by the connection handler without modification.
+    /// </summary>
+    [Test]
+    public async Task Search_ReturnsApiResultFromConnectionHandler()
+    {
+        var criteria = new List<SearchCriteria>
+        {
+            new() { Field = "name", Value = "Amanda", Criteria = "like" }
+        };
+        var response = new ApiResult<List<Project>> { IsSuccess = true, Data = [] };
+        ConnectionHandler
+            .PostSearchAsync<Project>(
+                Arg.Any<List<SearchCriteria>>(),
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Search(criteria);
+
+        result.ShouldBeSameAs(response);
+    }
+
+    /// <summary>
     ///     Update calls <see cref="IBexioConnectionHandler.PostAsync{TResult,TUpdate}" /> (not PUT) at
     ///     <c>/2.0/pr_project/{id}</c> — Bexio edits projects via POST on this resource.
     /// </summary>

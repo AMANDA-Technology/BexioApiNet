@@ -25,29 +25,31 @@ SOFTWARE.
 
 using System.Runtime.InteropServices;
 using BexioApiNet.Abstractions.Models.Api;
+using BexioApiNet.Abstractions.Models.Payroll.Paystubs;
 
 namespace BexioApiNet.Interfaces.Connectors.Payroll;
 
 /// <summary>
-///     Service for downloading payroll paystubs in the Bexio payroll namespace (v4.0).
-///     Paystubs are a nested binary resource under employees — the single available
-///     operation returns the raw PDF bytes for a given employee, year and month at
-///     <c>/4.0/payroll/employees/{employeeId}/paystub-pdf/{year}/{month}</c>. No JSON
-///     model is involved; the response is surfaced as <c>byte[]</c> on the
-///     <see cref="ApiResult{T}" /> wrapper.
+///     Service for retrieving payroll paystub PDFs in the Bexio payroll namespace
+///     (v4.0). Paystubs are a nested resource under employees — the single available
+///     operation is routed to
+///     <c>/4.0/payroll/employees/{employeeId}/paystub-pdf/{year}/{month}</c>. The
+///     endpoint does not stream the PDF itself; it returns a JSON envelope with a
+///     <see cref="Paystub.Location" /> URI that the caller must follow to download
+///     the file.
 ///     <see href="https://docs.bexio.com/#tag/Paystubs">Paystubs</see>
 /// </summary>
 public interface IPaystubService
 {
     /// <summary>
-    ///     Downloads the paystub PDF for an employee for a given month as raw bytes.
+    ///     Retrieve the paystub download URI for an employee for a given month.
     ///     <see href="https://docs.bexio.com/#tag/Paystubs">Get Paystub PDF</see>
     /// </summary>
     /// <param name="employeeId">Identifier of the payroll employee.</param>
     /// <param name="year">Four-digit year of the requested paystub.</param>
     /// <param name="month">Month (1-12) of the requested paystub.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
-    /// <returns>An <see cref="ApiResult{T}" /> whose <c>Data</c> contains the PDF bytes on success.</returns>
-    public Task<ApiResult<byte[]>> GetPdf(int employeeId, int year, int month,
+    /// <returns>An <see cref="ApiResult{T}" /> wrapping a <see cref="Paystub" /> whose <see cref="Paystub.Location" /> points at the generated PDF.</returns>
+    public Task<ApiResult<Paystub>> GetPdf(Guid employeeId, int year, int month,
         [Optional] CancellationToken cancellationToken);
 }

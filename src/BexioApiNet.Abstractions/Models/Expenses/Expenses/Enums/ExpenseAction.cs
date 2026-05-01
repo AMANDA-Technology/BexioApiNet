@@ -27,7 +27,7 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Expenses.Expenses.Enums;
 
 /// <summary>
-/// Actions accepted by <c>POST /4.0/expenses/expenses/{id}/actions</c>.
+/// Actions accepted by <c>POST /4.0/expenses/{id}/actions</c>.
 /// <see href="https://docs.bexio.com/#tag/Expenses">Expenses</see>
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]

@@ -23,52 +23,38 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using BexioApiNet.Abstractions.Enums.Api;
-using BexioApiNet.Models;
-using BexioApiNet.Services.Connectors.Contacts;
-
-namespace BexioApiNet.E2eTests.Tests.Contacts.Contacts;
+namespace BexioApiNet.E2eTests.Tests.MasterData.Permissions;
 
 /// <summary>
-/// Live E2E tests for <see cref="ContactService.Get"/>. The DI wire-up that exposes
-/// <c>Contacts</c> on <see cref="IBexioApiClient"/> is delivered in issue #49; until
-/// then the service is constructed directly from the same environment credentials
-/// that drive <see cref="BexioE2eTestBase"/>.
+///     Live E2E coverage for the Bexio v3.0 <c>/permissions</c> singleton endpoint. The
+///     endpoint returns the access descriptor for the signed-in user; only a GET is
+///     supported (no Create/Update/Delete in the OpenAPI spec).
 /// </summary>
-public class TestList : BexioE2eTestBase
+public sealed class TestPermissions : BexioE2eTestBase
 {
     /// <summary>
-    /// List the first page of contacts and confirm the request round-trips successfully.
+    ///     Reads the permissions singleton and confirms the response carries the
+    ///     <c>permissions</c> dictionary populated by Bexio. The set of keys varies per
+    ///     tenant so the test only asserts the dictionary is non-empty and that each
+    ///     descriptor exposes an <c>activation</c> attribute (the only attribute returned
+    ///     for every resource per the Bexio docs).
     /// </summary>
     [Test]
-    public async Task List_ReturnsContacts()
+    public async Task Get_ReturnsPermissionsForSignedInUser()
     {
         Assert.That(BexioApiClient, Is.Not.Null);
 
-        using var connectionHandler = CreateConnectionHandler();
-        var service = new ContactService(connectionHandler);
+        var result = await BexioApiClient!.Permissions.Get();
 
-        var result = await service.Get(new QueryParameterContact(Limit: 5));
-
-        Assert.That(result, Is.Not.Null);
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.ApiError, Is.Null);
             Assert.That(result.Data, Is.Not.Null);
         });
-    }
 
-    private static BexioConnectionHandler CreateConnectionHandler()
-    {
-        var baseUri = Environment.GetEnvironmentVariable("BexioApiNet__BaseUri")!;
-        var jwtToken = Environment.GetEnvironmentVariable("BexioApiNet__JwtToken")!;
-        return new BexioConnectionHandler(
-            new BexioConfiguration
-            {
-                BaseUri = baseUri,
-                JwtToken = jwtToken,
-                AcceptHeaderFormat = ApiAcceptHeaders.JsonFormatted
-            });
+        Assert.That(result.Data!.Permissions, Is.Not.Null.And.Not.Empty);
+        foreach (var (_, access) in result.Data.Permissions!)
+            Assert.That(access.Activation, Is.Not.Null);
     }
 }

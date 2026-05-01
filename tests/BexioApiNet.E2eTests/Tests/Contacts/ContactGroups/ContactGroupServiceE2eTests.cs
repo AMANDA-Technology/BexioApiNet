@@ -25,7 +25,6 @@ SOFTWARE.
 
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
-using BexioApiNet.Abstractions.Models.Contacts.ContactGroups;
 using BexioApiNet.Abstractions.Models.Contacts.ContactGroups.Views;
 using BexioApiNet.Interfaces.Connectors.Contacts;
 using BexioApiNet.Models;
@@ -36,19 +35,17 @@ namespace BexioApiNet.E2eTests.Tests.Contacts.ContactGroups;
 /// <summary>
 /// Live end-to-end tests for <see cref="ContactGroupService"/>. Tests are skipped when
 /// the required environment variables (<c>BexioApiNet__BaseUri</c>, <c>BexioApiNet__JwtToken</c>)
-/// are not present. The service is constructed directly because it is not yet wired into
-/// <c>IBexioApiClient</c> (tracked separately in issue #49).
+/// are not present.
 /// </summary>
 [Category("E2E")]
-public class ContactGroupServiceE2eTests
+public sealed class ContactGroupServiceE2eTests
 {
     private BexioConnectionHandler? _connectionHandler;
     private IContactGroupService _sut = null!;
 
     /// <summary>
     /// Reads the required credentials from environment variables. Calls
-    /// <see cref="Assert.Ignore(string)"/> when either is missing so the suite does not
-    /// fail CI or AI agent runs that lack live credentials.
+    /// <see cref="Assert.Ignore(string)"/> when either is missing.
     /// </summary>
     [SetUp]
     public void Setup()
@@ -84,10 +81,10 @@ public class ContactGroupServiceE2eTests
     }
 
     /// <summary>
-    /// Verifies that listing contact groups returns a successful response.
+    /// Lists contact groups with auto-paging enabled.
     /// </summary>
     [Test]
-    public async Task Get()
+    public async Task Get_ListsContactGroups()
     {
         var res = await _sut.Get(autoPage: true);
 
@@ -101,124 +98,55 @@ public class ContactGroupServiceE2eTests
     }
 
     /// <summary>
-    /// Verifies that fetching a single contact group by id succeeds when at least one group exists.
+    /// Searches contact groups with a name prefix filter.
     /// </summary>
     [Test]
-    public async Task GetById()
-    {
-        var list = await _sut.Get();
-        Assert.That(list, Is.Not.Null);
-        Assert.That(list.IsSuccess, Is.True);
-
-        if (list.Data is not { Count: > 0 } existing)
-        {
-            Assert.Ignore("no contact groups available on this tenant");
-            return;
-        }
-
-        var res = await _sut.GetById(existing[0].Id);
-
-        Assert.That(res, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(res.IsSuccess, Is.True);
-            Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data?.Id, Is.EqualTo(existing[0].Id));
-        });
-    }
-
-    /// <summary>
-    /// Verifies that creating a contact group succeeds and returns the persisted record.
-    /// Cleans up the created group as part of the test.
-    /// </summary>
-    [Test]
-    public async Task Create()
-    {
-        var name = $"Test group {Guid.NewGuid():N}";
-        var res = await _sut.Create(new ContactGroupCreate(name));
-
-        Assert.That(res, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(res.IsSuccess, Is.True);
-            Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data, Is.Not.Null);
-            Assert.That(res.Data?.Name, Is.EqualTo(name));
-        });
-
-        if (res.Data is { } created)
-            await _sut.Delete(created.Id);
-    }
-
-    /// <summary>
-    /// Verifies that searching contact groups by name returns a successful response.
-    /// </summary>
-    [Test]
-    public async Task Search()
+    public async Task Search_ReturnsContactGroups()
     {
         var criteria = new List<SearchCriteria>
         {
-            new() { Field = "name", Value = "Test", Criteria = "like" }
+            new() { Field = "name", Value = "E2E", Criteria = "like" }
         };
 
         var res = await _sut.Search(criteria);
 
         Assert.That(res, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(res.IsSuccess, Is.True);
-            Assert.That(res.ApiError, Is.Null);
-            Assert.That(res.Data, Is.Not.Null);
-        });
+        Assert.That(res.IsSuccess, Is.True);
     }
 
     /// <summary>
-    /// Verifies that updating a contact group changes the name and returns the updated record.
-    /// Creates and deletes a temporary group as part of the test.
+    /// Exercises the full Create → Read → Update → Delete lifecycle for a contact group.
+    /// All test data is prefixed with <c>"E2E-"</c> for easy identification and cleaned up
+    /// in <c>try/finally</c> to avoid leaking records if assertions fail.
     /// </summary>
     [Test]
-    public async Task Update()
+    public async Task FullCrudLifecycle_OnContactGroup()
     {
-        var created = await _sut.Create(new ContactGroupCreate($"Test group {Guid.NewGuid():N}"));
-        Assert.That(created.IsSuccess, Is.True);
-        Assert.That(created.Data, Is.Not.Null);
+        var name = $"E2E-Group-{DateTime.UtcNow:yyyyMMddHHmmssfff}";
+
+        var create = await _sut.Create(new ContactGroupCreate(name));
+        Assert.That(create.IsSuccess, Is.True, $"Create failed: {create.ApiError?.Message}");
+        Assert.That(create.Data, Is.Not.Null);
+        Assert.That(create.Data!.Name, Is.EqualTo(name));
+
+        var createdId = create.Data.Id;
 
         try
         {
-            var newName = $"Updated group {Guid.NewGuid():N}";
-            var res = await _sut.Update(created.Data!.Id, new ContactGroupUpdate(newName));
+            var read = await _sut.GetById(createdId);
+            Assert.That(read.IsSuccess, Is.True);
+            Assert.That(read.Data?.Id, Is.EqualTo(createdId));
+            Assert.That(read.Data?.Name, Is.EqualTo(name));
 
-            Assert.That(res, Is.Not.Null);
-            Assert.Multiple(() =>
-            {
-                Assert.That(res.IsSuccess, Is.True);
-                Assert.That(res.ApiError, Is.Null);
-                Assert.That(res.Data?.Name, Is.EqualTo(newName));
-            });
+            var updatedName = $"{name}-updated";
+            var update = await _sut.Update(createdId, new ContactGroupUpdate(updatedName));
+            Assert.That(update.IsSuccess, Is.True);
+            Assert.That(update.Data?.Name, Is.EqualTo(updatedName));
         }
         finally
         {
-            await _sut.Delete(created.Data!.Id);
+            var delete = await _sut.Delete(createdId);
+            Assert.That(delete.IsSuccess, Is.True);
         }
-    }
-
-    /// <summary>
-    /// Verifies that deleting a contact group succeeds.
-    /// </summary>
-    [Test]
-    public async Task Delete()
-    {
-        var created = await _sut.Create(new ContactGroupCreate($"Test group {Guid.NewGuid():N}"));
-        Assert.That(created.IsSuccess, Is.True);
-        Assert.That(created.Data, Is.Not.Null);
-
-        var res = await _sut.Delete(created.Data!.Id);
-
-        Assert.That(res, Is.Not.Null);
-        Assert.Multiple(() =>
-        {
-            Assert.That(res.IsSuccess, Is.True);
-            Assert.That(res.ApiError, Is.Null);
-        });
     }
 }

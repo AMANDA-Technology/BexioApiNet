@@ -26,7 +26,7 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Expenses.Expenses;
 
 /// <summary>
-/// Envelope response returned by <c>GET /4.0/expenses/expenses</c>.
+/// Envelope response returned by <c>GET /4.0/expenses</c>.
 /// The v4.0 list endpoints wrap results in a <c>{ data, paging }</c> object instead of
 /// returning a raw array (the convention used by v2.0 / v3.0 endpoints).
 /// <see href="https://docs.bexio.com/#tag/Expenses">Expenses</see>

@@ -23,6 +23,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Projects;
 
 namespace BexioApiNet.IntegrationTests.Projects;
@@ -30,7 +31,10 @@ namespace BexioApiNet.IntegrationTests.Projects;
 /// <summary>
 ///     Integration tests covering <see cref="ProjectTypeService" />. The request path is composed
 ///     from <see cref="ProjectConfiguration" /> (<c>2.0/pr_project_type</c>) and must reach WireMock
-///     intact when the service is driven through the real connection handler.
+///     intact when the service is driven through the real connection handler. Response payloads
+///     mirror the
+///     <see href="https://docs.bexio.com/#tag/Projects/operation/v2ListProjectType">List Project Type</see>
+///     OpenAPI schema exactly.
 /// </summary>
 public sealed class ProjectTypeServiceIntegrationTests : IntegrationTestBase
 {
@@ -38,10 +42,12 @@ public sealed class ProjectTypeServiceIntegrationTests : IntegrationTestBase
 
     /// <summary>
     ///     <c>ProjectTypeService.Get()</c> must issue a <c>GET</c> against <c>/2.0/pr_project_type</c>
-    ///     and deserialize the returned project type entries.
+    ///     and deserialize a fully populated <c>ProjectType</c> payload — the schema only defines
+    ///     <c>id</c> and <c>name</c>, both of which must round-trip into the <c>ProjectType</c>
+    ///     record.
     /// </summary>
     [Test]
-    public async Task ProjectTypeService_Get_SendsGetRequestToCorrectPath()
+    public async Task ProjectTypeService_Get_DeserializesFullProjectTypePayload()
     {
         const string responseBody = """
                                     [
@@ -56,7 +62,7 @@ public sealed class ProjectTypeServiceIntegrationTests : IntegrationTestBase
 
         var service = new ProjectTypeService(ConnectionHandler);
 
-        var result = await service.Get(TestContext.CurrentContext.CancellationToken);
+        var result = await service.Get(cancellationToken: TestContext.CurrentContext.CancellationToken);
 
         var request = Server.LogEntries.Last().RequestMessage!;
 
@@ -65,9 +71,42 @@ public sealed class ProjectTypeServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(result.Data, Is.Not.Null);
             Assert.That(result.Data, Has.Count.EqualTo(2));
-            Assert.That(result.Data![0].Name, Is.EqualTo("Internal Project"));
+            Assert.That(result.Data![0].Id, Is.EqualTo(1));
+            Assert.That(result.Data[0].Name, Is.EqualTo("Internal Project"));
+            Assert.That(result.Data[1].Id, Is.EqualTo(2));
+            Assert.That(result.Data[1].Name, Is.EqualTo("Customer Project"));
             Assert.That(request.Method, Is.EqualTo("GET"));
             Assert.That(request.AbsolutePath, Is.EqualTo(ProjectTypesPath));
+        });
+    }
+
+    /// <summary>
+    ///     When a <see cref="QueryParameterProjectType" /> is supplied, <c>ProjectTypeService.Get</c>
+    ///     must translate its <c>order_by</c> value into a query-string parameter on the outgoing
+    ///     request — the OpenAPI <c>v2ListProjectType</c> operation accepts an <c>order_by</c>
+    ///     sort clause.
+    /// </summary>
+    [Test]
+    public async Task ProjectTypeService_Get_WithQueryParams_AppendsOrderBy()
+    {
+        Server
+            .Given(Request.Create().WithPath(ProjectTypesPath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+
+        var service = new ProjectTypeService(ConnectionHandler);
+
+        var result = await service.Get(
+            new QueryParameterProjectType("name"),
+            cancellationToken: TestContext.CurrentContext.CancellationToken);
+
+        var request = Server.LogEntries.Last().RequestMessage!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(request.Method, Is.EqualTo("GET"));
+            Assert.That(request.AbsolutePath, Is.EqualTo(ProjectTypesPath));
+            Assert.That(request.RawQuery, Does.Contain("order_by=name"));
         });
     }
 }

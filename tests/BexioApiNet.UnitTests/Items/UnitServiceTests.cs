@@ -286,17 +286,18 @@ public sealed class UnitServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    /// Update forwards the update view to <see cref="IBexioConnectionHandler.PutAsync{TResult,TUpdate}"/>
-    /// against the per-id sub-path (the Bexio Units API uses PUT for full-replacement edits).
+    /// Update forwards the update view to <see cref="IBexioConnectionHandler.PostAsync{TResult,TUpdate}"/>
+    /// against the per-id sub-path. Bexio's <c>v2EditUnit</c> operation is exposed as
+    /// <c>POST /2.0/unit/{unit_id}</c>, matching the Bexio v2 convention of using POST for edits.
     /// </summary>
     [Test]
-    public async Task Update_CallsPutAsyncWithIdInPath()
+    public async Task Update_CallsPostAsyncWithIdInPath()
     {
         const int id = 7;
         var payload = new UnitUpdate("kilogram");
         var expected = new ApiResult<Unit> { IsSuccess = true, Data = NewUnit(id) };
         ConnectionHandler
-            .PutAsync<Unit, UnitUpdate>(
+            .PostAsync<Unit, UnitUpdate>(
                 Arg.Any<UnitUpdate>(),
                 Arg.Any<string>(),
                 Arg.Any<CancellationToken>())
@@ -305,7 +306,7 @@ public sealed class UnitServiceTests : ServiceTestBase
         var result = await _sut.Update(id, payload);
 
         Assert.That(result, Is.SameAs(expected));
-        await ConnectionHandler.Received(1).PutAsync<Unit, UnitUpdate>(
+        await ConnectionHandler.Received(1).PostAsync<Unit, UnitUpdate>(
             payload,
             $"{ExpectedEndpoint}/{id}",
             Arg.Any<CancellationToken>());

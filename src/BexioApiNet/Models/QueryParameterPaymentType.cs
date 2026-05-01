@@ -26,19 +26,41 @@ SOFTWARE.
 namespace BexioApiNet.Models;
 
 /// <summary>
-/// Dictionary for optional query parameters
+/// Optional query parameters for the Bexio payment types endpoints
+/// (<c>GET /2.0/payment_type</c> and <c>POST /2.0/payment_type/search</c>). All parameters are
+/// optional per the Bexio v2.0 spec; only the values supplied by the caller are added to the
+/// request URI.
+/// <see href="https://docs.bexio.com/#tag/Payment-Types/operation/v2ListPaymentTypes">List Payment Types</see>
 /// </summary>
+/// <param name="Limit">Maximum number of results (1–2000).</param>
+/// <param name="Offset">Offset to skip from the start of the result set.</param>
+/// <param name="OrderBy">Sort expression. Multiple sort fields can be combined with a comma. Append <c>_asc</c> / <c>_desc</c> to control direction.</param>
 public sealed record QueryParameterPaymentType(
-    int Limit,
-    int Offset
+    int? Limit = null,
+    int? Offset = null,
+    string? OrderBy = null
 )
 {
     /// <summary>
+    /// Underlying <see cref="BexioApiNet.Models.QueryParameter"/> forwarded to
+    /// <see cref="BexioApiNet.Interfaces.IBexioConnectionHandler.GetAsync{TResult}"/>.
+    /// Only properties that have been set by the caller are added to the dictionary.
     /// </summary>
-    public QueryParameter? QueryParameter { get; } =
-        new(new Dictionary<string, object>
-        {
-            { "limit", Limit },
-            { "offset", Offset }
-        });
+    public QueryParameter? QueryParameter { get; } = Build(Limit, Offset, OrderBy);
+
+    private static QueryParameter? Build(int? limit, int? offset, string? orderBy)
+    {
+        var parameters = new Dictionary<string, object>();
+
+        if (limit is { } l)
+            parameters["limit"] = l;
+
+        if (offset is { } o)
+            parameters["offset"] = o;
+
+        if (!string.IsNullOrWhiteSpace(orderBy))
+            parameters["order_by"] = orderBy;
+
+        return parameters.Count is 0 ? null : new QueryParameter(parameters);
+    }
 }

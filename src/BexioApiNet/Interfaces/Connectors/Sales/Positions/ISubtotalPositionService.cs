@@ -24,22 +24,29 @@ SOFTWARE.
 */
 
 using System.Runtime.InteropServices;
+using BexioApiNet.Abstractions.Enums.Sales;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Positions;
+using BexioApiNet.Abstractions.Models.Sales.Positions.Views;
 
 namespace BexioApiNet.Interfaces.Connectors.Sales.Positions;
 
 /// <summary>
-///     Service for Bexio document subtotal positions.
+///     Service for Bexio document subtotal positions. Subtotal positions print a running total
+///     of preceding positions and are valid on quotes (<c>kb_offer</c>), orders (<c>kb_order</c>)
+///     and invoices (<c>kb_invoice</c>) — not deliveries.
 ///     <see href="https://docs.bexio.com/#tag/Subtotal-positions" />
 /// </summary>
 public interface ISubtotalPositionService
 {
     /// <summary>
     ///     List all subtotal positions for the given document.
-    ///     <see href="https://docs.bexio.com/#tag/Subtotal-positions/operation/v2ListKbPositionSubtotals" />
+    ///     <see href="https://docs.bexio.com/#tag/Subtotal-positions/operation/v2ListSubtotalPositions" />
     /// </summary>
-    /// <param name="documentType">The Bexio document type segment (e.g. <c>kb_invoice</c>, <c>kb_offer</c>).</param>
+    /// <param name="documentType">
+    ///     The Bexio document type segment. Use <see cref="KbDocumentType" /> constants
+    ///     (e.g. <see cref="KbDocumentType.Invoice" />).
+    /// </param>
     /// <param name="documentId">The parent document identifier.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}" /> wrapping the list of subtotal positions.</returns>
@@ -48,7 +55,7 @@ public interface ISubtotalPositionService
 
     /// <summary>
     ///     Fetch a single subtotal position by identifier.
-    ///     <see href="https://docs.bexio.com/#tag/Subtotal-positions/operation/v2ShowKbPositionSubtotal" />
+    ///     <see href="https://docs.bexio.com/#tag/Subtotal-positions/operation/v2ShowSubtotalPosition" />
     /// </summary>
     /// <param name="documentType">The Bexio document type segment.</param>
     /// <param name="documentId">The parent document identifier.</param>
@@ -60,33 +67,33 @@ public interface ISubtotalPositionService
 
     /// <summary>
     ///     Create a new subtotal position under the given document.
-    ///     <see href="https://docs.bexio.com/#tag/Subtotal-positions/operation/v2CreateKbPositionSubtotal" />
+    ///     <see href="https://docs.bexio.com/#tag/Subtotal-positions/operation/v2CreateSubtotalPosition" />
     /// </summary>
     /// <param name="documentType">The Bexio document type segment.</param>
     /// <param name="documentId">The parent document identifier.</param>
-    /// <param name="position">The subtotal position to create.</param>
+    /// <param name="payload">The create payload — only <c>text</c> is accepted by the Bexio API.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}" /> wrapping the created subtotal position.</returns>
-    public Task<ApiResult<PositionSubtotal>> Create(string documentType, int documentId, PositionSubtotal position,
-        [Optional] CancellationToken cancellationToken);
+    public Task<ApiResult<PositionSubtotal>> Create(string documentType, int documentId,
+        PositionSubtotalCreate payload, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
     ///     Update an existing subtotal position. Bexio uses <c>POST</c> to the single-position path
     ///     (not <c>PUT</c>) for position updates.
-    ///     <see href="https://docs.bexio.com/#tag/Subtotal-positions/operation/v2EditKbPositionSubtotal" />
+    ///     <see href="https://docs.bexio.com/#tag/Subtotal-positions/operation/v2EditSubtotalPosition" />
     /// </summary>
     /// <param name="documentType">The Bexio document type segment.</param>
     /// <param name="documentId">The parent document identifier.</param>
     /// <param name="positionId">The position identifier.</param>
-    /// <param name="position">The updated subtotal position payload.</param>
+    /// <param name="payload">The update payload — only <c>text</c> is accepted by the Bexio API.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}" /> wrapping the updated subtotal position.</returns>
     public Task<ApiResult<PositionSubtotal>> Update(string documentType, int documentId, int positionId,
-        PositionSubtotal position, [Optional] CancellationToken cancellationToken);
+        PositionSubtotalCreate payload, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
     ///     Delete a subtotal position.
-    ///     <see href="https://docs.bexio.com/#tag/Subtotal-positions/operation/v2DeleteKbPositionSubtotal" />
+    ///     <see href="https://docs.bexio.com/#tag/Subtotal-positions/operation/v2DeleteSubtotalPosition" />
     /// </summary>
     /// <param name="documentType">The Bexio document type segment.</param>
     /// <param name="documentId">The parent document identifier.</param>

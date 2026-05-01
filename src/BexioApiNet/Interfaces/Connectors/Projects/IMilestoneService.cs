@@ -26,6 +26,7 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Projects.Milestones;
 using BexioApiNet.Abstractions.Models.Projects.Milestones.Views;
+using BexioApiNet.Models;
 
 namespace BexioApiNet.Interfaces.Connectors.Projects;
 
@@ -41,9 +42,10 @@ public interface IMilestoneService
     ///     <see href="https://docs.bexio.com/#tag/Projects/operation/ListMilestones">List Milestones</see>
     /// </summary>
     /// <param name="projectId">The parent project identifier.</param>
+    /// <param name="queryParameter">Optional query parameters (limit/offset).</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>An <see cref="ApiResult{T}" /> wrapping the list of milestones for the project.</returns>
-    public Task<ApiResult<List<Milestone>?>> GetAsync(int projectId, CancellationToken cancellationToken = default);
+    public Task<ApiResult<List<Milestone>?>> GetAsync(int projectId, QueryParameterMilestone? queryParameter = null, CancellationToken cancellationToken = default);
 
     /// <summary>
     ///     Fetch a single milestone by identifier for a given project.
@@ -68,7 +70,9 @@ public interface IMilestoneService
         CancellationToken cancellationToken = default);
 
     /// <summary>
-    ///     Edit an existing milestone.
+    ///     Edit an existing milestone. Bexio uses
+    ///     <c>POST /3.0/projects/{project_id}/milestones/{milestone_id}</c> (not <c>PUT</c>) for
+    ///     full-replacement edits on this resource.
     ///     <see href="https://docs.bexio.com/#tag/Projects/operation/EditMilestone">Edit Milestone</see>
     /// </summary>
     /// <param name="projectId">The parent project identifier.</param>

@@ -36,7 +36,9 @@ namespace BexioApiNet.UnitTests.MasterData;
 ///     Offline unit tests for <see cref="SalutationService" />. Each test verifies that the service
 ///     forwards its calls to <see cref="IBexioConnectionHandler" /> with the expected verb and path,
 ///     propagates the response unchanged, and honours the canonical <c>autoPage</c> + <c>X-Total-Count</c>
-///     pagination contract. No network access.
+///     pagination contract. The Bexio Salutations API uses <c>POST /2.0/salutation/{id}</c> for full
+///     replacement edits — see <see href="https://docs.bexio.com/#tag/Salutations/operation/v2EditSalutation" />.
+///     No network access.
 /// </summary>
 [TestFixture]
 public sealed class SalutationServiceTests : ServiceTestBase
@@ -101,6 +103,22 @@ public sealed class SalutationServiceTests : ServiceTestBase
             ExpectedEndpoint,
             queryParameter.QueryParameter,
             Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     <see cref="QueryParameterSalutation" /> serializes <c>limit</c> and <c>offset</c> only —
+    ///     the Bexio salutations endpoint does not accept any other query parameters per the
+    ///     v3.0.0 OpenAPI spec.
+    /// </summary>
+    [Test]
+    public void QueryParameterSalutation_Serializes_OnlyLimitAndOffset()
+    {
+        var queryParameter = new QueryParameterSalutation(50, 100);
+
+        Assert.That(queryParameter.QueryParameter, Is.Not.Null);
+        Assert.That(queryParameter.QueryParameter!.Parameters.Keys, Is.EquivalentTo(new[] { "limit", "offset" }));
+        Assert.That(queryParameter.QueryParameter.Parameters["limit"], Is.EqualTo(50));
+        Assert.That(queryParameter.QueryParameter.Parameters["offset"], Is.EqualTo(100));
     }
 
     /// <summary>
@@ -287,17 +305,19 @@ public sealed class SalutationServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    ///     Update forwards the update view to <see cref="IBexioConnectionHandler.PutAsync{TResult,TUpdate}" />
-    ///     against the per-id sub-path.
+    ///     Update forwards the update view to <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" />
+    ///     against the per-id sub-path. The Bexio Salutations API uses <c>POST</c> (not <c>PUT</c>)
+    ///     for full-replacement edits — see
+    ///     <see href="https://docs.bexio.com/#tag/Salutations/operation/v2EditSalutation" />.
     /// </summary>
     [Test]
-    public async Task Update_CallsPutAsyncWithIdInPath()
+    public async Task Update_CallsPostAsyncWithIdInPath()
     {
         const int id = 7;
         var payload = new SalutationUpdate("Frau");
         var expected = new ApiResult<Salutation> { IsSuccess = true, Data = NewSalutation(id) };
         ConnectionHandler
-            .PutAsync<Salutation, SalutationUpdate>(
+            .PostAsync<Salutation, SalutationUpdate>(
                 Arg.Any<SalutationUpdate>(),
                 Arg.Any<string>(),
                 Arg.Any<CancellationToken>())
@@ -306,7 +326,7 @@ public sealed class SalutationServiceTests : ServiceTestBase
         var result = await _sut.Update(id, payload);
 
         Assert.That(result, Is.SameAs(expected));
-        await ConnectionHandler.Received(1).PutAsync<Salutation, SalutationUpdate>(
+        await ConnectionHandler.Received(1).PostAsync<Salutation, SalutationUpdate>(
             payload,
             $"{ExpectedEndpoint}/{id}",
             Arg.Any<CancellationToken>());

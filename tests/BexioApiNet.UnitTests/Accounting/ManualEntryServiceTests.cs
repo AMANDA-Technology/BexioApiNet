@@ -621,7 +621,6 @@ public sealed class ManualEntryServiceTests : ServiceTestBase
         return new ManualEntry(
             id,
             "manual_single_entry",
-            "manual",
             new DateOnly(2025, 1, 1),
             string.Empty,
             null,

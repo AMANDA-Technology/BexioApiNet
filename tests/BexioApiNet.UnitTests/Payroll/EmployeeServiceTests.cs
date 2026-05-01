@@ -35,8 +35,10 @@ namespace BexioApiNet.UnitTests.Payroll;
 /// Offline unit tests for <see cref="EmployeeService"/>. Each test asserts that the service
 /// forwards its calls to <see cref="IBexioConnectionHandler"/> with the expected verb, path
 /// and payload, and returns the handler's <see cref="ApiResult{T}"/> unchanged. Verifies
-/// that <see cref="EmployeeService.Patch"/> routes to <c>PATCH</c> (not <c>PUT</c>) as per
-/// the Bexio v4.0 <c>payroll/employees</c> semantics. No network, no filesystem.
+/// that <see cref="EmployeeService.GetById"/> sends the spec-required <c>date</c> query
+/// parameter and that <see cref="EmployeeService.Patch"/> routes to <c>PATCH</c> (not
+/// <c>PUT</c>) per the Bexio v4.0 <c>payroll/employees</c> semantics. No network, no
+/// filesystem.
 /// </summary>
 [TestFixture]
 [Category("Unit")]
@@ -57,24 +59,25 @@ public sealed class EmployeeServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    /// Get forwards a <see langword="null"/> <see cref="QueryParameter"/> to
-    /// <see cref="IBexioConnectionHandler.GetAsync{TResult}"/> at the employees collection path.
+    /// <c>Get</c> forwards a <see langword="null"/> <see cref="QueryParameter"/> to
+    /// <see cref="IBexioConnectionHandler.GetAsync{TResult}"/> at the employees collection
+    /// path.
     /// </summary>
     [Test]
     public async Task Get_CallsGetAsync_WithoutQueryParameter()
     {
-        var response = new ApiResult<List<Employee>>
+        var response = new ApiResult<EmployeeListResponse>
         {
             IsSuccess = true,
-            Data = []
+            Data = new EmployeeListResponse([])
         };
         ConnectionHandler
-            .GetAsync<List<Employee>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .GetAsync<EmployeeListResponse>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(response);
 
         var result = await _sut.Get();
 
-        await ConnectionHandler.Received(1).GetAsync<List<Employee>>(
+        await ConnectionHandler.Received(1).GetAsync<EmployeeListResponse>(
             ExpectedEndpoint,
             null,
             Arg.Any<CancellationToken>());
@@ -82,38 +85,48 @@ public sealed class EmployeeServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    /// GetById calls <see cref="IBexioConnectionHandler.GetAsync{TResult}"/> with the
-    /// employee id appended to the endpoint root and a <see langword="null"/> query parameter.
+    /// <c>GetById</c> calls <see cref="IBexioConnectionHandler.GetAsync{TResult}"/> with the
+    /// employee id appended to the endpoint root and a <c>date</c> query parameter
+    /// (formatted <c>yyyy-MM-dd</c>) — required by the Bexio v4.0 <c>getEmployeeOnDate</c>
+    /// operation.
     /// </summary>
     [Test]
-    public async Task GetById_CallsGetAsync_WithIdInPath()
+    public async Task GetById_CallsGetAsync_WithIdInPathAndDateQueryParameter()
     {
         var id = Guid.NewGuid();
+        var date = new DateOnly(2026, 1, 31);
         string? capturedPath = null;
+        QueryParameter? capturedQuery = null;
         ConnectionHandler
             .GetAsync<Employee>(
                 Arg.Do<string>(path => capturedPath = path),
-                Arg.Any<QueryParameter?>(),
+                Arg.Do<QueryParameter?>(q => capturedQuery = q),
                 Arg.Any<CancellationToken>())
             .Returns(new ApiResult<Employee> { IsSuccess = true });
 
-        await _sut.GetById(id);
+        await _sut.GetById(id, date);
 
         Assert.That(capturedPath, Is.EqualTo($"{ExpectedEndpoint}/{id}"));
+        Assert.That(capturedQuery, Is.Not.Null);
+        Assert.That(capturedQuery!.Parameters["date"], Is.EqualTo("2026-01-31"));
         await ConnectionHandler.Received(1).GetAsync<Employee>(
             $"{ExpectedEndpoint}/{id}",
-            null,
+            Arg.Any<QueryParameter?>(),
             Arg.Any<CancellationToken>());
     }
 
     /// <summary>
-    /// Create forwards the <see cref="EmployeeCreate"/> payload and the endpoint path
+    /// <c>Create</c> forwards the <see cref="EmployeeCreate"/> payload and the endpoint path
     /// to <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}"/>.
     /// </summary>
     [Test]
     public async Task Create_CallsPostAsync()
     {
-        var payload = new EmployeeCreate(FirstName: "John", LastName: "Doe", Email: "john@example.com");
+        var payload = new EmployeeCreate(
+            AhvNumber: "756.1234.5678.97",
+            FirstName: "John",
+            LastName: "Doe",
+            Email: "john@example.com");
         var response = new ApiResult<Employee> { IsSuccess = true };
         ConnectionHandler
             .PostAsync<Employee, EmployeeCreate>(Arg.Any<EmployeeCreate>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -129,14 +142,14 @@ public sealed class EmployeeServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    /// Patch calls <see cref="IBexioConnectionHandler.PatchAsync{TResult,TPatch}"/> (PATCH, not PUT)
-    /// with the employee id appended to the endpoint root.
+    /// <c>Patch</c> calls <see cref="IBexioConnectionHandler.PatchAsync{TResult,TPatch}"/>
+    /// (PATCH, not PUT) with the employee id appended to the endpoint root.
     /// </summary>
     [Test]
     public async Task Patch_CallsPatchAsync_WithIdInPath()
     {
         var id = Guid.NewGuid();
-        var payload = new EmployeePatch(FirstName: "Jane");
+        var payload = new EmployeePatch(AhvNumber: "756.1234.5678.97", FirstName: "Jane");
         string? capturedPath = null;
         ConnectionHandler
             .PatchAsync<Employee, EmployeePatch>(

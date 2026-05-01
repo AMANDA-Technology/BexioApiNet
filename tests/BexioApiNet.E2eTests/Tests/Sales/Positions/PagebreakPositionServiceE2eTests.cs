@@ -33,17 +33,29 @@ namespace BexioApiNet.E2eTests.Tests.Sales.Positions;
 /// environment variables (<c>BexioApiNet__BaseUri</c>, <c>BexioApiNet__JwtToken</c>) are not
 /// present. Mutating operations (create / update / delete) are intentionally omitted to avoid
 /// leaving orphaned positions on the live tenant — they are covered offline by the integration
-/// suite.
+/// suite. Tests structurally validate the JSON payload deserializes into
+/// <c>PositionPagebreak</c> per the OpenAPI <c>PositionPagebreakExtended</c> schema.
 /// </summary>
 [Category("E2E")]
 public sealed class PagebreakPositionServiceE2eTests : BexioE2eTestBase
 {
     /// <summary>
-    /// Lists the pagebreak positions of the first available invoice and asserts the request
-    /// round-trips successfully. Skips gracefully when no invoices exist on the tenant.
+    /// Verifies <see cref="IBexioApiClient.PagebreakPositions"/> is registered correctly via DI.
     /// </summary>
     [Test]
-    public async Task Get_ReturnsPagebreakPositions()
+    public void PagebreakPositions_IsNotNull()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+        Assert.That(BexioApiClient!.PagebreakPositions, Is.Not.Null);
+    }
+
+    /// <summary>
+    /// Lists the pagebreak positions of the first available invoice and asserts the request
+    /// round-trips successfully. Where positions exist, asserts each position has the
+    /// <c>KbPositionPagebreak</c> discriminator per the OpenAPI schema.
+    /// </summary>
+    [Test]
+    public async Task Get_ReturnsPagebreakPositions_FromInvoice()
     {
         Assert.That(BexioApiClient, Is.Not.Null);
 
@@ -57,6 +69,76 @@ public sealed class PagebreakPositionServiceE2eTests : BexioE2eTestBase
         }
 
         var result = await BexioApiClient.PagebreakPositions.Get(KbDocumentType.Invoice, existing[0].Id);
+
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null);
+        });
+
+        if (result.Data is { Count: > 0 } positions)
+        {
+            Assert.Multiple(() =>
+            {
+                foreach (var position in positions)
+                {
+                    Assert.That(position.Type, Is.EqualTo("KbPositionPagebreak"));
+                    Assert.That(position.Id, Is.Not.Null);
+                }
+            });
+        }
+    }
+
+    /// <summary>
+    /// Lists pagebreak positions for the first available quote and verifies the OpenAPI schema
+    /// applies for the <c>kb_offer</c> document type as well.
+    /// </summary>
+    [Test]
+    public async Task Get_ReturnsPagebreakPositions_FromQuote()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var quotes = await BexioApiClient!.Quotes.Get();
+        Assert.That(quotes.IsSuccess, Is.True);
+
+        if (quotes.Data is not { Count: > 0 } existing)
+        {
+            Assert.Ignore("no quotes available on this tenant");
+            return;
+        }
+
+        var result = await BexioApiClient.PagebreakPositions.Get(KbDocumentType.Offer, existing[0].Id);
+
+        Assert.That(result, Is.Not.Null);
+        Assert.Multiple(() =>
+        {
+            Assert.That(result.IsSuccess, Is.True);
+            Assert.That(result.ApiError, Is.Null);
+            Assert.That(result.Data, Is.Not.Null);
+        });
+    }
+
+    /// <summary>
+    /// Lists pagebreak positions for the first available order and verifies the OpenAPI schema
+    /// applies for the <c>kb_order</c> document type as well.
+    /// </summary>
+    [Test]
+    public async Task Get_ReturnsPagebreakPositions_FromOrder()
+    {
+        Assert.That(BexioApiClient, Is.Not.Null);
+
+        var orders = await BexioApiClient!.Orders.Get();
+        Assert.That(orders.IsSuccess, Is.True);
+
+        if (orders.Data is not { Count: > 0 } existing)
+        {
+            Assert.Ignore("no orders available on this tenant");
+            return;
+        }
+
+        var result = await BexioApiClient.PagebreakPositions.Get(KbDocumentType.Order, existing[0].Id);
 
         Assert.That(result, Is.Not.Null);
         Assert.Multiple(() =>

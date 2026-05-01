@@ -36,7 +36,11 @@ namespace BexioApiNet.UnitTests.Purchases;
 /// Offline unit tests for <see cref="BillService"/>. Each test asserts that the service
 /// forwards its calls to <see cref="IBexioConnectionHandler"/> with the expected
 /// verb, path, payload and query parameters, and returns the handler's <see cref="ApiResult{T}"/>
-/// unchanged. No network, no filesystem.
+/// unchanged. Verifies the path composed from <see cref="BillConfiguration"/>
+/// (<c>4.0/purchase/bills</c> and <c>4.0/purchase/documentnumbers/bills</c>) and the
+/// HTTP verbs documented in the v3.0.0 OpenAPI spec — most notably <c>PUT</c> for the
+/// resource update (<c>ApiBills_PUT</c>) and the bookings transition (<c>ApiBillBookings_PUT</c>).
+/// No network, no filesystem.
 /// </summary>
 [TestFixture]
 public sealed class BillServiceTests : ServiceTestBase
@@ -102,6 +106,54 @@ public sealed class BillServiceTests : ServiceTestBase
             ExpectedEndpoint,
             queryParameter.QueryParameter,
             Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// <see cref="QueryParameterBill"/> serializes the spec-supported keys with their
+    /// underscore-cased Bexio names (e.g. <c>search_term</c>, <c>bill_date_start</c>).
+    /// Only the parameters supplied by the caller are added to the dictionary.
+    /// </summary>
+    [Test]
+    public void QueryParameterBill_Serializes_AllSupportedKeys()
+    {
+        var queryParameter = new QueryParameterBill(
+            limit: 10,
+            page: 2,
+            order: "asc",
+            sort: "document_no",
+            searchTerm: "Acme",
+            status: "TODO",
+            billDateStart: new DateOnly(2026, 1, 1),
+            billDateEnd: new DateOnly(2026, 6, 30),
+            dueDateStart: new DateOnly(2026, 1, 1),
+            dueDateEnd: new DateOnly(2026, 6, 30),
+            vendorRef: "VR-1",
+            title: "Title",
+            currencyCode: "CHF",
+            pendingAmountMin: 1.0,
+            pendingAmountMax: 100.0,
+            vendor: "Doe",
+            grossMin: 0.0,
+            grossMax: 1000.0,
+            netMin: 0.0,
+            netMax: 900.0,
+            documentNo: "AB-1234",
+            supplierId: 1323,
+            averageExchangeRateEnabled: true);
+
+        var keys = queryParameter.QueryParameter.Parameters.Keys;
+
+        Assert.That(keys, Is.EquivalentTo(new[]
+        {
+            "limit", "page", "order", "sort", "search_term", "status",
+            "bill_date_start", "bill_date_end", "due_date_start", "due_date_end",
+            "vendor_ref", "title", "currency_code", "pending_amount_min", "pending_amount_max",
+            "vendor", "gross_min", "gross_max", "net_min", "net_max",
+            "document_no", "supplier_id", "average_exchange_rate_enabled"
+        }));
+        Assert.That(queryParameter.QueryParameter.Parameters["bill_date_start"], Is.EqualTo("2026-01-01"));
+        Assert.That(queryParameter.QueryParameter.Parameters["status"], Is.EqualTo("TODO"));
+        Assert.That(queryParameter.QueryParameter.Parameters["supplier_id"], Is.EqualTo(1323));
     }
 
     /// <summary>

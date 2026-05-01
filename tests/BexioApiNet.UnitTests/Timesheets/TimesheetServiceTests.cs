@@ -287,17 +287,18 @@ public sealed class TimesheetServiceTests : ServiceTestBase
 
     /// <summary>
     /// Update forwards the update view to
-    /// <see cref="IBexioConnectionHandler.PutAsync{TResult,TUpdate}" /> against the per-id
-    /// sub-path.
+    /// <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}" /> against the per-id
+    /// sub-path. Bexio v2 timesheet edits use POST, not PUT, per the OpenAPI spec
+    /// (operationId <c>v2EditTimesheet</c>).
     /// </summary>
     [Test]
-    public async Task Update_CallsPutAsyncWithIdInPath()
+    public async Task Update_CallsPostAsyncWithIdInPath()
     {
         const int id = 7;
         var payload = NewTimesheetUpdate();
         var expected = new ApiResult<Timesheet> { IsSuccess = true, Data = NewTimesheet(id) };
         ConnectionHandler
-            .PutAsync<Timesheet, TimesheetUpdate>(
+            .PostAsync<Timesheet, TimesheetUpdate>(
                 Arg.Any<TimesheetUpdate>(),
                 Arg.Any<string>(),
                 Arg.Any<CancellationToken>())
@@ -306,7 +307,7 @@ public sealed class TimesheetServiceTests : ServiceTestBase
         var result = await _sut.Update(id, payload);
 
         result.ShouldBeSameAs(expected);
-        await ConnectionHandler.Received(1).PutAsync<Timesheet, TimesheetUpdate>(
+        await ConnectionHandler.Received(1).PostAsync<Timesheet, TimesheetUpdate>(
             payload,
             $"{ExpectedEndpoint}/{id}",
             Arg.Any<CancellationToken>());

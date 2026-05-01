@@ -52,7 +52,7 @@ public sealed class ProjectTypeServiceTests : ServiceTestBase
 
     /// <summary>
     ///     Get calls <see cref="IBexioConnectionHandler.GetAsync{TResult}" /> once with the expected
-    ///     endpoint path and a null query parameter (this endpoint takes no filters).
+    ///     endpoint path and a null query parameter when none is supplied.
     /// </summary>
     [Test]
     public async Task Get_CallsGetAsync_WithExpectedPath()
@@ -70,6 +70,30 @@ public sealed class ProjectTypeServiceTests : ServiceTestBase
         await ConnectionHandler.Received(1).GetAsync<List<ProjectType>>(
             ExpectedEndpoint,
             null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     Get forwards the <see cref="QueryParameterProjectType" />'s underlying
+    ///     <see cref="QueryParameter" /> so the caller's <c>order_by</c> sort clause reaches the API.
+    /// </summary>
+    [Test]
+    public async Task Get_WithQueryParameter_PassesQueryParameterToConnectionHandler()
+    {
+        var queryParameter = new QueryParameterProjectType("name");
+        var response = new ApiResult<List<ProjectType>> { IsSuccess = true, Data = [] };
+        ConnectionHandler
+            .GetAsync<List<ProjectType>>(
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        await _sut.Get(queryParameter);
+
+        await ConnectionHandler.Received(1).GetAsync<List<ProjectType>>(
+            ExpectedEndpoint,
+            queryParameter.QueryParameter,
             Arg.Any<CancellationToken>());
     }
 

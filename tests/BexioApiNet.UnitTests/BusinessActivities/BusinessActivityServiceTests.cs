@@ -88,7 +88,7 @@ public sealed class BusinessActivityServiceTests : ServiceTestBase
     [Test]
     public async Task Get_WithQueryParameter_PassesQueryParameterToConnectionHandler()
     {
-        var queryParameter = new QueryParameterBusinessActivity(Limit: 50, Offset: 25);
+        var queryParameter = new QueryParameterBusinessActivity(Limit: 50, Offset: 25, OrderBy: "name_asc");
         ConnectionHandler
             .GetAsync<List<BusinessActivity>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
             .Returns(Task.FromResult(new ApiResult<List<BusinessActivity>?> { IsSuccess = true, Data = [] }));

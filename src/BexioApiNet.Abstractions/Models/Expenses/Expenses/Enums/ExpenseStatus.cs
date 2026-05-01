@@ -27,7 +27,7 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Expenses.Expenses.Enums;
 
 /// <summary>
-/// Expense status as returned by the Bexio v4.0 <c>/expenses/expenses</c> endpoints.
+/// Expense status as returned by the Bexio v4.0 <c>/expenses</c> endpoints.
 /// <see href="https://docs.bexio.com/#tag/Expenses">Expenses</see>
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
@@ -41,55 +41,5 @@ public enum ExpenseStatus
     /// <summary>
     /// Expense has been booked.
     /// </summary>
-    BOOKED,
-
-    /// <summary>
-    /// Payment has been partially created for this expense.
-    /// </summary>
-    PARTIALLY_CREATED,
-
-    /// <summary>
-    /// Payment has been fully created for this expense.
-    /// </summary>
-    CREATED,
-
-    /// <summary>
-    /// Payment has been partially sent.
-    /// </summary>
-    PARTIALLY_SENT,
-
-    /// <summary>
-    /// Payment has been sent.
-    /// </summary>
-    SENT,
-
-    /// <summary>
-    /// Payment has been partially downloaded.
-    /// </summary>
-    PARTIALLY_DOWNLOADED,
-
-    /// <summary>
-    /// Payment has been downloaded.
-    /// </summary>
-    DOWNLOADED,
-
-    /// <summary>
-    /// Expense has been partially paid.
-    /// </summary>
-    PARTIALLY_PAID,
-
-    /// <summary>
-    /// Expense has been fully paid.
-    /// </summary>
-    PAID,
-
-    /// <summary>
-    /// Payment has partially failed.
-    /// </summary>
-    PARTIALLY_FAILED,
-
-    /// <summary>
-    /// Payment has failed.
-    /// </summary>
-    FAILED
+    DONE
 }

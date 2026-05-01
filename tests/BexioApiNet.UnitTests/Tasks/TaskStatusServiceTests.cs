@@ -95,4 +95,24 @@ public sealed class TaskStatusServiceTests : ServiceTestBase
 
         result.ShouldBeSameAs(response);
     }
+
+    /// <summary>
+    ///     The cancellation token supplied by the caller must be forwarded to the connection
+    ///     handler so cooperative cancellation flows end-to-end.
+    /// </summary>
+    [Test]
+    public async Task Get_ForwardsCancellationTokenToConnectionHandler()
+    {
+        using var cts = new CancellationTokenSource();
+        ConnectionHandler
+            .GetAsync<List<TaskStatus>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<List<TaskStatus>?> { IsSuccess = true, Data = [] });
+
+        await _sut.Get(cts.Token);
+
+        await ConnectionHandler.Received(1).GetAsync<List<TaskStatus>?>(
+            ExpectedEndpoint,
+            null,
+            cts.Token);
+    }
 }
