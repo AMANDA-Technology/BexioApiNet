@@ -23,40 +23,31 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using System.Runtime.InteropServices;
-using BexioApiNet.Abstractions.Models.Api;
-using BexioApiNet.Abstractions.Models.Payroll.Paystubs;
-using BexioApiNet.Interfaces;
-using BexioApiNet.Interfaces.Connectors.Payroll;
-using BexioApiNet.Services.Connectors.Base;
+namespace BexioApiNet.Models;
 
-namespace BexioApiNet.Services.Connectors.Payroll;
-
-/// <inheritdoc cref="IPaystubService" />
-public sealed class PaystubService : ConnectorService, IPaystubService
+/// <summary>
+/// Query parameters for
+/// <c>GET /4.0/payroll/employees/{employeeId}/absences</c>. The Bexio v4.0 spec
+/// requires the absences listing to be scoped to a single business year via the
+/// <c>businessYear</c> query parameter.
+/// <see href="https://docs.bexio.com/#tag/Absences">Absences</see>
+/// </summary>
+public sealed record QueryParameterAbsence
 {
     /// <summary>
-    ///     The api endpoint version.
+    /// Initializes a new instance of the <see cref="QueryParameterAbsence"/> record.
     /// </summary>
-    private const string ApiVersion = PaystubConfiguration.ApiVersion;
+    /// <param name="businessYear">Four-digit business year used to filter the absences (required by the API).</param>
+    public QueryParameterAbsence(int businessYear)
+    {
+        QueryParameter = new(new Dictionary<string, object>
+        {
+            ["businessYear"] = businessYear
+        });
+    }
 
     /// <summary>
-    ///     The api request path prefix for the parent payroll employee resource.
+    /// Serializable query parameter dictionary forwarded to <c>ConnectionHandler</c>.
     /// </summary>
-    private const string EndpointRoot = PaystubConfiguration.EndpointRoot;
-
-    /// <inheritdoc />
-    public PaystubService(IBexioConnectionHandler bexioConnectionHandler) : base(bexioConnectionHandler)
-    {
-    }
-
-    /// <inheritdoc />
-    public async Task<ApiResult<Paystub>> GetPdf(Guid employeeId, int year, int month,
-        [Optional] CancellationToken cancellationToken)
-    {
-        return await ConnectionHandler.GetAsync<Paystub>(
-            $"{ApiVersion}/{EndpointRoot}/{employeeId}/paystub-pdf/{year}/{month}",
-            null,
-            cancellationToken);
-    }
+    public QueryParameter QueryParameter { get; }
 }

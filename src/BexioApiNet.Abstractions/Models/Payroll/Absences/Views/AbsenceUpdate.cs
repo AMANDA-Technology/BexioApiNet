@@ -26,18 +26,24 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Payroll.Absences.Views;
 
 /// <summary>
-/// Update view for <c>PUT /4.0/payroll/employees/{employeeId}/absences/{id}</c>. All
-/// fields are nullable to support partial-replacement payloads — only the properties
-/// supplied by the caller are serialized and sent to Bexio.
+/// Update view for <c>PUT /4.0/payroll/employees/{employeeId}/absences/{absenceId}</c>.
+/// All fields shown are required by the v4.0 spec — PUT performs a full replacement
+/// and the entire absence body must be supplied.
 /// <see href="https://docs.bexio.com/#tag/Absences">Absences</see>
 /// </summary>
-/// <param name="AbsenceType">Absence type (e.g. <c>SICK</c>, <c>VACATION</c>, <c>MATERNITY</c>).</param>
+/// <param name="Reason">Absence reason. Currently supported: <c>Injury</c>, <c>Sickness</c>, <c>MaternityLeave</c>, <c>MilitaryLeave</c>, <c>Vacation</c>, <c>InterruptionOfWork</c>.</param>
 /// <param name="StartDate">First day of the absence.</param>
 /// <param name="EndDate">Last day of the absence.</param>
-/// <param name="Status">Approval status (e.g. <c>PENDING</c>, <c>APPROVED</c>, <c>REJECTED</c>).</param>
+/// <param name="HalfDay">Whether the absence covers half-days only.</param>
+/// <param name="ContinuedPay">Continued-pay percentage (decimal).</param>
+/// <param name="Disability">Disability percentage (decimal).</param>
+/// <param name="PaidHours">Paid hours associated with the absence (decimal).</param>
 public sealed record AbsenceUpdate(
-    [property: JsonPropertyName("absence_type")] string? AbsenceType = null,
-    [property: JsonPropertyName("start_date")] DateTime? StartDate = null,
-    [property: JsonPropertyName("end_date")] DateTime? EndDate = null,
-    [property: JsonPropertyName("status")] string? Status = null
+    [property: JsonPropertyName("reason")] string Reason,
+    [property: JsonPropertyName("start_date")] DateOnly StartDate,
+    [property: JsonPropertyName("end_date")] DateOnly EndDate,
+    [property: JsonPropertyName("half_day")] bool HalfDay,
+    [property: JsonPropertyName("continued_pay")] decimal ContinuedPay,
+    [property: JsonPropertyName("disability")] decimal Disability,
+    [property: JsonPropertyName("paid_hours")] decimal PaidHours
 );

@@ -29,6 +29,7 @@ using BexioApiNet.Abstractions.Models.Payroll.Employees;
 using BexioApiNet.Abstractions.Models.Payroll.Employees.Views;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Payroll;
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Base;
 
 namespace BexioApiNet.Services.Connectors.Payroll;
@@ -52,15 +53,16 @@ public sealed class EmployeeService : ConnectorService, IEmployeeService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<List<Employee>>> Get([Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<EmployeeListResponse>> Get([Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.GetAsync<List<Employee>>($"{ApiVersion}/{EndpointRoot}", null, cancellationToken);
+        return await ConnectionHandler.GetAsync<EmployeeListResponse>($"{ApiVersion}/{EndpointRoot}", null, cancellationToken);
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<Employee>> GetById(Guid id, [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<Employee>> GetById(Guid id, DateOnly date, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.GetAsync<Employee>($"{ApiVersion}/{EndpointRoot}/{id}", null, cancellationToken);
+        var queryParameter = new QueryParameterEmployee(date);
+        return await ConnectionHandler.GetAsync<Employee>($"{ApiVersion}/{EndpointRoot}/{id}", queryParameter.QueryParameter, cancellationToken);
     }
 
     /// <inheritdoc />

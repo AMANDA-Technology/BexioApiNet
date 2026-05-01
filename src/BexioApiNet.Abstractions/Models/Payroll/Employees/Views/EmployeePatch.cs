@@ -26,18 +26,39 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Payroll.Employees.Views;
 
 /// <summary>
-/// Patch view for <c>PATCH /4.0/payroll/employees/{id}</c>. All fields are optional
-/// (nullable) — only the properties supplied by the caller are sent to Bexio and
-/// persisted. Unspecified fields retain their current server-side value.
+/// Patch view for <c>PATCH /4.0/payroll/employees/{employeeId}</c>. The Bexio v4.0
+/// spec uses the same body schema as <c>POST /4.0/payroll/employees</c> — including
+/// <c>ahvNumber</c> (wire name <c>ahv_number</c>) which is required by the API even
+/// for partial updates. Other fields are optional and only serialized when supplied.
 /// <see href="https://docs.bexio.com/#tag/Employees">Employees</see>
 /// </summary>
+/// <param name="AhvNumber">Swiss AHV (social security) number. Required by the API.</param>
+/// <param name="Email">Employee email address.</param>
 /// <param name="FirstName">Employee first name.</param>
 /// <param name="LastName">Employee last name.</param>
-/// <param name="Email">Employee email address.</param>
-/// <param name="EmploymentStatus">Employment status (e.g. <c>ACTIVE</c>, <c>INACTIVE</c>).</param>
+/// <param name="PersonalNumber">Internal personal number assigned by the company.</param>
+/// <param name="Nationality">ISO Alpha-2 nationality code (special values: <c>11</c> = unknown, <c>22</c> = stateless).</param>
+/// <param name="Iban">Bank IBAN for salary payments.</param>
+/// <param name="MaritalStatus">Marital status enum value (default <c>unknown</c>).</param>
+/// <param name="Gender">Gender. Allowed values: <c>male</c>, <c>female</c>.</param>
+/// <param name="DateOfBirth">Employee date of birth.</param>
+/// <param name="Address">Postal address of the employee.</param>
+/// <param name="Language">UI language (default <c>de</c>). Allowed values: <c>de</c>, <c>it</c>, <c>fr</c>, <c>en</c>.</param>
+/// <param name="PhoneNumber">Employee phone number.</param>
+/// <param name="AnnualVacationDays">Total annual vacation days entitlement.</param>
 public sealed record EmployeePatch(
+    [property: JsonPropertyName("ahv_number")] string AhvNumber,
+    [property: JsonPropertyName("email")] string? Email = null,
     [property: JsonPropertyName("first_name")] string? FirstName = null,
     [property: JsonPropertyName("last_name")] string? LastName = null,
-    [property: JsonPropertyName("email")] string? Email = null,
-    [property: JsonPropertyName("employment_status")] string? EmploymentStatus = null
+    [property: JsonPropertyName("personal_number")] string? PersonalNumber = null,
+    [property: JsonPropertyName("nationality")] string? Nationality = null,
+    [property: JsonPropertyName("iban")] string? Iban = null,
+    [property: JsonPropertyName("marital_status")] string? MaritalStatus = null,
+    [property: JsonPropertyName("gender")] string? Gender = null,
+    [property: JsonPropertyName("date_of_birth")] DateOnly? DateOfBirth = null,
+    [property: JsonPropertyName("address")] EmployeeAddress? Address = null,
+    [property: JsonPropertyName("language")] string? Language = null,
+    [property: JsonPropertyName("phone_number")] string? PhoneNumber = null,
+    [property: JsonPropertyName("annual_vacation_days")] int? AnnualVacationDays = null
 );

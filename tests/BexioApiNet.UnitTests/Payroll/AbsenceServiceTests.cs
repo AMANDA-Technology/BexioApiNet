@@ -33,11 +33,12 @@ namespace BexioApiNet.UnitTests.Payroll;
 
 /// <summary>
 /// Offline unit tests for <see cref="AbsenceService"/>. Each test asserts that the service
-/// forwards its calls to <see cref="IBexioConnectionHandler"/> with the expected verb, path
-/// and payload, and returns the handler's <see cref="ApiResult{T}"/> unchanged. Verifies
-/// that absences are routed under the nested
-/// <c>4.0/payroll/employees/{employeeId}/absences</c> path and that <c>Update</c> uses
-/// <c>PUT</c> per the Bexio v4.0 convention. No network, no filesystem.
+/// forwards its calls to <see cref="IBexioConnectionHandler"/> with the expected verb, path,
+/// query string and payload, and returns the handler's <see cref="ApiResult{T}"/> unchanged.
+/// Verifies that absences are routed under the nested
+/// <c>4.0/payroll/employees/{employeeId}/absences</c> path, that <c>Get</c> sends the
+/// required <c>businessYear</c> query parameter and that <c>Update</c> uses <c>PUT</c> per
+/// the Bexio v4.0 convention. No network, no filesystem.
 /// </summary>
 [TestFixture]
 [Category("Unit")]
@@ -60,33 +61,40 @@ public sealed class AbsenceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    /// Get forwards a <see langword="null"/> <see cref="QueryParameter"/> to
+    /// <c>Get</c> forwards the <c>businessYear</c> query parameter to
     /// <see cref="IBexioConnectionHandler.GetAsync{TResult}"/> at the nested absences
     /// collection path under the supplied employee id.
     /// </summary>
     [Test]
-    public async Task Get_CallsGetAsync_WithEmployeeIdInPath()
+    public async Task Get_CallsGetAsync_WithEmployeeIdInPathAndBusinessYearQueryParameter()
     {
-        var response = new ApiResult<List<Absence>>
+        const int businessYear = 2026;
+        var response = new ApiResult<AbsenceListResponse>
         {
             IsSuccess = true,
-            Data = []
+            Data = new AbsenceListResponse([])
         };
+        QueryParameter? capturedQuery = null;
         ConnectionHandler
-            .GetAsync<List<Absence>>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .GetAsync<AbsenceListResponse>(
+                Arg.Any<string>(),
+                Arg.Do<QueryParameter?>(q => capturedQuery = q),
+                Arg.Any<CancellationToken>())
             .Returns(response);
 
-        var result = await _sut.Get(EmployeeId);
+        var result = await _sut.Get(EmployeeId, businessYear);
 
-        await ConnectionHandler.Received(1).GetAsync<List<Absence>>(
+        await ConnectionHandler.Received(1).GetAsync<AbsenceListResponse>(
             $"{ExpectedEndpoint}/{EmployeeId}/absences",
-            null,
+            Arg.Any<QueryParameter?>(),
             Arg.Any<CancellationToken>());
         Assert.That(result, Is.SameAs(response));
+        Assert.That(capturedQuery, Is.Not.Null);
+        Assert.That(capturedQuery!.Parameters["businessYear"], Is.EqualTo(businessYear));
     }
 
     /// <summary>
-    /// GetById calls <see cref="IBexioConnectionHandler.GetAsync{TResult}"/> with both
+    /// <c>GetById</c> calls <see cref="IBexioConnectionHandler.GetAsync{TResult}"/> with both
     /// the employee id and the absence id appended to the endpoint path and a
     /// <see langword="null"/> query parameter.
     /// </summary>
@@ -112,16 +120,16 @@ public sealed class AbsenceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    /// Create forwards the <see cref="AbsenceCreate"/> payload and the nested endpoint
+    /// <c>Create</c> forwards the <see cref="AbsenceCreate"/> payload and the nested endpoint
     /// path to <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}"/>.
     /// </summary>
     [Test]
     public async Task Create_CallsPostAsync_WithEmployeeIdInPath()
     {
         var payload = new AbsenceCreate(
-            AbsenceType: "SICK",
-            StartDate: new DateTime(2026, 1, 10),
-            EndDate: new DateTime(2026, 1, 12));
+            Reason: "Sickness",
+            StartDate: new DateOnly(2026, 1, 10),
+            EndDate: new DateOnly(2026, 1, 12));
         var response = new ApiResult<Absence> { IsSuccess = true };
         ConnectionHandler
             .PostAsync<Absence, AbsenceCreate>(Arg.Any<AbsenceCreate>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
@@ -137,7 +145,7 @@ public sealed class AbsenceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    /// Update calls <see cref="IBexioConnectionHandler.PutAsync{TResult,TUpdate}"/>
+    /// <c>Update</c> calls <see cref="IBexioConnectionHandler.PutAsync{TResult,TUpdate}"/>
     /// (PUT, not PATCH) with both the employee id and the absence id appended to
     /// the nested endpoint path.
     /// </summary>
@@ -145,7 +153,14 @@ public sealed class AbsenceServiceTests : ServiceTestBase
     public async Task Update_CallsPutAsync_WithEmployeeAndAbsenceIdInPath()
     {
         var id = Guid.NewGuid();
-        var payload = new AbsenceUpdate(Status: "APPROVED");
+        var payload = new AbsenceUpdate(
+            Reason: "Vacation",
+            StartDate: new DateOnly(2026, 6, 1),
+            EndDate: new DateOnly(2026, 6, 14),
+            HalfDay: false,
+            ContinuedPay: 100m,
+            Disability: 0m,
+            PaidHours: 80m);
         string? capturedPath = null;
         ConnectionHandler
             .PutAsync<Absence, AbsenceUpdate>(
@@ -164,8 +179,8 @@ public sealed class AbsenceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    /// Delete calls <see cref="IBexioConnectionHandler.Delete"/> with both the employee
-    /// id and the absence id appended to the nested endpoint path.
+    /// <c>Delete</c> calls <see cref="IBexioConnectionHandler.Delete"/> with both the
+    /// employee id and the absence id appended to the nested endpoint path.
     /// </summary>
     [Test]
     public async Task Delete_CallsConnectionHandlerDelete_WithEmployeeAndAbsenceIdInPath()
@@ -185,7 +200,8 @@ public sealed class AbsenceServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    /// Delete returns the <see cref="ApiResult{T}"/> from the connection handler unchanged.
+    /// <c>Delete</c> returns the <see cref="ApiResult{T}"/> from the connection handler
+    /// unchanged.
     /// </summary>
     [Test]
     public async Task Delete_ReturnsApiResultFromConnectionHandler()

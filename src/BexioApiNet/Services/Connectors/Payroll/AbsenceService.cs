@@ -29,6 +29,7 @@ using BexioApiNet.Abstractions.Models.Payroll.Absences;
 using BexioApiNet.Abstractions.Models.Payroll.Absences.Views;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Payroll;
+using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Base;
 
 namespace BexioApiNet.Services.Connectors.Payroll;
@@ -52,9 +53,10 @@ public sealed class AbsenceService : ConnectorService, IAbsenceService
     }
 
     /// <inheritdoc />
-    public async Task<ApiResult<List<Absence>>> Get(Guid employeeId, [Optional] CancellationToken cancellationToken)
+    public async Task<ApiResult<AbsenceListResponse>> Get(Guid employeeId, int businessYear, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.GetAsync<List<Absence>>($"{ApiVersion}/{EndpointRoot}/{employeeId}/absences", null, cancellationToken);
+        var queryParameter = new QueryParameterAbsence(businessYear);
+        return await ConnectionHandler.GetAsync<AbsenceListResponse>($"{ApiVersion}/{EndpointRoot}/{employeeId}/absences", queryParameter.QueryParameter, cancellationToken);
     }
 
     /// <inheritdoc />
