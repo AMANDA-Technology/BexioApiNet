@@ -26,20 +26,24 @@ SOFTWARE.
 namespace BexioApiNet.E2eTests.Tests.Tasks;
 
 /// <summary>
-///     Live E2E coverage for <c>GET /2.0/task_status</c>. Skipped automatically when Bexio
-///     credentials are missing via <see cref="BexioE2eTestBase" />.
+///     Live E2E coverage for <c>GET /2.0/task_status</c>. Read-only lookup endpoint, so no
+///     create/update/delete lifecycle is exercised. Skipped automatically when Bexio credentials
+///     are missing via <see cref="BexioE2eTestBase" />.
 /// </summary>
 public class TaskStatusServiceE2eTests : BexioE2eTestBase
 {
     /// <summary>
-    ///     Retrieves the task status list from the live Bexio API and asserts the call is successful.
+    ///     Retrieves the task status list from the live Bexio API and asserts the call is
+    ///     successful. Performs structural assertions against the OpenAPI <c>task_status</c>
+    ///     schema — every entry must carry a positive <c>id</c> and a non-empty <c>name</c>.
     /// </summary>
     [Test]
-    public async Task GetAll()
+    public async Task GetAll_StructurallyMatchesOpenApiSchema()
     {
         Assert.That(BexioApiClient, Is.Not.Null);
 
         var res = await BexioApiClient!.TaskStatuses.Get();
+
         Assert.That(res, Is.Not.Null);
         Assert.Multiple(() =>
         {
@@ -47,5 +51,17 @@ public class TaskStatusServiceE2eTests : BexioE2eTestBase
             Assert.That(res.ApiError, Is.Null);
             Assert.That(res.Data, Is.Not.Null);
         });
+
+        if (res.Data is null || res.Data.Count is 0)
+            return;
+
+        foreach (var status in res.Data)
+        {
+            Assert.Multiple(() =>
+            {
+                Assert.That(status.Id, Is.GreaterThan(0));
+                Assert.That(status.Name, Is.Not.Null.And.Not.Empty);
+            });
+        }
     }
 }

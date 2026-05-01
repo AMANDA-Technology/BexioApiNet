@@ -102,6 +102,32 @@ public sealed class TaskServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    ///     Get forwards a <see cref="QueryParameterTask" /> populated with <c>order_by</c> so the
+    ///     handler receives the v2 list ordering directive (<c>id</c>, <c>finish_date</c>, optionally
+    ///     <c>_asc</c>/<c>_desc</c>).
+    /// </summary>
+    [Test]
+    public async Task Get_WithOrderByQueryParameter_PassesQueryParameterToConnectionHandler()
+    {
+        var queryParameter = new QueryParameterTask(OrderBy: "finish_date_desc");
+        var response = new ApiResult<List<BexioTask>?> { IsSuccess = true, Data = [] };
+        ConnectionHandler
+            .GetAsync<List<BexioTask>?>(
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        await _sut.Get(queryParameter);
+
+        await ConnectionHandler.Received(1).GetAsync<List<BexioTask>?>(
+            ExpectedEndpoint,
+            queryParameter.QueryParameter,
+            Arg.Any<CancellationToken>());
+        queryParameter.QueryParameter!.Parameters["order_by"].ShouldBe("finish_date_desc");
+    }
+
+    /// <summary>
     ///     Get (autoPage = true) triggers <see cref="IBexioConnectionHandler.FetchAll{TResult}" /> when
     ///     the <c>X-Total-Count</c> header is present and the initial response only returned a page of
     ///     the full result set.
@@ -146,6 +172,39 @@ public sealed class TaskServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    ///     Get (autoPage = false) must not invoke <see cref="IBexioConnectionHandler.FetchAll{TResult}" />,
+    ///     even when the connection handler reports a positive <c>X-Total-Count</c>.
+    /// </summary>
+    [Test]
+    public async Task Get_WithoutAutoPage_DoesNotCallFetchAll()
+    {
+        var response = new ApiResult<List<BexioTask>?>
+        {
+            IsSuccess = true,
+            Data = [BuildTask(1)],
+            ResponseHeaders = new Dictionary<string, int?>
+            {
+                { ApiHeaderNames.TotalResults, 100 }
+            }
+        };
+        ConnectionHandler
+            .GetAsync<List<BexioTask>?>(
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        await _sut.Get();
+
+        await ConnectionHandler.DidNotReceive().FetchAll<BexioTask>(
+            Arg.Any<int>(),
+            Arg.Any<int>(),
+            Arg.Any<string>(),
+            Arg.Any<QueryParameter?>(),
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
     ///     Get returns the <see cref="ApiResult{T}" /> produced by the connection handler when
     ///     auto-paging is not requested (no additional FetchAll round-trip, result passes through).
     /// </summary>
@@ -163,6 +222,26 @@ public sealed class TaskServiceTests : ServiceTestBase
         var result = await _sut.Get();
 
         result.ShouldBeSameAs(response);
+    }
+
+    /// <summary>
+    ///     Get forwards the caller's cancellation token to the connection handler so cooperative
+    ///     cancellation propagates end-to-end.
+    /// </summary>
+    [Test]
+    public async Task Get_ForwardsCancellationTokenToConnectionHandler()
+    {
+        using var cts = new CancellationTokenSource();
+        ConnectionHandler
+            .GetAsync<List<BexioTask>?>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<List<BexioTask>?> { IsSuccess = true, Data = [] });
+
+        await _sut.Get(cancellationToken: cts.Token);
+
+        await ConnectionHandler.Received(1).GetAsync<List<BexioTask>?>(
+            ExpectedEndpoint,
+            null,
+            cts.Token);
     }
 
     /// <summary>
@@ -204,6 +283,26 @@ public sealed class TaskServiceTests : ServiceTestBase
         var result = await _sut.GetById(1);
 
         result.ShouldBeSameAs(response);
+    }
+
+    /// <summary>
+    ///     GetById forwards the caller's cancellation token to the connection handler so cooperative
+    ///     cancellation propagates end-to-end.
+    /// </summary>
+    [Test]
+    public async Task GetById_ForwardsCancellationTokenToConnectionHandler()
+    {
+        using var cts = new CancellationTokenSource();
+        ConnectionHandler
+            .GetAsync<BexioTask>(Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<BexioTask> { IsSuccess = true });
+
+        await _sut.GetById(1, cts.Token);
+
+        await ConnectionHandler.Received(1).GetAsync<BexioTask>(
+            $"{ExpectedEndpoint}/1",
+            null,
+            cts.Token);
     }
 
     /// <summary>
@@ -251,6 +350,27 @@ public sealed class TaskServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    ///     Create forwards the caller's cancellation token to the connection handler so cooperative
+    ///     cancellation propagates end-to-end.
+    /// </summary>
+    [Test]
+    public async Task Create_ForwardsCancellationTokenToConnectionHandler()
+    {
+        using var cts = new CancellationTokenSource();
+        var payload = BuildCreatePayload();
+        ConnectionHandler
+            .PostAsync<BexioTask, TaskCreate>(Arg.Any<TaskCreate>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<BexioTask> { IsSuccess = true });
+
+        await _sut.Create(payload, cts.Token);
+
+        await ConnectionHandler.Received(1).PostAsync<BexioTask, TaskCreate>(
+            payload,
+            ExpectedEndpoint,
+            cts.Token);
+    }
+
+    /// <summary>
     ///     Search forwards the criteria, the <c>/search</c> path and the optional query parameter to
     ///     <see cref="IBexioConnectionHandler.PostSearchAsync{TResult}" />.
     /// </summary>
@@ -281,6 +401,59 @@ public sealed class TaskServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    ///     Search without an explicit query parameter still issues the request; the connection handler
+    ///     receives <see langword="null" /> so no query string is appended.
+    /// </summary>
+    [Test]
+    public async Task Search_WithoutQueryParameter_PassesNullToConnectionHandler()
+    {
+        var criteria = new List<SearchCriteria>
+        {
+            new() { Field = "subject", Value = "Send docs", Criteria = "=" }
+        };
+        ConnectionHandler
+            .PostSearchAsync<BexioTask>(
+                Arg.Any<List<SearchCriteria>>(),
+                Arg.Any<string>(),
+                Arg.Any<QueryParameter?>(),
+                Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<List<BexioTask>> { IsSuccess = true, Data = [] });
+
+        await _sut.Search(criteria);
+
+        await ConnectionHandler.Received(1).PostSearchAsync<BexioTask>(
+            criteria,
+            $"{ExpectedEndpoint}/search",
+            null,
+            Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    ///     Search forwards the caller's cancellation token to the connection handler so cooperative
+    ///     cancellation propagates end-to-end.
+    /// </summary>
+    [Test]
+    public async Task Search_ForwardsCancellationTokenToConnectionHandler()
+    {
+        using var cts = new CancellationTokenSource();
+        var criteria = new List<SearchCriteria>
+        {
+            new() { Field = "subject", Value = "Send docs", Criteria = "=" }
+        };
+        ConnectionHandler
+            .PostSearchAsync<BexioTask>(Arg.Any<List<SearchCriteria>>(), Arg.Any<string>(), Arg.Any<QueryParameter?>(), Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<List<BexioTask>> { IsSuccess = true, Data = [] });
+
+        await _sut.Search(criteria, cancellationToken: cts.Token);
+
+        await ConnectionHandler.Received(1).PostSearchAsync<BexioTask>(
+            criteria,
+            $"{ExpectedEndpoint}/search",
+            null,
+            cts.Token);
+    }
+
+    /// <summary>
     ///     Update calls <see cref="IBexioConnectionHandler.PostAsync{TResult,TUpdate}" /> (not PUT) at
     ///     <c>/2.0/task/{id}</c> — Bexio edits tasks via POST on this resource.
     /// </summary>
@@ -308,6 +481,47 @@ public sealed class TaskServiceTests : ServiceTestBase
     }
 
     /// <summary>
+    ///     Update returns the <see cref="ApiResult{T}" /> produced by the connection handler without modification.
+    /// </summary>
+    [Test]
+    public async Task Update_ReturnsApiResultFromConnectionHandler()
+    {
+        var payload = BuildUpdatePayload();
+        var response = new ApiResult<BexioTask> { IsSuccess = true };
+        ConnectionHandler
+            .PostAsync<BexioTask, TaskUpdate>(
+                Arg.Any<TaskUpdate>(),
+                Arg.Any<string>(),
+                Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Update(1, payload);
+
+        result.ShouldBeSameAs(response);
+    }
+
+    /// <summary>
+    ///     Update forwards the caller's cancellation token to the connection handler so cooperative
+    ///     cancellation propagates end-to-end.
+    /// </summary>
+    [Test]
+    public async Task Update_ForwardsCancellationTokenToConnectionHandler()
+    {
+        using var cts = new CancellationTokenSource();
+        var payload = BuildUpdatePayload();
+        ConnectionHandler
+            .PostAsync<BexioTask, TaskUpdate>(Arg.Any<TaskUpdate>(), Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<BexioTask> { IsSuccess = true });
+
+        await _sut.Update(7, payload, cts.Token);
+
+        await ConnectionHandler.Received(1).PostAsync<BexioTask, TaskUpdate>(
+            payload,
+            $"{ExpectedEndpoint}/7",
+            cts.Token);
+    }
+
+    /// <summary>
     ///     Delete forwards the call to <see cref="IBexioConnectionHandler.Delete" /> with the task id
     ///     appended to the endpoint root.
     /// </summary>
@@ -326,6 +540,41 @@ public sealed class TaskServiceTests : ServiceTestBase
         await _sut.Delete(id);
 
         capturedPath.ShouldBe($"{ExpectedEndpoint}/{id}");
+    }
+
+    /// <summary>
+    ///     Delete returns the <see cref="ApiResult{T}" /> produced by the connection handler without modification.
+    /// </summary>
+    [Test]
+    public async Task Delete_ReturnsApiResultFromConnectionHandler()
+    {
+        var response = new ApiResult<object> { IsSuccess = true };
+        ConnectionHandler
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(response);
+
+        var result = await _sut.Delete(1);
+
+        result.ShouldBeSameAs(response);
+    }
+
+    /// <summary>
+    ///     Delete forwards the caller's cancellation token to the connection handler so cooperative
+    ///     cancellation propagates end-to-end.
+    /// </summary>
+    [Test]
+    public async Task Delete_ForwardsCancellationTokenToConnectionHandler()
+    {
+        using var cts = new CancellationTokenSource();
+        ConnectionHandler
+            .Delete(Arg.Any<string>(), Arg.Any<CancellationToken>())
+            .Returns(new ApiResult<object> { IsSuccess = true });
+
+        await _sut.Delete(99, cts.Token);
+
+        await ConnectionHandler.Received(1).Delete(
+            $"{ExpectedEndpoint}/99",
+            cts.Token);
     }
 
     private static TaskCreate BuildCreatePayload()
