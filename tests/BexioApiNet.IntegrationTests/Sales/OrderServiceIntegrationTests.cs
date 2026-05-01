@@ -27,6 +27,7 @@ using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Sales.Orders;
 using BexioApiNet.Abstractions.Models.Sales.Orders.Views;
 using BexioApiNet.Services.Connectors.Sales;
+using System.Text.Json;
 
 namespace BexioApiNet.IntegrationTests.Sales;
 
@@ -513,6 +514,243 @@ public sealed class OrderServiceIntegrationTests : IntegrationTestBase
             Assert.That(result.IsSuccess, Is.True);
             Assert.That(request.Method, Is.EqualTo("DELETE"));
             Assert.That(request.AbsolutePath, Is.EqualTo(expectedPath));
+        });
+    }
+
+    /// <summary>
+    /// Asserts every field declared by the Bexio <c>Order</c> / <c>OrderWithDetails</c> schema in
+    /// <c>doc/openapi/bexio-v3.json</c> deserializes onto the <see cref="Order"/> record with the
+    /// expected value. Guards against silent drift between the spec and the model.
+    /// </summary>
+    [Test]
+    public async Task OrderService_GetById_DeserializesAllFieldsFromSpec()
+    {
+        const int id = 1;
+        var expectedPath = $"{OrdersPath}/{id}";
+
+        const string fullyPopulatedOrder = """
+            {
+                "id": 1,
+                "document_nr": "AU-00001",
+                "title": "Sample order",
+                "contact_id": 14,
+                "contact_sub_id": 21,
+                "user_id": 1,
+                "project_id": 99,
+                "pr_project_id": null,
+                "logopaper_id": 1,
+                "language_id": 1,
+                "bank_account_id": 1,
+                "currency_id": 1,
+                "payment_type_id": 1,
+                "header": "Order header",
+                "footer": "Order footer",
+                "total_gross": "17.800000",
+                "total_net": "17.800000",
+                "total_taxes": "1.3706",
+                "total": "19.150000",
+                "total_rounding_difference": -0.02,
+                "mwst_type": 0,
+                "mwst_is_net": true,
+                "show_position_taxes": false,
+                "is_valid_from": "2019-06-24",
+                "contact_address": "Muster AG\nMusterstrasse 15\n8640 Rapperswil",
+                "contact_address_manual": null,
+                "delivery_address_type": 0,
+                "delivery_address": "Muster AG\nMusterstrasse 15\n8640 Rapperswil",
+                "delivery_address_manual": null,
+                "kb_item_status_id": 5,
+                "is_recurring": false,
+                "api_reference": "ext-002",
+                "viewed_by_client_at": "2019-06-25 09:00:00",
+                "updated_at": "2019-04-08 13:17:32",
+                "template_slug": "581a8010821e01426b8b456b",
+                "taxs": [
+                    { "percentage": "7.70", "value": "1.3706" }
+                ],
+                "network_link": "https://office.bexio.com/share/order/abc",
+                "positions": []
+            }
+            """;
+
+        Server
+            .Given(Request.Create().WithPath(expectedPath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(fullyPopulatedOrder));
+
+        var service = new OrderService(ConnectionHandler);
+
+        var result = await service.GetById(id, TestContext.CurrentContext.CancellationToken);
+
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Data, Is.Not.Null);
+        var order = result.Data!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(order.Id, Is.EqualTo(1));
+            Assert.That(order.DocumentNr, Is.EqualTo("AU-00001"));
+            Assert.That(order.Title, Is.EqualTo("Sample order"));
+            Assert.That(order.ContactId, Is.EqualTo(14));
+            Assert.That(order.ContactSubId, Is.EqualTo(21));
+            Assert.That(order.UserId, Is.EqualTo(1));
+            Assert.That(order.ProjectId, Is.EqualTo(99));
+            Assert.That(order.PrProjectId, Is.Null);
+            Assert.That(order.LogopaperId, Is.EqualTo(1));
+            Assert.That(order.LanguageId, Is.EqualTo(1));
+            Assert.That(order.BankAccountId, Is.EqualTo(1));
+            Assert.That(order.CurrencyId, Is.EqualTo(1));
+            Assert.That(order.PaymentTypeId, Is.EqualTo(1));
+            Assert.That(order.Header, Is.EqualTo("Order header"));
+            Assert.That(order.Footer, Is.EqualTo("Order footer"));
+            Assert.That(order.TotalGross, Is.EqualTo("17.800000"));
+            Assert.That(order.TotalNet, Is.EqualTo("17.800000"));
+            Assert.That(order.TotalTaxes, Is.EqualTo("1.3706"));
+            Assert.That(order.Total, Is.EqualTo("19.150000"));
+            Assert.That(order.TotalRoundingDifference, Is.EqualTo(-0.02m));
+            Assert.That(order.MwstType, Is.EqualTo(0));
+            Assert.That(order.MwstIsNet, Is.True);
+            Assert.That(order.ShowPositionTaxes, Is.False);
+            Assert.That(order.IsValidFrom, Is.EqualTo("2019-06-24"));
+            Assert.That(order.ContactAddress, Is.EqualTo("Muster AG\nMusterstrasse 15\n8640 Rapperswil"));
+            Assert.That(order.ContactAddressManual, Is.Null);
+            Assert.That(order.DeliveryAddressType, Is.EqualTo(0));
+            Assert.That(order.DeliveryAddress, Is.EqualTo("Muster AG\nMusterstrasse 15\n8640 Rapperswil"));
+            Assert.That(order.DeliveryAddressManual, Is.Null);
+            Assert.That(order.KbItemStatusId, Is.EqualTo(5));
+            Assert.That(order.IsRecurring, Is.False);
+            Assert.That(order.ApiReference, Is.EqualTo("ext-002"));
+            Assert.That(order.ViewedByClientAt, Is.EqualTo("2019-06-25 09:00:00"));
+            Assert.That(order.UpdatedAt, Is.EqualTo("2019-04-08 13:17:32"));
+            Assert.That(order.TemplateSlug, Is.EqualTo("581a8010821e01426b8b456b"));
+            Assert.That(order.Taxs, Is.Not.Null);
+            Assert.That(order.Taxs!, Has.Count.EqualTo(1));
+            Assert.That(order.Taxs![0].Percentage, Is.EqualTo("7.70"));
+            Assert.That(order.Taxs![0].Value, Is.EqualTo("1.3706"));
+            Assert.That(order.NetworkLink, Is.EqualTo("https://office.bexio.com/share/order/abc"));
+            Assert.That(order.Positions, Is.Not.Null);
+            Assert.That(order.Positions!, Is.Empty);
+        });
+    }
+
+    /// <summary>
+    /// Cross-checks that every property name declared on the <c>Order</c> schema in the OpenAPI
+    /// document maps to an <see cref="Order"/> property via its <c>JsonPropertyName</c> attribute.
+    /// </summary>
+    [Test]
+    public void Order_AllSpecPropertyNames_AreCoveredByModel()
+    {
+        var specProperties = new[]
+        {
+            "id", "document_nr", "title", "contact_id", "contact_sub_id", "user_id", "project_id",
+            "pr_project_id", "logopaper_id", "language_id", "bank_account_id", "currency_id",
+            "payment_type_id", "header", "footer", "total_gross", "total_net", "total_taxes",
+            "total", "total_rounding_difference", "mwst_type", "mwst_is_net", "show_position_taxes",
+            "is_valid_from", "contact_address", "contact_address_manual", "delivery_address_type",
+            "delivery_address", "delivery_address_manual", "kb_item_status_id", "is_recurring",
+            "api_reference", "viewed_by_client_at", "updated_at", "template_slug", "taxs",
+            "network_link", "positions"
+        };
+
+        var modelJsonNames = typeof(Order)
+            .GetProperties()
+            .Select(p => p.GetCustomAttributes(typeof(System.Text.Json.Serialization.JsonPropertyNameAttribute), false)
+                .Cast<System.Text.Json.Serialization.JsonPropertyNameAttribute>()
+                .Select(a => a.Name)
+                .FirstOrDefault())
+            .Where(name => name is not null)
+            .ToHashSet();
+
+        Assert.Multiple(() =>
+        {
+            foreach (var name in specProperties)
+                Assert.That(modelJsonNames, Does.Contain(name), $"Order model is missing JSON property: {name}");
+        });
+    }
+
+    /// <summary>
+    /// Verifies that the <c>OrderRepetition</c> schema deserializes both into the
+    /// <see cref="OrderRepetition"/> wrapper and into the polymorphic <see cref="OrderRepetitionDaily"/>
+    /// subtype identified by its <c>type</c> discriminator.
+    /// </summary>
+    [Test]
+    public async Task OrderService_GetRepetition_DeserializesPolymorphicSchedule()
+    {
+        const int id = 1;
+        var expectedPath = $"{OrdersPath}/{id}/repetition";
+
+        const string fullyPopulatedRepetition = """
+            {
+                "start": "2019-01-01",
+                "end": "2019-12-31",
+                "repetition": { "type": "daily", "interval": 5 }
+            }
+            """;
+
+        Server
+            .Given(Request.Create().WithPath(expectedPath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody(fullyPopulatedRepetition));
+
+        var service = new OrderService(ConnectionHandler);
+
+        var result = await service.GetRepetition(id, TestContext.CurrentContext.CancellationToken);
+
+        Assert.That(result.IsSuccess, Is.True);
+        Assert.That(result.Data, Is.Not.Null);
+        var repetition = result.Data!;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(repetition.Start, Is.EqualTo("2019-01-01"));
+            Assert.That(repetition.End, Is.EqualTo("2019-12-31"));
+            Assert.That(repetition.Repetition, Is.InstanceOf<OrderRepetitionDaily>());
+            Assert.That(((OrderRepetitionDaily)repetition.Repetition!).Interval, Is.EqualTo(5));
+        });
+    }
+
+    /// <summary>
+    /// Verifies that <c>OrderService.Get</c> forwards <c>limit</c>, <c>offset</c> and
+    /// <c>order_by</c> from <see cref="Models.QueryParameterOrder"/> as URL query parameters,
+    /// matching the three optional query parameters declared on <c>GET /2.0/kb_order</c>.
+    /// </summary>
+    [Test]
+    public async Task OrderService_Get_ForwardsQueryParameters()
+    {
+        Server
+            .Given(Request.Create().WithPath(OrdersPath).UsingGet())
+            .RespondWith(Response.Create().WithStatusCode(200).WithBody("[]"));
+
+        var service = new OrderService(ConnectionHandler);
+
+        var queryParameter = new Models.QueryParameterOrder(Limit: 50, Offset: 10, OrderBy: "id_desc");
+
+        await service.Get(queryParameter, cancellationToken: TestContext.CurrentContext.CancellationToken);
+
+        var request = Server.LogEntries.Last().RequestMessage!;
+        var queryString = request.RawQuery ?? string.Empty;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(queryString, Does.Contain("limit=50"));
+            Assert.That(queryString, Does.Contain("offset=10"));
+            Assert.That(queryString, Does.Contain("order_by=id_desc"));
+        });
+    }
+
+    /// <summary>
+    /// Sanity check that the canned <c>OrderResponse</c> stays valid JSON. Catches accidental
+    /// breakage of the fixture when fields are added or removed.
+    /// </summary>
+    [Test]
+    public void OrderResponse_FixtureIsValidJson()
+    {
+        using var doc = JsonDocument.Parse(OrderResponse);
+        var root = doc.RootElement;
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(root.TryGetProperty("id", out _), Is.True);
+            Assert.That(root.TryGetProperty("kb_item_status_id", out _), Is.True);
+            Assert.That(root.TryGetProperty("is_recurring", out _), Is.True);
         });
     }
 }
