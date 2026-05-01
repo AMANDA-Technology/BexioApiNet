@@ -26,23 +26,39 @@ SOFTWARE.
 namespace BexioApiNet.Models;
 
 /// <summary>
-/// Dictionary for optional query parameters on business activity endpoints
+/// Typed query parameter wrapper for the Bexio business activity endpoints
 /// (<c>GET /2.0/client_service</c> and <c>POST /2.0/client_service/search</c>).
+/// Each constructor argument is optional so callers can supply only the parameters
+/// they need; <see langword="null"/> values are skipped and not serialized onto the URL.
 /// </summary>
-/// <param name="Limit">Limit the number of results (Bexio max is 2000).</param>
+/// <param name="Limit">Limit the number of results (Bexio default <c>500</c>, maximum <c>2000</c>).</param>
 /// <param name="Offset">Skip over the given number of elements before returning results.</param>
+/// <param name="OrderBy">Sort clause — one of <c>id</c> or <c>name</c>, optionally with <c>_asc</c>/<c>_desc</c> suffixes.</param>
 public sealed record QueryParameterBusinessActivity(
-    int Limit,
-    int Offset
+    int? Limit = null,
+    int? Offset = null,
+    string? OrderBy = null
 )
 {
     /// <summary>
-    /// Parameter dictionary rendered onto the request URI by the connection handler.
+    /// The underlying <see cref="Models.QueryParameter"/> passed to <see cref="Interfaces.IBexioConnectionHandler"/>.
+    /// <see langword="null"/> when every input is <see langword="null"/> so the handler appends no query string.
     /// </summary>
-    public QueryParameter? QueryParameter { get; } =
-        new(Parameters: new()
-        {
-            {"limit", Limit},
-            {"offset", Offset}
-        });
+    public QueryParameter? QueryParameter { get; } = BuildQueryParameter(Limit, Offset, OrderBy);
+
+    private static QueryParameter? BuildQueryParameter(int? limit, int? offset, string? orderBy)
+    {
+        var parameters = new Dictionary<string, object>();
+
+        if (limit is { } l)
+            parameters["limit"] = l;
+
+        if (offset is { } o)
+            parameters["offset"] = o;
+
+        if (!string.IsNullOrWhiteSpace(orderBy))
+            parameters["order_by"] = orderBy;
+
+        return parameters.Count is 0 ? null : new QueryParameter(parameters);
+    }
 };

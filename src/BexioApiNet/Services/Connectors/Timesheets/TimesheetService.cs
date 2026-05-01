@@ -92,7 +92,7 @@ public sealed class TimesheetService : ConnectorService, ITimesheetService
     /// <inheritdoc />
     public async Task<ApiResult<Timesheet>> Update(int id, TimesheetUpdate timesheet, [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PutAsync<Timesheet, TimesheetUpdate>(timesheet, $"{ApiVersion}/{EndpointRoot}/{id}", cancellationToken);
+        return await ConnectionHandler.PostAsync<Timesheet, TimesheetUpdate>(timesheet, $"{ApiVersion}/{EndpointRoot}/{id}", cancellationToken);
     }
 
     /// <inheritdoc />

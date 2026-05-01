@@ -27,21 +27,21 @@ SOFTWARE.
 namespace BexioApiNet.Abstractions.Models.Expenses.Expenses.Enums;
 
 /// <summary>
-/// Target status for the <c>PUT /4.0/expenses/expenses/{id}/bookings/{status}</c> endpoint.
-/// Only <c>DRAFT</c> and <c>BOOKED</c> are accepted as booking transition targets.
+/// Target status for the <c>PUT /4.0/expenses/{id}/bookings/{status}</c> endpoint.
+/// Only <c>DRAFT</c> and <c>DONE</c> are accepted as booking transition targets.
 /// <see href="https://docs.bexio.com/#tag/Expenses">Expenses</see>
 /// </summary>
 [JsonConverter(typeof(JsonStringEnumConverter))]
 public enum ExpenseBookingStatus
 {
     /// <summary>
-    /// Transition the expense back to <c>DRAFT</c> status. Only allowed from <c>BOOKED</c>.
+    /// Transition the expense back to <c>DRAFT</c> status. Only allowed from <c>DONE</c>.
     /// </summary>
     DRAFT,
 
     /// <summary>
-    /// Transition the expense to <c>BOOKED</c> status. Only allowed from <c>DRAFT</c> and
+    /// Transition the expense to <c>DONE</c> status. Only allowed from <c>DRAFT</c> and
     /// triggers the full set of booking validations in the Bexio API.
     /// </summary>
-    BOOKED
+    DONE
 }

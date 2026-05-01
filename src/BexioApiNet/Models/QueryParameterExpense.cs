@@ -26,8 +26,8 @@ SOFTWARE.
 namespace BexioApiNet.Models;
 
 /// <summary>
-/// Query parameters for <c>GET /4.0/expenses/expenses</c>. All parameters are optional;
-/// only supplied values are appended to the final URI.
+/// Query parameters for <c>GET /4.0/expenses</c>. All parameters are optional;
+/// only supplied values are appended to the final URI. Mirrors the Bexio v3 OpenAPI spec.
 /// <see href="https://docs.bexio.com/#tag/Expenses">Expenses</see>
 /// </summary>
 public sealed record QueryParameterExpense
@@ -35,51 +35,43 @@ public sealed record QueryParameterExpense
     /// <summary>
     /// Initializes a new instance of the <see cref="QueryParameterExpense"/> record.
     /// </summary>
-    /// <param name="limit">Page size (1-500). Bexio default is 100.</param>
-    /// <param name="page">1-based page number. Bexio default is 1.</param>
+    /// <param name="limit">Page size. Bexio default is <c>100</c>.</param>
+    /// <param name="page">1-based page number. Bexio default is <c>1</c>.</param>
     /// <param name="order">Sort direction. Must be <c>asc</c> or <c>desc</c>. Bexio default is <c>asc</c>.</param>
     /// <param name="sort">Field name to sort by (e.g. <c>document_no</c>).</param>
-    /// <param name="searchTerm">Free-text search term (3-255 characters).</param>
-    /// <param name="status">Status filter — one of <c>DRAFTS</c>, <c>TODO</c>, <c>PAID</c>, <c>OVERDUE</c>.</param>
-    /// <param name="expenseDateStart">Lower bound (inclusive) for <c>expense_date</c>.</param>
-    /// <param name="expenseDateEnd">Upper bound (inclusive) for <c>expense_date</c>.</param>
-    /// <param name="dueDateStart">Lower bound (inclusive) for <c>due_date</c>.</param>
-    /// <param name="dueDateEnd">Upper bound (inclusive) for <c>due_date</c>.</param>
-    /// <param name="vendorRef">Substring filter on <c>vendor_ref</c>.</param>
-    /// <param name="title">Substring filter on <c>title</c>.</param>
-    /// <param name="currencyCode">Substring filter on <c>currency_code</c>.</param>
-    /// <param name="pendingAmountMin">Lower bound (inclusive) for <c>pending_amount</c>.</param>
-    /// <param name="pendingAmountMax">Upper bound (inclusive) for <c>pending_amount</c>.</param>
     /// <param name="vendor">Substring filter across <c>lastname_company</c> and <c>firstname_suffix</c>.</param>
     /// <param name="grossMin">Lower bound (inclusive) for <c>gross</c>.</param>
     /// <param name="grossMax">Upper bound (inclusive) for <c>gross</c>.</param>
     /// <param name="netMin">Lower bound (inclusive) for <c>net</c>.</param>
     /// <param name="netMax">Upper bound (inclusive) for <c>net</c>.</param>
+    /// <param name="paidOnStart">Lower bound (inclusive) for <c>paid_on</c>.</param>
+    /// <param name="paidOnEnd">Upper bound (inclusive) for <c>paid_on</c>.</param>
+    /// <param name="createdAtStart">Lower bound (inclusive) for <c>created_at</c>.</param>
+    /// <param name="createdAtEnd">Upper bound (inclusive) for <c>created_at</c>.</param>
+    /// <param name="title">Substring filter on <c>title</c>.</param>
+    /// <param name="currencyCode">Filter on <c>currency_code</c>.</param>
     /// <param name="documentNo">Substring filter on <c>document_no</c>.</param>
     /// <param name="supplierId">Exact match on <c>supplier_id</c>.</param>
+    /// <param name="projectId">Exact match on <c>project_id</c>.</param>
     public QueryParameterExpense(
         int? limit = null,
         int? page = null,
         string? order = null,
         string? sort = null,
-        string? searchTerm = null,
-        string? status = null,
-        DateOnly? expenseDateStart = null,
-        DateOnly? expenseDateEnd = null,
-        DateOnly? dueDateStart = null,
-        DateOnly? dueDateEnd = null,
-        string? vendorRef = null,
-        string? title = null,
-        string? currencyCode = null,
-        double? pendingAmountMin = null,
-        double? pendingAmountMax = null,
         string? vendor = null,
         double? grossMin = null,
         double? grossMax = null,
         double? netMin = null,
         double? netMax = null,
+        DateOnly? paidOnStart = null,
+        DateOnly? paidOnEnd = null,
+        DateTimeOffset? createdAtStart = null,
+        DateTimeOffset? createdAtEnd = null,
+        string? title = null,
+        string? currencyCode = null,
         string? documentNo = null,
-        int? supplierId = null)
+        int? supplierId = null,
+        Guid? projectId = null)
     {
         var parameters = new Dictionary<string, object>();
 
@@ -87,24 +79,20 @@ public sealed record QueryParameterExpense
         if (page is { } p) parameters["page"] = p;
         if (!string.IsNullOrWhiteSpace(order)) parameters["order"] = order;
         if (!string.IsNullOrWhiteSpace(sort)) parameters["sort"] = sort;
-        if (!string.IsNullOrWhiteSpace(searchTerm)) parameters["search_term"] = searchTerm;
-        if (!string.IsNullOrWhiteSpace(status)) parameters["status"] = status;
-        if (expenseDateStart is { } eds) parameters["expense_date_start"] = eds.ToString("yyyy-MM-dd");
-        if (expenseDateEnd is { } ede) parameters["expense_date_end"] = ede.ToString("yyyy-MM-dd");
-        if (dueDateStart is { } dds) parameters["due_date_start"] = dds.ToString("yyyy-MM-dd");
-        if (dueDateEnd is { } dde) parameters["due_date_end"] = dde.ToString("yyyy-MM-dd");
-        if (!string.IsNullOrWhiteSpace(vendorRef)) parameters["vendor_ref"] = vendorRef;
-        if (!string.IsNullOrWhiteSpace(title)) parameters["title"] = title;
-        if (!string.IsNullOrWhiteSpace(currencyCode)) parameters["currency_code"] = currencyCode;
-        if (pendingAmountMin is { } pmin) parameters["pending_amount_min"] = pmin;
-        if (pendingAmountMax is { } pmax) parameters["pending_amount_max"] = pmax;
         if (!string.IsNullOrWhiteSpace(vendor)) parameters["vendor"] = vendor;
         if (grossMin is { } gmin) parameters["gross_min"] = gmin;
         if (grossMax is { } gmax) parameters["gross_max"] = gmax;
         if (netMin is { } nmin) parameters["net_min"] = nmin;
         if (netMax is { } nmax) parameters["net_max"] = nmax;
+        if (paidOnStart is { } pos) parameters["paid_on_start"] = pos.ToString("yyyy-MM-dd");
+        if (paidOnEnd is { } poe) parameters["paid_on_end"] = poe.ToString("yyyy-MM-dd");
+        if (createdAtStart is { } cas) parameters["created_at_start"] = cas.ToString("yyyy-MM-ddTHH:mm:sszzz");
+        if (createdAtEnd is { } cae) parameters["created_at_end"] = cae.ToString("yyyy-MM-ddTHH:mm:sszzz");
+        if (!string.IsNullOrWhiteSpace(title)) parameters["title"] = title;
+        if (!string.IsNullOrWhiteSpace(currencyCode)) parameters["currency_code"] = currencyCode;
         if (!string.IsNullOrWhiteSpace(documentNo)) parameters["document_no"] = documentNo;
         if (supplierId is { } sid) parameters["supplier_id"] = sid;
+        if (projectId is { } pid) parameters["project_id"] = pid;
 
         QueryParameter = new(parameters);
     }

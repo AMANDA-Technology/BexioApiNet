@@ -31,7 +31,8 @@ namespace BexioApiNet.IntegrationTests.Timesheets;
 /// Integration tests covering <see cref="TimesheetStatusService" />. The request path is
 /// composed from <see cref="TimesheetStatusConfiguration" /> (<c>2.0/timesheet_status</c>)
 /// and must reach WireMock intact when the service is driven through the real connection
-/// handler.
+/// handler. Stub bodies use the <c>v2TimeSheetStatus</c> schema so deserialization is
+/// exercised end-to-end.
 /// </summary>
 public sealed class TimesheetStatusServiceIntegrationTests : IntegrationTestBase
 {
@@ -67,7 +68,7 @@ public sealed class TimesheetStatusServiceIntegrationTests : IntegrationTestBase
 
     /// <summary>
     /// When the server returns a populated list, <c>TimesheetStatusService.Get()</c> must
-    /// deserialize each status lookup entry (<c>id</c>, <c>name</c>) intact.
+    /// deserialize each <c>v2TimeSheetStatus</c> entry intact (<c>id</c>, <c>name</c>).
     /// </summary>
     [Test]
     public async Task TimesheetStatusService_Get_DeserializesPopulatedList()
@@ -91,12 +92,13 @@ public sealed class TimesheetStatusServiceIntegrationTests : IntegrationTestBase
         Assert.Multiple(() =>
         {
             Assert.That(result.IsSuccess, Is.True);
-            Assert.That(result.Data, Is.Not.Null);
-            Assert.That(result.Data!, Has.Count.EqualTo(3));
+            Assert.That(result.Data, Has.Count.EqualTo(3));
             Assert.That(result.Data![0].Id, Is.EqualTo(1));
-            Assert.That(result.Data![0].Name, Is.EqualTo("Open"));
-            Assert.That(result.Data![2].Id, Is.EqualTo(4));
-            Assert.That(result.Data![2].Name, Is.EqualTo("Done"));
+            Assert.That(result.Data[0].Name, Is.EqualTo("Open"));
+            Assert.That(result.Data[1].Id, Is.EqualTo(2));
+            Assert.That(result.Data[1].Name, Is.EqualTo("In Progress"));
+            Assert.That(result.Data[2].Id, Is.EqualTo(4));
+            Assert.That(result.Data[2].Name, Is.EqualTo("Done"));
         });
     }
 }

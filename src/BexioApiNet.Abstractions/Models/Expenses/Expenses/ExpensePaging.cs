@@ -27,7 +27,7 @@ namespace BexioApiNet.Abstractions.Models.Expenses.Expenses;
 
 /// <summary>
 /// Paging envelope returned by the list endpoint
-/// <c>GET /4.0/expenses/expenses</c>. Bexio v4.0 list endpoints use page-based
+/// <c>GET /4.0/expenses</c>. Bexio v4.0 list endpoints use page-based
 /// pagination (not offset-based).
 /// </summary>
 /// <param name="Page">Current 1-based page number.</param>
