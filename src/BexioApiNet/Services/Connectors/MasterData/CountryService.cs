@@ -99,7 +99,7 @@ public sealed class CountryService : ConnectorService, ICountryService
     public async Task<ApiResult<Country>> Update(int id, CountryUpdate country,
         [Optional] CancellationToken cancellationToken)
     {
-        return await ConnectionHandler.PutAsync<Country, CountryUpdate>(country,
+        return await ConnectionHandler.PostAsync<Country, CountryUpdate>(country,
             $"{ApiVersion}/{EndpointRoot}/{id}", cancellationToken);
     }
 

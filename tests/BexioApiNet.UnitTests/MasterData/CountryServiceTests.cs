@@ -286,17 +286,19 @@ public sealed class CountryServiceTests : ServiceTestBase
     }
 
     /// <summary>
-    /// Update forwards the update view to <see cref="IBexioConnectionHandler.PutAsync{TResult,TUpdate}"/>
-    /// against the per-id sub-path (Update uses PUT per the epic blueprint).
+    /// Update forwards the update view to <see cref="IBexioConnectionHandler.PostAsync{TResult,TCreate}"/>
+    /// against the per-id sub-path. Bexio's v2 country edit endpoint is documented as
+    /// <c>POST /2.0/country/{country_id}</c> (operationId <c>v2EditCountry</c>) — full-replacement
+    /// edits use POST, not PUT.
     /// </summary>
     [Test]
-    public async Task Update_CallsPutAsyncWithIdInPath()
+    public async Task Update_CallsPostAsyncWithIdInPath()
     {
         const int id = 7;
         var payload = new CountryUpdate("Kiribati", "KIR", "KI");
         var expected = new ApiResult<Country> { IsSuccess = true, Data = NewCountry(id) };
         ConnectionHandler
-            .PutAsync<Country, CountryUpdate>(
+            .PostAsync<Country, CountryUpdate>(
                 Arg.Any<CountryUpdate>(),
                 Arg.Any<string>(),
                 Arg.Any<CancellationToken>())
@@ -305,7 +307,7 @@ public sealed class CountryServiceTests : ServiceTestBase
         var result = await _sut.Update(id, payload);
 
         Assert.That(result, Is.SameAs(expected));
-        await ConnectionHandler.Received(1).PutAsync<Country, CountryUpdate>(
+        await ConnectionHandler.Received(1).PostAsync<Country, CountryUpdate>(
             payload,
             $"{ExpectedEndpoint}/{id}",
             Arg.Any<CancellationToken>());

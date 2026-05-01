@@ -28,6 +28,7 @@ using BexioApiNet.Abstractions.Enums.MasterData;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.MasterData.Comments;
 using BexioApiNet.Abstractions.Models.MasterData.Comments.Views;
+using BexioApiNet.Models;
 
 namespace BexioApiNet.Interfaces.Connectors.MasterData;
 
@@ -45,9 +46,11 @@ public interface ICommentService
     /// </summary>
     /// <param name="kbDocumentType">The document-type discriminator (offer, order, invoice).</param>
     /// <param name="documentId">The id of the parent document.</param>
+    /// <param name="queryParameterComment">Optional pagination parameters (<c>limit</c>, <c>offset</c>).</param>
+    /// <param name="autoPage">Fetch all available results when <see langword="true"/>.</param>
     /// <param name="cancellationToken">Cancellation token</param>
     /// <returns></returns>
-    public Task<ApiResult<List<Comment>?>> Get(KbDocumentType kbDocumentType, int documentId, [Optional] CancellationToken cancellationToken);
+    public Task<ApiResult<List<Comment>?>> Get(KbDocumentType kbDocumentType, int documentId, [Optional] QueryParameterComment? queryParameterComment, [Optional] bool autoPage, [Optional] CancellationToken cancellationToken);
 
     /// <summary>
     /// Fetch a single comment for the given document.
