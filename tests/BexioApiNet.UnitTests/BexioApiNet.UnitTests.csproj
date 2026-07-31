@@ -25,6 +25,7 @@
     <ItemGroup>
         <ProjectReference Include="..\..\src\BexioApiNet.Abstractions\BexioApiNet.Abstractions.csproj" />
         <ProjectReference Include="..\..\src\BexioApiNet\BexioApiNet.csproj" />
+        <ProjectReference Include="..\..\src\BexioApiNet.AspNetCore\BexioApiNet.AspNetCore.csproj" />
     </ItemGroup>
 
 </Project>

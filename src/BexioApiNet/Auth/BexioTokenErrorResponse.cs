@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -23,11 +23,24 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Global using directives
+using System.Text.Json.Serialization;
 
-global using NUnit.Framework;
-global using WireMock.Server;
-global using WireMock.RequestBuilders;
-global using WireMock.ResponseBuilders;
-global using BexioApiNet.Auth;
-global using BexioApiNet.Services;
+namespace BexioApiNet.Auth;
+
+/// <summary>
+/// Error response of the bexio token endpoint, per RFC 6749 § 5.2.
+/// </summary>
+public sealed record BexioTokenErrorResponse
+{
+    /// <summary>
+    /// OAuth error code, e.g. <c>invalid_grant</c> or <c>unauthorized_client</c>.
+    /// </summary>
+    [JsonPropertyName("error")]
+    public string? Error { get; init; }
+
+    /// <summary>
+    /// Human readable description of the error.
+    /// </summary>
+    [JsonPropertyName("error_description")]
+    public string? ErrorDescription { get; init; }
+}

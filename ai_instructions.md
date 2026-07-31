@@ -18,7 +18,8 @@ If anything here conflicts with `CLAUDE.md`, **this file wins for agent behavior
 
 1. This library is a 1:1 typed .NET client for the **Bexio REST API v3.0.0**. Source of truth: <https://docs.bexio.com/>.
    - **Vendored spec (primary reference for AI agents):** [`doc/openapi/bexio-v3.json`](./doc/openapi/bexio-v3.json) — OpenAPI 3.0.2, API v3.0.0, 355 paths, retrieved 2026-04-18. Use this for offline, deterministic model generation. See [`doc/openapi/README.md`](./doc/openapi/README.md) for the refresh procedure.
-   - **Human-readable mirror:** <https://docs.bexio.com/> — use for browsing documentation and for verifying context not captured in the JSON spec.
+   - **Human-readable mirror:** <https://docs.bexio.com/> — use for browsing documentation and for verifying context not captured in the JSON spec. It looks like a JS single-page app and per-anchor fetching returns nothing, but `curl -sL https://docs.bexio.com/` returns ~8.5 MB of server-rendered HTML with the whole documentation in it. Strip the tags and read it — do not conclude a topic is undocumented from a failed anchor fetch.
+   - **Identity provider:** <https://auth.bexio.com/realms/bexio/.well-known/openid-configuration> is machine-readable and authoritative for endpoints. It is a Keycloak realm, so `grant_types_supported` and `token_endpoint_auth_methods_supported` describe the realm, **not** what a given app registration may use.
 2. **Every** endpoint, DTO field, status code and query parameter must match the Bexio docs exactly. If the docs and the code disagree, **the docs are right** — open a change.
 3. Never invent endpoints, fields or behavior that the Bexio docs do not describe. If the docs are ambiguous, stop and ask rather than guessing.
 
@@ -57,15 +58,31 @@ If a change would require bumping any of these, stop and escalate.
   3. Register it in `BexioServiceCollection.AddBexioServices`.
 
 ### 3.4 DI registration
-- `AddBexioServices` registers the connection handler as a **typed `HttpClient`** via `IHttpClientFactory`. **Do not** reintroduce `services.AddScoped<IBexioConnectionHandler, BexioConnectionHandler>()` — that re-creates the socket-exhaustion bug.
-- The dual constructor on `BexioConnectionHandler` is deliberate:
-  - `(IBexioConfiguration)` — non-DI consumers; owns and disposes the `HttpClient`.
-  - `(HttpClient, IBexioConfiguration)` — DI path; does **not** dispose the injected client.
+- `AddBexioServices` registers the connection handler as a **typed `HttpClient`** via `IHttpClientFactory`, with `BexioAuthDelegatingHandler` in the pipeline. **Do not** reintroduce `services.AddScoped<IBexioConnectionHandler, BexioConnectionHandler>()` — that re-creates the socket-exhaustion bug.
+- Registration overloads: `(baseUri, jwtToken)` and `(IBexioConfiguration)` for a static token, `(IBexioConfiguration, Func<IServiceProvider, IBexioTokenProvider>)` for a custom provider, and `AddBexioServicesWithRefreshToken` / `AddBexioServicesWithClientCredentials` for the OIDC flows. All existing overloads must keep working unchanged.
+- `IBexioTokenProvider` is registered as a **singleton** so its token cache is process-wide. A store or other scoped dependency it needs must be reached through `IServiceScopeFactory` (see `ScopedBexioRefreshTokenStore`), never captured directly.
+- The constructors on `BexioConnectionHandler` are deliberate:
+  - `(IBexioConfiguration)` — non-DI consumers with a static token; owns and disposes the `HttpClient`.
+  - `(IBexioConfiguration, IBexioTokenProvider)` — non-DI consumers with an OIDC token; owns and disposes the `HttpClient`.
+  - `(HttpClient, IBexioConfiguration)` — DI path; does **not** dispose the injected client, and expects the client's handler pipeline to authenticate.
 
-### 3.5 Query parameters
+### 3.5 Authentication
+
+- The bearer token is resolved **per request** by `BexioAuthDelegatingHandler` from an `IBexioTokenProvider`. Never set `Authorization` on `HttpClient.DefaultRequestHeaders` — that pins the token for the client's lifetime and breaks short-lived OIDC tokens.
+- `Invalidate(accessToken)` names the rejected token and clears the cache **only if it still holds it**. Do not "simplify" it to an unconditional clear: concurrent 401s would each discard the token the previous one just minted, turning N rejections into N token requests.
+- Never assume a token lifetime. Derive it from `expires_in`, fall back to a configured lifetime when it is absent, and clamp the clock skew so it cannot exceed the lifetime — either degenerate case would make the cache unusable and put a token request in front of every API call.
+- Providers live in `src/BexioApiNet/Auth/`: `StaticBexioTokenProvider` (PAT), `RefreshTokenBexioTokenProvider` and `ClientCredentialsBexioTokenProvider` (both on `CachingBexioTokenProvider`, which owns expiry, clock skew and single-flight renewal).
+- `IBexioRefreshTokenStore` is an interface only. **Never** add a concrete store to this library — persistence is the host's decision.
+- Refresh token rotation is **conditional**: bexio documents it only for the idp.bexio.com migration, and the Refresh Token Flow section does not mention it. Persist a replacement when the response carries one, keep the stored token when it does not — never require or ignore rotation. When a replacement does arrive, it must be persisted before the refresh is reported successful; do not reorder or "optimize" that write away.
+- Scopes are caller-supplied strings, never an enum — the realm advertises far more than the documented table lists. They are fixed at consent time, so the refresh path must not accept or send a scope set.
+- The client authentication method is configurable (`client_secret_post` / `client_secret_basic`) because bexio does not document which one portal-registered apps use. Do not hardcode one.
+- Treat `client_credentials` as unproven: it is absent from the documentation, and bexio's API access runs with the rights of the user who set up the connection. Never make it the recommended path.
+- The token client (`BexioTokenClient`) sends every parameter in the request **body**; the current identity provider rejects query parameters. It throws `BexioAuthenticationException` on failure — that is deliberate and does not contradict §3.1, which covers Bexio API responses, not the identity provider.
+
+### 3.6 Query parameters
 - Optional query parameters go in a domain-specific `QueryParameter<Entity>` record (see `src/BexioApiNet/Models/QueryParameter*.cs`). The wrapped `QueryParameter.Parameters` dictionary is what the handler serializes onto the URL.
 
-### 3.6 Search, Action, and Bulk Operations
+### 3.7 Search, Action, and Bulk Operations
 - For the Bexio `/search` endpoints, use `ConnectionHandler.PostSearchAsync` with the `SearchCriteria` model (from `BexioApiNet.Abstractions.Models.Api`).
 - For bulk creation endpoints, use `ConnectionHandler.PostBulkAsync`.
 - For endpoints emitting an action (issue, send, cancel), use `ConnectionHandler.PostActionAsync` (with or without a return type).
@@ -125,6 +142,8 @@ If a change would require bumping any of these, stop and escalate.
 
 Do not:
 - Instantiate `HttpClient` directly in new code. Use the injected client from `ConnectionHandler`.
+- Pin an `Authorization` header on `HttpClient.DefaultRequestHeaders`. Use `BexioAuthDelegatingHandler`.
+- Ship a concrete `IBexioRefreshTokenStore`, or log/serialize tokens of any kind.
 - Throw exceptions from connector methods for normal non-2xx responses — populate `ApiResult`.
 - Use classes when a record fits. Use mutable state when `init` / `required` fits.
 - Add Newtonsoft.Json, AutoMapper, MediatR, FluentAssertions or other frameworks not already on the dependency list.

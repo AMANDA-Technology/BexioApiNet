@@ -25,6 +25,7 @@ SOFTWARE.
 
 using System.Net.Http.Headers;
 using BexioApiNet.Abstractions.Enums.Api;
+using BexioApiNet.Auth;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
@@ -72,8 +73,8 @@ public static class BexioServiceCollection
     /// <param name="services">Service collection to register Bexio services into.</param>
     /// <param name="baseUri">Bexio API base URI (see <see href="https://docs.bexio.com/#section/API-basics/API-routes" />).</param>
     /// <param name="jwtToken">
-    ///     JWT token used for authentication (see
-    ///     <see href="https://docs.bexio.com/#section/Authentication/JWT-(JSON-Web-Tokens)" />).
+    ///     Static bearer token used for authentication, typically a Personal Access Token (see
+    ///     <see href="https://docs.bexio.com/#section/Authentication" />).
     /// </param>
     /// <param name="acceptHeaderFormat">Accept header format. Defaults to <see cref="ApiAcceptHeaders.JsonFormatted" />.</param>
     /// <returns>The same service collection, to allow chaining.</returns>
@@ -89,18 +90,43 @@ public static class BexioServiceCollection
     }
 
     /// <summary>
-    ///     Adds the configuration, handler and rest service to the services. The <see cref="IBexioConnectionHandler" />
-    ///     is registered as a typed <see cref="HttpClient" /> backed by <see cref="IHttpClientFactory" /> to avoid
-    ///     socket exhaustion under load.
+    ///     Adds the configuration, handler and rest service to the services, authenticating with the static
+    ///     <see cref="IBexioConfiguration.JwtToken" />.
     /// </summary>
     /// <param name="services">Service collection to register Bexio services into.</param>
-    /// <param name="bexioConfiguration">Bexio configuration (base URI, JWT token, accept header format).</param>
+    /// <param name="bexioConfiguration">Bexio configuration (base URI, static token, accept header format).</param>
     /// <returns>The same service collection, to allow chaining.</returns>
     // ReSharper disable once MemberCanBePrivate.Global
     public static IServiceCollection AddBexioServices(this IServiceCollection services,
         IBexioConfiguration bexioConfiguration)
     {
+        ArgumentNullException.ThrowIfNull(bexioConfiguration);
+        ArgumentException.ThrowIfNullOrWhiteSpace(bexioConfiguration.JwtToken);
+
+        return services.AddBexioServices(bexioConfiguration,
+            _ => new StaticBexioTokenProvider(bexioConfiguration.JwtToken));
+    }
+
+    /// <summary>
+    ///     Adds the configuration, handler and rest service to the services, resolving the bearer token per
+    ///     request from the supplied <see cref="IBexioTokenProvider" />. Use this for OIDC access tokens.
+    ///     The <see cref="IBexioConnectionHandler" /> is registered as a typed <see cref="HttpClient" /> backed by
+    ///     <see cref="IHttpClientFactory" /> to avoid socket exhaustion under load.
+    /// </summary>
+    /// <param name="services">Service collection to register Bexio services into.</param>
+    /// <param name="bexioConfiguration">Bexio configuration (base URI, accept header format). The static token is ignored.</param>
+    /// <param name="tokenProviderFactory">Factory for the token provider, registered as a singleton so its token cache is shared.</param>
+    /// <returns>The same service collection, to allow chaining.</returns>
+    // ReSharper disable once MemberCanBePrivate.Global
+    public static IServiceCollection AddBexioServices(this IServiceCollection services,
+        IBexioConfiguration bexioConfiguration, Func<IServiceProvider, IBexioTokenProvider> tokenProviderFactory)
+    {
+        ArgumentNullException.ThrowIfNull(bexioConfiguration);
+        ArgumentNullException.ThrowIfNull(tokenProviderFactory);
+
         services.AddSingleton(bexioConfiguration);
+        services.AddSingleton(tokenProviderFactory);
+        services.AddTransient<BexioAuthDelegatingHandler>();
 
         services.AddHttpClient<IBexioConnectionHandler, BexioConnectionHandler>((provider, client) =>
             {
@@ -112,10 +138,12 @@ public static class BexioServiceCollection
                 client.BaseAddress = new Uri(configuration.BaseUri);
                 client.DefaultRequestHeaders.Accept.Add(
                     new MediaTypeWithQualityHeaderValue(configuration.AcceptHeaderFormat));
-                client.DefaultRequestHeaders.Authorization =
-                    new AuthenticationHeaderValue("Bearer", configuration.JwtToken);
+
+                // No Authorization header here on purpose: it is set per request by the
+                // BexioAuthDelegatingHandler, so a renewed token takes effect without a new client.
             })
-            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false })
+            .AddHttpMessageHandler<BexioAuthDelegatingHandler>();
 
         services.AddScoped<IBankAccountService, BankAccountService>();
         services.AddScoped<IAccountService, AccountService>();

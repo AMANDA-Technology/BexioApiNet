@@ -36,8 +36,12 @@ public interface IBexioConfiguration
     public string BaseUri { get; set; }
 
     /// <summary>
-    /// Created JWT Token for accessing the API. <see href="https://docs.bexio.com/#section/Authentication/JWT-(JSON-Web-Tokens)">Authentication/JWT-(JSON-Web-Tokens)</see>
+    /// Static bearer token for accessing the API, typically a Personal Access Token. <see href="https://docs.bexio.com/#section/Authentication">Authentication</see>
     /// </summary>
+    /// <remarks>
+    /// Only used by the static token path. Registrations that supply an <c>IBexioTokenProvider</c> — the OIDC
+    /// flows — resolve the token per request and ignore this value.
+    /// </remarks>
     public string JwtToken { get; set; }
 
     /// <summary>

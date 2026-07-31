@@ -34,7 +34,7 @@ public sealed record BexioConfiguration : IBexioConfiguration
     public required string BaseUri { get; set; }
 
     /// <inheritdoc />
-    public required string JwtToken { get; set; }
+    public string JwtToken { get; set; } = string.Empty;
 
     /// <inheritdoc />
     public required string AcceptHeaderFormat { get; set; }

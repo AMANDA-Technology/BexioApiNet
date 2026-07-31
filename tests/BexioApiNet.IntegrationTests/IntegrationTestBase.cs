@@ -70,13 +70,16 @@ public abstract class IntegrationTestBase
     {
         Server = WireMockServer.Start();
 
-        HttpClient = new HttpClient(new HttpClientHandler { AllowAutoRedirect = false })
+        // Mirrors the AddBexioServices pipeline: the bearer token comes from the delegating
+        // handler per request, not from DefaultRequestHeaders.
+        HttpClient = new HttpClient(new BexioAuthDelegatingHandler(
+            new StaticBexioTokenProvider(FakeJwtToken),
+            new HttpClientHandler { AllowAutoRedirect = false }))
         {
             BaseAddress = new Uri(Server.Url! + "/"),
             DefaultRequestHeaders =
             {
-                Accept = { new MediaTypeWithQualityHeaderValue(ApiAcceptHeaders.JsonFormatted) },
-                Authorization = new AuthenticationHeaderValue("Bearer", FakeJwtToken)
+                Accept = { new MediaTypeWithQualityHeaderValue(ApiAcceptHeaders.JsonFormatted) }
             }
         };
 
