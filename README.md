@@ -34,9 +34,9 @@ Bexio authenticates with bearer tokens — see [Authentication](https://docs.bex
 
 | Mode | Registration | Use when |
 |------|--------------|----------|
-| Personal Access Token | `AddBexioServices(baseUri, jwtToken)` | Simplest setup. The token has a fixed expiry and must be re-minted by hand. |
-| OIDC authorization code + `offline_access` | `AddBexioServicesWithRefreshToken(...)` | Unattended integrations. Needs one-time user consent and a refresh token store. |
-| OIDC `client_credentials` | `AddBexioServicesWithClientCredentials(...)` | No consent, no storage — only if your bexio app registration permits the grant (see [`doc/analysis/api-doc-discrepancies.md`](doc/analysis/api-doc-discrepancies.md)). |
+| OIDC authorization code + `offline_access` | `AddBexioServicesWithRefreshToken(...)` | **The supported path for unattended integrations.** Needs one-time user consent and a refresh token store. |
+| Personal Access Token | `AddBexioServices(baseUri, jwtToken)` | Scripts and local development. Expires after 60 days and bexio documents it as strictly personal — not a fit for a server. |
+| OIDC `client_credentials` | `AddBexioServicesWithClientCredentials(...)` | **Unproven against bexio.** Never mentioned in their docs, and their permission model grants API access with the rights of the user who set up the connection — a token with no user behind it may mint and still be rejected. See [`doc/analysis/api-doc-discrepancies.md`](doc/analysis/api-doc-discrepancies.md). |
 
 #### Personal Access Token
 
@@ -79,7 +79,11 @@ var tokens = await tokenClient.ExchangeAuthorizationCodeAsync(code, cancellation
 await store.StoreRefreshTokenAsync(tokens.RefreshToken!, ct);
 ```
 
-From then on the provider renews access tokens on its own. Bexio **rotates** refresh tokens, so every renewal invalidates the previous one — the replacement is handed to `StoreRefreshTokenAsync` and the renewal only counts as successful once that write completes. Make the write durable: if it is lost, both tokens are gone and the customer has to consent again.
+From then on the provider renews access tokens on its own. When a renewal returns a **rotated** refresh token, it is handed to `StoreRefreshTokenAsync` and the renewal only counts as successful once that write completes; when it returns none, the stored token is kept. Make the write durable: bexio invalidates the previous token as soon as it issues a replacement, so a lost write leaves no usable credential and the customer has to consent again.
+
+Two things the flow does not do, by design: scopes are fixed at consent time and cannot be widened on refresh, and offline sessions idle out after a year of no use.
+
+If the token endpoint answers `401` for an otherwise correct request, set `ClientAuthenticationMethod = BexioClientAuthenticationMethod.ClientSecretBasic` — bexio does not document which method portal-registered apps are configured for.
 
 #### OIDC with client credentials
 
@@ -95,6 +99,8 @@ builder.Services.AddBexioServicesWithClientCredentials(
 ```
 
 Token endpoint failures throw `BexioAuthenticationException` (carrying the OAuth `error` code) rather than returning an `ApiResult` — there is no API request to attach a result to.
+
+`IBexioTokenClient.RevokeTokenAsync` revokes an access or refresh token for clean teardown when an integration is disconnected.
 
 ### ASP.NET Core (DI)
 

@@ -30,6 +30,12 @@ namespace BexioApiNet.Auth;
 /// <see href="https://developer.bexio.com">developer.bexio.com</see>. This is the provider behind
 /// the <c>jwtToken</c> based registration overloads.
 /// </summary>
+/// <remarks>
+/// A Personal Access Token expires after 60 days, carries all default scopes, and bexio documents
+/// it as "strictly intended for personal use and should never be shared". It is therefore a poor
+/// fit for an unattended server integration — use
+/// <see cref="RefreshTokenBexioTokenProvider" /> with the authorization code flow instead.
+/// </remarks>
 public sealed class StaticBexioTokenProvider : IBexioTokenProvider
 {
     private readonly string _accessToken;

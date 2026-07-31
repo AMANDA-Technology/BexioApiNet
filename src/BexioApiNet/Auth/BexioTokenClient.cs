@@ -24,6 +24,8 @@ SOFTWARE.
 */
 
 using System.Net;
+using System.Net.Http.Headers;
+using System.Text;
 using System.Text.Json;
 
 namespace BexioApiNet.Auth;
@@ -127,42 +129,84 @@ public sealed class BexioTokenClient : IBexioTokenClient
         return RequestTokenAsync(parameters, cancellationToken);
     }
 
+    /// <inheritdoc />
+    public async Task RevokeTokenAsync(string token, string? tokenTypeHint = null, CancellationToken cancellationToken = default)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(token);
+
+        var parameters = new Dictionary<string, string> { ["token"] = token };
+
+        if (!string.IsNullOrWhiteSpace(tokenTypeHint))
+            parameters["token_type_hint"] = tokenTypeHint;
+
+        var (statusCode, body) = await SendAsync(_options.RevocationEndpoint, parameters, cancellationToken);
+
+        // RFC 7009: the endpoint answers 200 for a valid token and for an unknown one alike.
+        if (!IsSuccess(statusCode))
+            throw CreateFailure(statusCode, body);
+    }
+
     /// <summary>
-    /// Posts a token request as <c>application/x-www-form-urlencoded</c>. Client credentials are
-    /// added to the body rather than the query string, which the current bexio identity provider
-    /// requires.
+    /// Posts a token request and maps the response.
     /// </summary>
     /// <param name="parameters">Grant specific parameters.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The issued tokens.</returns>
     private async Task<BexioTokenResponse> RequestTokenAsync(Dictionary<string, string> parameters, CancellationToken cancellationToken)
     {
-        parameters["client_id"] = _options.ClientId;
+        var (statusCode, body) = await SendAsync(_options.TokenEndpoint, parameters, cancellationToken);
 
-        if (!string.IsNullOrWhiteSpace(_options.ClientSecret))
-            parameters["client_secret"] = _options.ClientSecret;
+        if (!IsSuccess(statusCode))
+            throw CreateFailure(statusCode, body);
+
+        var token = TryDeserialize<BexioTokenResponse>(body);
+
+        return token is null || string.IsNullOrWhiteSpace(token.AccessToken)
+            ? throw new BexioAuthenticationException(
+                $"The bexio token endpoint returned {(int)statusCode} without a usable access token.")
+            : token;
+    }
+
+    /// <summary>
+    /// Posts an endpoint request as <c>application/x-www-form-urlencoded</c> with the client
+    /// credentials applied. Parameters go into the body rather than the query string, which the
+    /// current bexio identity provider requires.
+    /// </summary>
+    /// <param name="endpoint">Absolute endpoint URI.</param>
+    /// <param name="parameters">Request specific parameters.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The status code and raw body of the response.</returns>
+    private async Task<(HttpStatusCode StatusCode, string Body)> SendAsync(Uri endpoint,
+        Dictionary<string, string> parameters, CancellationToken cancellationToken)
+    {
+        var useBasicAuthentication = _options.ClientAuthenticationMethod == BexioClientAuthenticationMethod.ClientSecretBasic
+                                     && !string.IsNullOrWhiteSpace(_options.ClientSecret);
+
+        // RFC 6749 § 2.3.1: a client must not present its credentials in more than one way per
+        // request, so with Basic they are omitted from the body.
+        if (!useBasicAuthentication)
+        {
+            parameters["client_id"] = _options.ClientId;
+
+            if (!string.IsNullOrWhiteSpace(_options.ClientSecret))
+                parameters["client_secret"] = _options.ClientSecret;
+        }
 
         var httpClient = _httpClientFactory();
 
         try
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, _options.TokenEndpoint)
+            using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
             {
                 Content = new FormUrlEncodedContent(parameters)
             };
 
+            if (useBasicAuthentication)
+                request.Headers.Authorization = CreateBasicAuthenticationHeader();
+
             using var response = await httpClient.SendAsync(request, cancellationToken);
-            var body = await response.Content.ReadAsStringAsync(cancellationToken);
 
-            if (!response.IsSuccessStatusCode)
-                throw CreateFailure(response.StatusCode, body);
-
-            var token = TryDeserialize<BexioTokenResponse>(body);
-
-            return token is null || string.IsNullOrWhiteSpace(token.AccessToken)
-                ? throw new BexioAuthenticationException(
-                    $"The bexio token endpoint returned {(int)response.StatusCode} without a usable access token.")
-                : token;
+            return (response.StatusCode, await response.Content.ReadAsStringAsync(cancellationToken));
         }
         finally
         {
@@ -170,6 +214,22 @@ public sealed class BexioTokenClient : IBexioTokenClient
                 httpClient.Dispose();
         }
     }
+
+    /// <summary>
+    /// Builds the <c>Basic</c> authorization header for <c>client_secret_basic</c>. Per
+    /// RFC 6749 § 2.3.1 both values are form-url-encoded before they are joined and base64 encoded.
+    /// </summary>
+    private AuthenticationHeaderValue CreateBasicAuthenticationHeader()
+    {
+        var credentials = $"{Uri.EscapeDataString(_options.ClientId)}:{Uri.EscapeDataString(_options.ClientSecret!)}";
+        return new AuthenticationHeaderValue("Basic", Convert.ToBase64String(Encoding.UTF8.GetBytes(credentials)));
+    }
+
+    /// <summary>
+    /// True for a 2xx status code.
+    /// </summary>
+    /// <param name="statusCode">Status code returned by the identity provider.</param>
+    private static bool IsSuccess(HttpStatusCode statusCode) => (int)statusCode is >= 200 and <= 299;
 
     /// <summary>
     /// Builds the exception for a rejected token request. Only the OAuth error fields are copied

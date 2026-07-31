@@ -49,9 +49,23 @@ public sealed record BexioOAuthOptions
     public string Authority { get; init; } = BexioAuthDefaults.Authority;
 
     /// <summary>
-    /// Scopes to request. For an unattended authorization code integration this must include
-    /// <see cref="BexioAuthDefaults.OfflineAccessScope" /> so a refresh token is issued.
+    /// How the client authenticates at the token endpoint. Defaults to
+    /// <see cref="BexioClientAuthenticationMethod.ClientSecretPost" />; switch to
+    /// <see cref="BexioClientAuthenticationMethod.ClientSecretBasic" /> if the token endpoint
+    /// answers <c>401</c> for an otherwise correct request.
     /// </summary>
+    public BexioClientAuthenticationMethod ClientAuthenticationMethod { get; init; } = BexioClientAuthenticationMethod.ClientSecretPost;
+
+    /// <summary>
+    /// Scopes to request, as bexio spells them. For an unattended authorization code integration
+    /// this must include <see cref="BexioAuthDefaults.OfflineAccessScope" /> so a refresh token is
+    /// issued.
+    /// </summary>
+    /// <remarks>
+    /// Free-form strings by design: the realm advertises far more scopes than the documented table
+    /// lists, and read access is implied by the matching write scope (<c>contact_edit</c> grants
+    /// <c>contact_show</c>). Scopes are fixed at consent time — they cannot be changed on refresh.
+    /// </remarks>
     public IReadOnlyList<string> Scopes { get; init; } = [];
 
     /// <summary>
@@ -74,6 +88,11 @@ public sealed record BexioOAuthOptions
     /// Absolute URI of the authorization endpoint, derived from <see cref="Authority" />.
     /// </summary>
     public Uri AuthorizationEndpoint => BuildEndpoint(BexioAuthDefaults.AuthorizationEndpointPath);
+
+    /// <summary>
+    /// Absolute URI of the token revocation endpoint, derived from <see cref="Authority" />.
+    /// </summary>
+    public Uri RevocationEndpoint => BuildEndpoint(BexioAuthDefaults.RevocationEndpointPath);
 
     /// <summary>
     /// Combines the authority with an endpoint path, tolerating a missing trailing slash.

@@ -31,11 +31,13 @@ namespace BexioApiNet.Auth;
 /// scope.
 /// </summary>
 /// <remarks>
-/// bexio rotates refresh tokens: every refresh invalidates the token it was called with and
-/// returns a replacement. This provider persists the replacement through
-/// <see cref="IBexioRefreshTokenStore" /> and only then reports the refresh as successful. If the
-/// store write fails the exception propagates and no access token is cached, so the caller learns
-/// about the failure instead of running on a token whose refresh credential was silently lost.
+/// Refresh token rotation is handled defensively, because bexio does not document whether it is
+/// universal: if the response carries a replacement, it is persisted through
+/// <see cref="IBexioRefreshTokenStore" /> and only then is the refresh reported as successful; if
+/// it carries none, the stored token is kept and reused. Requiring a replacement — or ignoring one
+/// — would break under the opposite behaviour. If the store write fails the exception propagates
+/// and no access token is cached, so the caller learns about the failure instead of running on a
+/// token whose refresh credential was silently lost.
 /// </remarks>
 public sealed class RefreshTokenBexioTokenProvider : CachingBexioTokenProvider
 {
@@ -72,8 +74,9 @@ public sealed class RefreshTokenBexioTokenProvider : CachingBexioTokenProvider
 
         var response = await _tokenClient.RefreshTokenAsync(refreshToken, cancellationToken);
 
-        // The rotated token must reach the store before this refresh counts as successful — bexio
-        // has already invalidated the old one at this point.
+        // A replacement is optional. When one arrives it must reach the store before this refresh
+        // counts as successful, because bexio has invalidated the old one by then; when none
+        // arrives the stored token stays valid and is reused.
         if (!string.IsNullOrWhiteSpace(response.RefreshToken) && !string.Equals(response.RefreshToken, refreshToken, StringComparison.Ordinal))
             await _refreshTokenStore.StoreRefreshTokenAsync(response.RefreshToken, cancellationToken);
 

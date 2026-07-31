@@ -46,9 +46,17 @@ public interface IBexioTokenClient
         string? codeVerifier = null, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Redeems a refresh token for a new access token. bexio rotates refresh tokens, so the
-    /// returned <see cref="BexioTokenResponse.RefreshToken" /> replaces the one passed in.
+    /// Redeems a refresh token for a new access token.
     /// </summary>
+    /// <remarks>
+    /// The response <em>may</em> carry a rotated <see cref="BexioTokenResponse.RefreshToken" />, in
+    /// which case it replaces the one passed in. bexio documents rotation only for the migration
+    /// off <c>idp.bexio.com</c>, so neither presence nor absence can be relied on — handle both.
+    /// <para>
+    /// Scopes cannot be changed here: a refresh keeps the scopes granted at consent time, and
+    /// acquiring new ones requires running the authorization code flow again.
+    /// </para>
+    /// </remarks>
     /// <param name="refreshToken">The current refresh token.</param>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The issued tokens.</returns>
@@ -56,11 +64,25 @@ public interface IBexioTokenClient
     Task<BexioTokenResponse> RefreshTokenAsync(string refreshToken, CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Requests a token with the <c>client_credentials</c> grant. Whether a given bexio app may
-    /// use this grant depends on its registration; see <c>doc/analysis/api-doc-discrepancies.md</c>.
+    /// Requests a token with the <c>client_credentials</c> grant. The bexio documentation never
+    /// mentions this grant and its permission model has no obvious place for a token without a
+    /// user behind it, so treat it as unproven — see <c>doc/analysis/api-doc-discrepancies.md</c>.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
     /// <returns>The issued tokens.</returns>
     /// <exception cref="BexioAuthenticationException">The token endpoint rejected the request.</exception>
     Task<BexioTokenResponse> ClientCredentialsAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Revokes an access or refresh token, for clean teardown when an integration is disconnected.
+    /// </summary>
+    /// <remarks>
+    /// Per RFC 7009 the endpoint answers <c>200</c> for an unknown token just as it does for a
+    /// valid one, so a successful call is not evidence that the token existed.
+    /// </remarks>
+    /// <param name="token">The token to revoke.</param>
+    /// <param name="tokenTypeHint">Optional <c>token_type_hint</c>, e.g. <c>refresh_token</c> or <c>access_token</c>.</param>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <exception cref="BexioAuthenticationException">The revocation endpoint rejected the request.</exception>
+    Task RevokeTokenAsync(string token, string? tokenTypeHint = null, CancellationToken cancellationToken = default);
 }

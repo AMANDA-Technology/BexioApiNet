@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using System.Net;
+using System.Text;
 using System.Web;
 
 namespace BexioApiNet.UnitTests.Auth;
@@ -217,6 +218,94 @@ public class BexioTokenClientTests
             () => client.ClientCredentialsAsync(TestContext.CurrentContext.CancellationToken));
 
         exception.StatusCode.ShouldBe(HttpStatusCode.BadGateway);
+    }
+
+    /// <summary>
+    /// bexio does not document which client authentication method a portal-registered app is
+    /// configured for. With <c>client_secret_basic</c> the credentials move to the authorization
+    /// header and must leave the body, since a client may not present them twice.
+    /// </summary>
+    [Test]
+    public async Task RefreshTokenAsync_WithClientSecretBasic_SendsCredentialsInAuthorizationHeader()
+    {
+        var (client, inner) = CreateClient(
+            options: Options with { ClientAuthenticationMethod = BexioClientAuthenticationMethod.ClientSecretBasic });
+
+        await client.RefreshTokenAsync("refresh-1", TestContext.CurrentContext.CancellationToken);
+
+        var request = inner.Requests.Single();
+        var form = ParseForm(request.Body);
+        var expected = Convert.ToBase64String(Encoding.UTF8.GetBytes("client-id:client-secret"));
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(request.Headers["Authorization"].Single(), Is.EqualTo($"Basic {expected}"));
+            Assert.That(form, Does.Not.ContainKey("client_id"));
+            Assert.That(form, Does.Not.ContainKey("client_secret"));
+            Assert.That(form["refresh_token"], Is.EqualTo("refresh-1"));
+        });
+    }
+
+    /// <summary>
+    /// A public client has no secret to put in a <c>Basic</c> header, so the request falls back to
+    /// sending the client id in the body.
+    /// </summary>
+    [Test]
+    public async Task RefreshTokenAsync_WithClientSecretBasicButNoSecret_FallsBackToBody()
+    {
+        var (client, inner) = CreateClient(options: Options with
+        {
+            ClientAuthenticationMethod = BexioClientAuthenticationMethod.ClientSecretBasic,
+            ClientSecret = null
+        });
+
+        await client.RefreshTokenAsync("refresh-1", TestContext.CurrentContext.CancellationToken);
+
+        var request = inner.Requests.Single();
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(request.Headers, Does.Not.ContainKey("Authorization"));
+            Assert.That(ParseForm(request.Body)["client_id"], Is.EqualTo("client-id"));
+        });
+    }
+
+    /// <summary>
+    /// Revocation posts the token to the realm's revoke endpoint, with the optional type hint.
+    /// </summary>
+    [Test]
+    public async Task RevokeTokenAsync_PostsTokenToRevocationEndpoint()
+    {
+        var (client, inner) = CreateClient(body: string.Empty);
+
+        await client.RevokeTokenAsync("refresh-1", "refresh_token", TestContext.CurrentContext.CancellationToken);
+
+        var request = inner.Requests.Single();
+        var form = ParseForm(request.Body);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(request.Method, Is.EqualTo(HttpMethod.Post));
+            Assert.That(request.RequestUri,
+                Is.EqualTo(new Uri("https://auth.example.local/realms/bexio/protocol/openid-connect/revoke")));
+            Assert.That(form["token"], Is.EqualTo("refresh-1"));
+            Assert.That(form["token_type_hint"], Is.EqualTo("refresh_token"));
+            Assert.That(form["client_id"], Is.EqualTo("client-id"));
+        });
+    }
+
+    /// <summary>
+    /// A rejected revocation surfaces the same way as a rejected token request.
+    /// </summary>
+    [Test]
+    public async Task RevokeTokenAsync_WhenEndpointRejects_Throws()
+    {
+        var (client, _) = CreateClient(HttpStatusCode.Unauthorized, """{"error":"invalid_client"}""");
+
+        var exception = await Should.ThrowAsync<BexioAuthenticationException>(
+            () => client.RevokeTokenAsync("refresh-1", cancellationToken: TestContext.CurrentContext.CancellationToken));
+
+        exception.Error.ShouldBe("invalid_client");
     }
 
     /// <summary>

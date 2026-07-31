@@ -27,9 +27,16 @@ namespace BexioApiNet.Auth;
 
 /// <summary>
 /// Mints access tokens with the <c>client_credentials</c> grant. Needs no user consent and no
-/// stored refresh token, but only works if the bexio app registration permits the grant — see
-/// <c>doc/analysis/api-doc-discrepancies.md</c>.
+/// stored refresh token.
 /// </summary>
+/// <remarks>
+/// <strong>Unproven against bexio.</strong> The grant is advertised by the realm but never appears
+/// in the bexio documentation, the app registration form offers no service-account option, and
+/// bexio's authorization is two-level — "the API access happens with the user rights of the user
+/// who set up the connection". A token minted without a user behind it has no such rights, so it
+/// may be issued and still be rejected by every API call. Prefer
+/// <see cref="RefreshTokenBexioTokenProvider" />; see <c>doc/analysis/api-doc-discrepancies.md</c>.
+/// </remarks>
 public sealed class ClientCredentialsBexioTokenProvider : CachingBexioTokenProvider
 {
     private readonly IBexioTokenClient _tokenClient;

@@ -48,6 +48,11 @@ public static class BexioAuthDefaults
     public const string AuthorizationEndpointPath = "protocol/openid-connect/auth";
 
     /// <summary>
+    /// Path of the token revocation endpoint, relative to the authority.
+    /// </summary>
+    public const string RevocationEndpointPath = "protocol/openid-connect/revoke";
+
+    /// <summary>
     /// Authorization header scheme used for bexio API requests.
     /// </summary>
     public const string BearerScheme = "Bearer";
