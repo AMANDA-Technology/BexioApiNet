@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -23,19 +23,37 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-using BexioApiNet.Interfaces;
+namespace BexioApiNet.Auth;
 
-namespace BexioApiNet.Services;
-
-/// <inheritdoc />
-public sealed record BexioConfiguration : IBexioConfiguration
+/// <summary>
+/// Supplies a pre-issued token that never changes, such as a Personal Access Token from
+/// <see href="https://developer.bexio.com">developer.bexio.com</see>. This is the provider behind
+/// the <c>jwtToken</c> based registration overloads.
+/// </summary>
+public sealed class StaticBexioTokenProvider : IBexioTokenProvider
 {
-    /// <inheritdoc />
-    public required string BaseUri { get; set; }
+    private readonly string _accessToken;
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="StaticBexioTokenProvider" /> class.
+    /// </summary>
+    /// <param name="accessToken">Pre-issued bearer token.</param>
+    public StaticBexioTokenProvider(string accessToken)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(accessToken);
+        _accessToken = accessToken;
+    }
 
     /// <inheritdoc />
-    public string JwtToken { get; set; } = string.Empty;
+    public Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default)
+        => Task.FromResult(_accessToken);
 
     /// <inheritdoc />
-    public required string AcceptHeaderFormat { get; set; }
+    /// <remarks>
+    /// No-op: there is nothing to renew. A rejected static token stays rejected, so
+    /// <see cref="BexioAuthDelegatingHandler" /> skips its retry for this provider.
+    /// </remarks>
+    public void Invalidate()
+    {
+    }
 }

@@ -34,6 +34,7 @@ The solution `BexioApiNet.sln` is organized into projects under `src/` and `test
 
 ## Key Conventions
 - **ApiResult Wrapper**: All API calls return an `ApiResult<T>` (or `ApiResult`) instead of throwing exceptions on non-2xx status codes. This wrapper contains the `IsSuccess` boolean, `StatusCode`, `ApiError` details, `Data`, and extracted `ResponseHeaders`.
+- **Authentication**: The bearer token is resolved per request by `BexioAuthDelegatingHandler` from an `IBexioTokenProvider` — a static Personal Access Token, or an OIDC token from the refresh-token or client-credentials flow. It is never pinned to `HttpClient.DefaultRequestHeaders`.
 - **Connector Pattern**: API endpoints are grouped logically into namespaces (e.g., `Accounting`, `Banking`) and implemented as individual connector services inheriting from `ConnectorService`.
 - **Dependency Injection**: The core `BexioApiClient` aggregates all connector services and is designed to be injected via `IBexioApiClient`.
 - **Query Parameters**: Optional query parameters are wrapped in domain-specific parameter objects extending `QueryParameter` (e.g., `QueryParameterManualEntry`).
@@ -45,7 +46,8 @@ The solution `BexioApiNet.sln` is organized into projects under `src/` and `test
 - **Testing guide**: `doc/development/testing-guide.md`
 - **Entry Point (DI)**: `src/BexioApiNet.AspNetCore/BexioServiceCollection.cs`
 - **Main Client Interface**: `src/BexioApiNet/Interfaces/IBexioApiClient.cs`
-- **Connection Handler**: `src/BexioApiNet/Services/BexioConnectionHandler.cs` (Handles HTTP execution and pagination; dual constructor — owns or borrows its `HttpClient`)
+- **Connection Handler**: `src/BexioApiNet/Services/BexioConnectionHandler.cs` (Handles HTTP execution and pagination; owns or borrows its `HttpClient`)
+- **Authentication**: `src/BexioApiNet/Auth/` (token providers, token client, delegating handler, refresh token store interface)
 - **Domain Models**: `src/BexioApiNet.Abstractions/Models/` (Grouped by domain, e.g., `Accounting/ManualEntries/`)
 
 ## Constraints & Gotchas

@@ -1,4 +1,4 @@
-﻿/*
+/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -23,11 +23,27 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
-// Global using directives
+namespace BexioApiNet.Auth;
 
-global using NUnit.Framework;
-global using WireMock.Server;
-global using WireMock.RequestBuilders;
-global using WireMock.ResponseBuilders;
-global using BexioApiNet.Auth;
-global using BexioApiNet.Services;
+/// <summary>
+/// Supplies the bearer token for outgoing bexio API requests. Resolved per request by
+/// <see cref="BexioAuthDelegatingHandler" />, so a short-lived OIDC access token can be swapped
+/// without recreating the <see cref="HttpClient" />.
+/// </summary>
+public interface IBexioTokenProvider
+{
+    /// <summary>
+    /// Gets a currently valid access token, renewing it if the cached one is expired or missing.
+    /// </summary>
+    /// <param name="cancellationToken">Cancellation token.</param>
+    /// <returns>The access token to send in the <c>Authorization</c> header.</returns>
+    /// <exception cref="BexioAuthenticationException">The token could not be obtained.</exception>
+    Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default);
+
+    /// <summary>
+    /// Discards the cached token so the next <see cref="GetAccessTokenAsync" /> call obtains a
+    /// fresh one. Called when bexio rejects a request with <c>401</c>, which can happen before
+    /// the advertised expiry if the token was revoked.
+    /// </summary>
+    void Invalidate();
+}

@@ -29,6 +29,7 @@ using System.Text.Json;
 using System.Web;
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
+using BexioApiNet.Auth;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Models;
 
@@ -54,22 +55,35 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     /// an <see cref="HttpClient"/> (registered via <c>IHttpClientFactory</c>) in ASP.NET Core applications
     /// to avoid socket exhaustion.
     /// </summary>
-    /// <param name="configuration">Bexio configuration.</param>
+    /// <param name="configuration">Bexio configuration. <see cref="IBexioConfiguration.JwtToken"/> is required on this path.</param>
     public BexioConnectionHandler(IBexioConfiguration configuration)
+        : this(configuration, new StaticBexioTokenProvider(RequireJwtToken(configuration)))
+    {
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="BexioConnectionHandler"/> class that resolves its bearer
+    /// token per request from <paramref name="tokenProvider"/>. Use this for OIDC access tokens, which are
+    /// short-lived and must be renewed without recreating the client. The instance creates and owns its own
+    /// <see cref="HttpClient"/>; prefer the DI-friendly overload accepting an <see cref="HttpClient"/> in
+    /// ASP.NET Core applications to avoid socket exhaustion.
+    /// </summary>
+    /// <param name="configuration">Bexio configuration. <see cref="IBexioConfiguration.JwtToken"/> is ignored on this path.</param>
+    /// <param name="tokenProvider">Supplies the bearer token for each request.</param>
+    public BexioConnectionHandler(IBexioConfiguration configuration, IBexioTokenProvider tokenProvider)
     {
         ArgumentException.ThrowIfNullOrWhiteSpace(configuration.BaseUri);
-        ArgumentException.ThrowIfNullOrWhiteSpace(configuration.JwtToken);
+        ArgumentNullException.ThrowIfNull(tokenProvider);
 
         if (!configuration.BaseUri.EndsWith('/'))
             configuration.BaseUri += '/';
 
-        _client = new(new HttpClientHandler { AllowAutoRedirect = false })
+        _client = new(new BexioAuthDelegatingHandler(tokenProvider, new HttpClientHandler { AllowAutoRedirect = false }))
         {
             BaseAddress = new(configuration.BaseUri),
             DefaultRequestHeaders =
             {
-                Accept = { new MediaTypeWithQualityHeaderValue(configuration.AcceptHeaderFormat) },
-                Authorization = new("Bearer", configuration.JwtToken)
+                Accept = { new MediaTypeWithQualityHeaderValue(configuration.AcceptHeaderFormat) }
             }
         };
         _ownsHttpClient = true;
@@ -80,16 +94,30 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
     /// <see cref="HttpClient"/>. Intended for DI scenarios where the client is produced and managed by
     /// <c>IHttpClientFactory</c>. The handler will not dispose of the injected client.
     /// </summary>
-    /// <param name="httpClient">Externally managed HTTP client. Must already be configured with <c>BaseAddress</c>, the <c>Accept</c> header and the <c>Authorization</c> header.</param>
+    /// <param name="httpClient">
+    /// Externally managed HTTP client. Must already be configured with <c>BaseAddress</c> and the <c>Accept</c>
+    /// header, and its handler pipeline must authenticate the request — <c>AddBexioServices</c> does this with a
+    /// <see cref="BexioAuthDelegatingHandler"/>.
+    /// </param>
     /// <param name="configuration">Bexio configuration used to validate required values.</param>
     public BexioConnectionHandler(HttpClient httpClient, IBexioConfiguration configuration)
     {
         ArgumentNullException.ThrowIfNull(httpClient);
         ArgumentException.ThrowIfNullOrWhiteSpace(configuration.BaseUri);
-        ArgumentException.ThrowIfNullOrWhiteSpace(configuration.JwtToken);
 
         _client = httpClient;
         _ownsHttpClient = false;
+    }
+
+    /// <summary>
+    /// Validates the static token before it is handed to a <see cref="StaticBexioTokenProvider"/>, so a missing
+    /// token surfaces as an <see cref="ArgumentException"/> from the constructor.
+    /// </summary>
+    /// <param name="configuration">Bexio configuration.</param>
+    private static string RequireJwtToken(IBexioConfiguration configuration)
+    {
+        ArgumentException.ThrowIfNullOrWhiteSpace(configuration.JwtToken);
+        return configuration.JwtToken;
     }
 
     /// <inheritdoc />

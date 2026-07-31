@@ -30,11 +30,15 @@ dotnet add package BexioApiNet.AspNetCore
 
 ### Authentication
 
-Bexio uses JWT bearer tokens — see [JWT authentication](https://docs.bexio.com/#section/Authentication/JWT-(JSON-Web-Tokens)) for how to obtain one, and [API routes](https://docs.bexio.com/#section/API-basics/API-routes) for the correct base URI.
+Bexio authenticates with bearer tokens — see [Authentication](https://docs.bexio.com/#section/Authentication) for how to obtain one, and [API routes](https://docs.bexio.com/#section/API-basics/API-routes) for the correct base URI. The token is resolved per request from an `IBexioTokenProvider`, so a short-lived token is renewed without recreating the HTTP client.
 
-### ASP.NET Core (DI)
+| Mode | Registration | Use when |
+|------|--------------|----------|
+| Personal Access Token | `AddBexioServices(baseUri, jwtToken)` | Simplest setup. The token has a fixed expiry and must be re-minted by hand. |
+| OIDC authorization code + `offline_access` | `AddBexioServicesWithRefreshToken(...)` | Unattended integrations. Needs one-time user consent and a refresh token store. |
+| OIDC `client_credentials` | `AddBexioServicesWithClientCredentials(...)` | No consent, no storage — only if your bexio app registration permits the grant (see [`doc/analysis/api-doc-discrepancies.md`](doc/analysis/api-doc-discrepancies.md)). |
 
-Register the client in `Program.cs`:
+#### Personal Access Token
 
 ```csharp
 builder.Services.AddBexioServices(
@@ -42,7 +46,59 @@ builder.Services.AddBexioServices(
     jwtToken: builder.Configuration["BexioApiNet:JwtToken"]!);
 ```
 
-Then inject `IBexioApiClient` wherever you need it:
+#### OIDC with refresh token rotation
+
+Register your own refresh token store — the library ships the interface only, because storage is an application decision:
+
+```csharp
+builder.Services.AddScoped<IBexioRefreshTokenStore, MyRefreshTokenStore>();
+
+builder.Services.AddBexioServicesWithRefreshToken(
+    new BexioConfiguration
+    {
+        BaseUri = builder.Configuration["BexioApiNet:BaseUri"]!,
+        AcceptHeaderFormat = ApiAcceptHeaders.JsonFormatted
+    },
+    new BexioOAuthOptions
+    {
+        ClientId = builder.Configuration["Bexio:ClientId"]!,
+        ClientSecret = builder.Configuration["Bexio:ClientSecret"],
+        RedirectUri = "https://myapp.example/bexio/callback",
+        Scopes = ["accounting", BexioAuthDefaults.OfflineAccessScope]
+    });
+```
+
+Bootstrap it once through the consent flow. `BexioAuthorizeUrlBuilder` builds the redirect, and `IBexioTokenClient` exchanges the code your callback receives:
+
+```csharp
+// 1. send the user here
+var consentUrl = BexioAuthorizeUrlBuilder.Build(oauthOptions, state: antiForgeryToken);
+
+// 2. in the callback, exchange the code and persist the refresh token
+var tokens = await tokenClient.ExchangeAuthorizationCodeAsync(code, cancellationToken: ct);
+await store.StoreRefreshTokenAsync(tokens.RefreshToken!, ct);
+```
+
+From then on the provider renews access tokens on its own. Bexio **rotates** refresh tokens, so every renewal invalidates the previous one — the replacement is handed to `StoreRefreshTokenAsync` and the renewal only counts as successful once that write completes. Make the write durable: if it is lost, both tokens are gone and the customer has to consent again.
+
+#### OIDC with client credentials
+
+```csharp
+builder.Services.AddBexioServicesWithClientCredentials(
+    bexioConfiguration,
+    new BexioOAuthOptions
+    {
+        ClientId = builder.Configuration["Bexio:ClientId"]!,
+        ClientSecret = builder.Configuration["Bexio:ClientSecret"]!,
+        Scopes = ["accounting"]
+    });
+```
+
+Token endpoint failures throw `BexioAuthenticationException` (carrying the OAuth `error` code) rather than returning an `ApiResult` — there is no API request to attach a result to.
+
+### ASP.NET Core (DI)
+
+After registering, inject `IBexioApiClient` wherever you need it:
 
 ```csharp
 public class ContactsController(IBexioApiClient bexio) : ControllerBase

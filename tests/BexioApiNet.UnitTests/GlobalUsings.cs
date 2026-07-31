@@ -1,4 +1,4 @@
-/*
+﻿/*
 MIT License
 
 Copyright (c) 2022 Philip Näf <philip.naef@amanda-technology.ch>
@@ -28,5 +28,6 @@ SOFTWARE.
 global using NUnit.Framework;
 global using NSubstitute;
 global using Shouldly;
+global using BexioApiNet.Auth;
 global using BexioApiNet.Interfaces;
 global using BexioApiNet.Services;
