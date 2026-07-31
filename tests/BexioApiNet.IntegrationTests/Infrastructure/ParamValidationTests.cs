@@ -165,7 +165,7 @@ public sealed class ParamValidationTests : IntegrationTestBase
             queryParam,
             TestContext.CurrentContext.CancellationToken);
 
-        var rawQuery = Server.LogEntries.Last().RequestMessage!.RawQuery ?? string.Empty;
+        var rawQuery = Server.LogEntries.Last().RequestMessage!.RawQuery;
 
         Assert.Multiple(() =>
         {

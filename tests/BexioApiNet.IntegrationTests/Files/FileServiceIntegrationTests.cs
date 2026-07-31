@@ -110,7 +110,7 @@ public sealed class FileServiceIntegrationTests : IntegrationTestBase
             Assert.That(file.SourceId, Is.EqualTo(2));
             Assert.That(file.SourceType, Is.EqualTo("web"));
             Assert.That(file.IsReferenced, Is.False);
-            Assert.That(file.CreatedAt, Is.EqualTo(new DateTime(2018, 6, 9, 8, 52, 10, DateTimeKind.Utc)));
+            Assert.That(file.CreatedAt.ToUniversalTime(), Is.EqualTo(new DateTime(2018, 6, 9, 8, 52, 10, DateTimeKind.Utc)));
         });
     }
 

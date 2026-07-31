@@ -23,6 +23,8 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 SOFTWARE.
 */
 
+using BexioApiNet.Abstractions.Models.Api;
+
 namespace BexioApiNet.E2eTests.Tests.Accounting.Taxes;
 
 /// <summary>

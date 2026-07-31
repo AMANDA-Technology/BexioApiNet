@@ -29,7 +29,7 @@ namespace BexioApiNet.IntegrationTests.Infrastructure;
 /// Verifies that the <see cref="BexioConnectionHandler"/> honours a caller-supplied
 /// <see cref="CancellationToken"/> and surfaces cancellation as
 /// <see cref="OperationCanceledException"/> (or a subclass such as <see cref="TaskCanceledException"/>).
-/// Cancellation is exercised both mid-flight (slow WireMock response cancelled after 100&nbsp;ms)
+/// Cancellation is exercised both mid-flight (slow WireMock response cancelled after 100 ms)
 /// and before the request is even sent (token cancelled up front).
 /// </summary>
 public sealed class CancellationTests : IntegrationTestBase
@@ -49,9 +49,10 @@ public sealed class CancellationTests : IntegrationTestBase
                 .WithDelay(TimeSpan.FromSeconds(10)));
 
         using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        var cancellationToken = cts.Token;
 
         Assert.ThrowsAsync<TaskCanceledException>(async () =>
-            await ConnectionHandler.GetAsync<List<object>>("2.0/slow", null, cts.Token));
+            await ConnectionHandler.GetAsync<List<object>>("2.0/slow", null, cancellationToken));
     }
 
     /// <summary>
@@ -72,9 +73,10 @@ public sealed class CancellationTests : IntegrationTestBase
 
         using var cts = new CancellationTokenSource();
         cts.Cancel();
+        var cancellationToken = cts.Token;
 
         Assert.CatchAsync<OperationCanceledException>(async () =>
-            await ConnectionHandler.GetAsync<List<object>>("2.0/accounts", null, cts.Token));
+            await ConnectionHandler.GetAsync<List<object>>("2.0/accounts", null, cancellationToken));
     }
 
     /// <summary>
@@ -92,9 +94,10 @@ public sealed class CancellationTests : IntegrationTestBase
                 .WithDelay(TimeSpan.FromSeconds(10)));
 
         using var cts = new CancellationTokenSource(TimeSpan.FromMilliseconds(100));
+        var cancellationToken = cts.Token;
         var payload = new { name = "test" };
 
         Assert.ThrowsAsync<TaskCanceledException>(async () =>
-            await ConnectionHandler.PostAsync<object, object>(payload, "2.0/slow", cts.Token));
+            await ConnectionHandler.PostAsync<object, object>(payload, "2.0/slow", cancellationToken));
     }
 }

@@ -24,7 +24,6 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Models.Api;
-using BexioApiNet.Abstractions.Models.Sales.Invoices.Views;
 using BexioApiNet.Models;
 
 namespace BexioApiNet.E2eTests.Tests.Sales.Invoices;

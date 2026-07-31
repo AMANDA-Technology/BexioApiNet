@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Enums.Api;
+using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Accounting;
 

@@ -68,7 +68,7 @@ public sealed class DiscountPositionServiceE2eTests : BexioE2eTestBase
             return;
         }
 
-        var result = await BexioApiClient.SalesDiscountPositions.GetAll(KbDocumentType.Invoice, existingInvoices[0].Id!);
+        var result = await BexioApiClient.SalesDiscountPositions.GetAll(KbDocumentType.Invoice, existingInvoices[0].Id);
 
         Assert.Multiple(() =>
         {

@@ -70,8 +70,10 @@ public sealed class HttpVerbExtensionTests : IntegrationTestBase
                 .WithBody("{\"Id\":7,\"Name\":\"updated\"}")
                 .WithHeader("Content-Type", "application/json"));
 
+        var payload = new TestPayload("updated", 42);
+
         var result = await ConnectionHandler.PutAsync<TestItem, TestPayload>(
-            new TestPayload("updated", 42),
+            payload,
             "3.0/accounting/manual_entries/7",
             TestContext.CurrentContext.CancellationToken);
 
@@ -84,8 +86,8 @@ public sealed class HttpVerbExtensionTests : IntegrationTestBase
             Assert.That(result.Data!.Id, Is.EqualTo(7));
             Assert.That(request.Method, Is.EqualTo("PUT"));
             Assert.That(request.AbsolutePath, Is.EqualTo(path));
-            Assert.That(request.Body, Does.Contain("\"Name\":\"updated\""));
-            Assert.That(request.Body, Does.Contain("\"Value\":42"));
+            Assert.That(request.Body, Does.Contain($"\"Name\":\"{payload.Name}\""));
+            Assert.That(request.Body, Does.Contain($"\"Value\":{payload.Value}"));
         });
     }
 
@@ -284,7 +286,7 @@ public sealed class HttpVerbExtensionTests : IntegrationTestBase
             TestContext.CurrentContext.CancellationToken);
 
         var request = Server.LogEntries.Last().RequestMessage!;
-        var rawQuery = request.RawQuery ?? string.Empty;
+        var rawQuery = request.RawQuery;
 
         Assert.Multiple(() =>
         {

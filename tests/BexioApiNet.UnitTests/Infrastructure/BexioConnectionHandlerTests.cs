@@ -285,8 +285,8 @@ public class BexioConnectionHandlerTests
             Assert.That(stub.CapturedRequestBody, Is.Not.Null);
             Assert.Multiple(() =>
             {
-                Assert.That(stub.CapturedRequestBody, Does.Contain("\"Name\":\"alpha\""));
-                Assert.That(stub.CapturedRequestBody, Does.Contain("\"Value\":42"));
+                Assert.That(stub.CapturedRequestBody, Does.Contain($"\"Name\":\"{payload.Name}\""));
+                Assert.That(stub.CapturedRequestBody, Does.Contain($"\"Value\":{payload.Value}"));
                 Assert.That(stub.CapturedRequest.Content!.Headers.ContentType?.MediaType,
                     Is.EqualTo("application/json"));
             });
@@ -462,11 +462,14 @@ public class BexioConnectionHandlerTests
         handler.Dispose();
 
         Assert.That(httpClient.BaseAddress, Is.Not.Null);
-        Assert.DoesNotThrowAsync(async () =>
-            await httpClient.GetAsync(new Uri("2.0/accounts", UriKind.Relative)));
+
+        // The client must still be usable after the handler was disposed — a direct await keeps
+        // the (later disposed) client out of a closure.
+        using var response = await httpClient.GetAsync(new Uri("2.0/accounts", UriKind.Relative));
+
+        Assert.That(response, Is.Not.Null);
         Assert.That(stub.CapturedRequest, Is.Not.Null);
 
-        await Task.CompletedTask;
         httpClient.Dispose();
     }
 
@@ -488,8 +491,11 @@ public class BexioConnectionHandlerTests
         {
             cts.Cancel();
 
-            Assert.CatchAsync<OperationCanceledException>(async () =>
-                await handler.GetAsync<TestItem>("2.0/accounts", null, cts.Token));
+            // Start the call outside the closure so neither the handler nor the token source is
+            // captured by the assertion delegate.
+            var call = handler.GetAsync<TestItem>("2.0/accounts", null, cts.Token);
+
+            Assert.CatchAsync<OperationCanceledException>(async () => await call);
         }
     }
 

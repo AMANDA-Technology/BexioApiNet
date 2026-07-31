@@ -1,0 +1,9 @@
+# ReSharper / Rider inspection settings for the live E2E test project.
+#
+# The test base classes and suites carry the "E2e" suffix (BexioE2eTestBase, FileServiceE2eTests,
+# ...). ReSharper's PascalCase rule expects an upper-case letter after a digit and therefore
+# suggests "E2E" for each of them. The "E2e" spelling is deliberate and applied consistently, so
+# the naming inspection is switched off for those files rather than renaming ~60 types.
+# Scoped to E2e-named files only — every other file in this project keeps the naming inspection.
+[*E2e*.cs]
+resharper_inconsistent_naming_highlighting = none

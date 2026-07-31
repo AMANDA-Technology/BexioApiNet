@@ -27,7 +27,6 @@ using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Contacts.ContactGroups.Views;
 using BexioApiNet.Interfaces.Connectors.Contacts;
-using BexioApiNet.Models;
 using BexioApiNet.Services.Connectors.Contacts;
 
 namespace BexioApiNet.E2eTests.Tests.Contacts.ContactGroups;

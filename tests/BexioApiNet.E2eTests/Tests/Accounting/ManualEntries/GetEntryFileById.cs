@@ -25,6 +25,7 @@ SOFTWARE.
 
 using BexioApiNet.Abstractions.Models.Accounting.ManualEntries.Enums;
 using BexioApiNet.Abstractions.Models.Accounting.ManualEntries.Views;
+using BexioApiNet.Interfaces.Connectors.Accounting;
 
 namespace BexioApiNet.E2eTests.Tests.Accounting.ManualEntries;
 

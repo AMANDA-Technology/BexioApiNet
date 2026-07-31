@@ -162,7 +162,7 @@ public sealed class PaginationTests : IntegrationTestBase
 
     /// <summary>
     /// When the caller supplies an initial <c>offset</c>, <c>FetchAll</c> subtracts it from
-    /// <paramref name="maxObjects"/> and preserves it across iterations so subsequent requests
+    /// <c>maxObjects</c> and preserves it across iterations so subsequent requests
     /// stay aligned with the caller's starting point.
     /// </summary>
     [Test]

@@ -726,7 +726,7 @@ public sealed class OrderServiceIntegrationTests : IntegrationTestBase
         await service.Get(queryParameter, cancellationToken: TestContext.CurrentContext.CancellationToken);
 
         var request = Server.LogEntries.Last().RequestMessage!;
-        var queryString = request.RawQuery ?? string.Empty;
+        var queryString = request.RawQuery;
 
         Assert.Multiple(() =>
         {

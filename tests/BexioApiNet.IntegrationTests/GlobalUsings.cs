@@ -29,5 +29,4 @@ global using NUnit.Framework;
 global using WireMock.Server;
 global using WireMock.RequestBuilders;
 global using WireMock.ResponseBuilders;
-global using BexioApiNet.Interfaces;
 global using BexioApiNet.Services;

@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using BexioApiNet.Abstractions.Enums.Api;
+using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Abstractions.Models.Banking.Payments;
 using BexioApiNet.Abstractions.Models.Banking.Payments.Enums;
 using BexioApiNet.Abstractions.Models.Banking.Payments.Views;
