@@ -69,6 +69,8 @@ If a change would require bumping any of these, stop and escalate.
 ### 3.5 Authentication
 
 - The bearer token is resolved **per request** by `BexioAuthDelegatingHandler` from an `IBexioTokenProvider`. Never set `Authorization` on `HttpClient.DefaultRequestHeaders` — that pins the token for the client's lifetime and breaks short-lived OIDC tokens.
+- `Invalidate(accessToken)` names the rejected token and clears the cache **only if it still holds it**. Do not "simplify" it to an unconditional clear: concurrent 401s would each discard the token the previous one just minted, turning N rejections into N token requests.
+- Never assume a token lifetime. Derive it from `expires_in`, fall back to a configured lifetime when it is absent, and clamp the clock skew so it cannot exceed the lifetime — either degenerate case would make the cache unusable and put a token request in front of every API call.
 - Providers live in `src/BexioApiNet/Auth/`: `StaticBexioTokenProvider` (PAT), `RefreshTokenBexioTokenProvider` and `ClientCredentialsBexioTokenProvider` (both on `CachingBexioTokenProvider`, which owns expiry, clock skew and single-flight renewal).
 - `IBexioRefreshTokenStore` is an interface only. **Never** add a concrete store to this library — persistence is the host's decision.
 - Refresh token rotation is **conditional**: bexio documents it only for the idp.bexio.com migration, and the Refresh Token Flow section does not mention it. Persist a replacement when the response carries one, keep the stored token when it does not — never require or ignore rotation. When a replacement does arrive, it must be persisted before the refresh is reported successful; do not reorder or "optimize" that write away.

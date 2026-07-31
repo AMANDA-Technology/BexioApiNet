@@ -49,7 +49,7 @@ public sealed class ClientCredentialsBexioTokenProvider : CachingBexioTokenProvi
     /// <param name="timeProvider">Time source. Defaults to <see cref="TimeProvider.System" />.</param>
     public ClientCredentialsBexioTokenProvider(IBexioTokenClient tokenClient, BexioOAuthOptions options,
         TimeProvider? timeProvider = null)
-        : base(GetClockSkew(options), timeProvider)
+        : base(options, timeProvider)
     {
         ArgumentNullException.ThrowIfNull(tokenClient);
         _tokenClient = tokenClient;
@@ -58,15 +58,4 @@ public sealed class ClientCredentialsBexioTokenProvider : CachingBexioTokenProvi
     /// <inheritdoc />
     protected override Task<BexioTokenResponse> AcquireTokenAsync(CancellationToken cancellationToken)
         => _tokenClient.ClientCredentialsAsync(cancellationToken);
-
-    /// <summary>
-    /// Reads the clock skew from the options, guarding against a null argument before the base
-    /// constructor runs.
-    /// </summary>
-    /// <param name="options">Client registration and endpoint settings.</param>
-    private static TimeSpan GetClockSkew(BexioOAuthOptions options)
-    {
-        ArgumentNullException.ThrowIfNull(options);
-        return options.ClockSkew;
-    }
 }

@@ -91,7 +91,11 @@ public static class BexioOAuthServiceCollection
     {
         ArgumentNullException.ThrowIfNull(oauthOptions);
 
-        services.AddHttpClient(BexioAuthDefaults.TokenHttpClientName);
+        // The token request carries the client secret, in the body or a Basic header. A 307/308
+        // redirect would replay both to whatever host the redirect names, so follow the same
+        // no-redirect rule the API client uses.
+        services.AddHttpClient(BexioAuthDefaults.TokenHttpClientName)
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 
         services.TryAddSingleton<IBexioTokenClient>(provider =>
         {

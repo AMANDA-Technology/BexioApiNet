@@ -100,6 +100,7 @@ public static class BexioServiceCollection
     public static IServiceCollection AddBexioServices(this IServiceCollection services,
         IBexioConfiguration bexioConfiguration)
     {
+        ArgumentNullException.ThrowIfNull(bexioConfiguration);
         ArgumentException.ThrowIfNullOrWhiteSpace(bexioConfiguration.JwtToken);
 
         return services.AddBexioServices(bexioConfiguration,

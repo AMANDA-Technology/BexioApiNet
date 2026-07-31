@@ -47,15 +47,25 @@ internal sealed record RecordedRequest(HttpMethod Method, Uri? RequestUri, strin
 internal sealed class QueuedResponseHandler : HttpMessageHandler
 {
     private readonly Queue<Func<HttpResponseMessage>> _responses = new();
+    private readonly Lock _gate = new();
+    private readonly List<RecordedRequest> _requests = [];
     private Func<HttpResponseMessage> _fallback = () => new HttpResponseMessage(HttpStatusCode.OK);
 
     /// <summary>
-    /// All requests seen so far, in order.
+    /// All requests seen so far, in order. Safe to read after the requests under test completed.
     /// </summary>
-    public List<RecordedRequest> Requests { get; } = [];
+    public IReadOnlyList<RecordedRequest> Requests => _requests;
 
     /// <summary>
-    /// Queues a response to be returned for the next request.
+    /// Answers based on the request rather than a queue. Takes precedence over
+    /// <see cref="Enqueue" /> and is the deterministic option for concurrent tests, where the
+    /// order requests reach the handler is undefined.
+    /// </summary>
+    public Func<RecordedRequest, HttpResponseMessage>? Responder { get; init; }
+
+    /// <summary>
+    /// Queues a response to be returned for the next request. The last queued response repeats once
+    /// the queue is drained.
     /// </summary>
     /// <param name="statusCode">Status code to answer with.</param>
     /// <param name="body">Response body.</param>
@@ -70,14 +80,23 @@ internal sealed class QueuedResponseHandler : HttpMessageHandler
     /// <inheritdoc />
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        Requests.Add(new RecordedRequest(
+        var recorded = new RecordedRequest(
             request.Method,
             request.RequestUri,
             request.Headers.Authorization?.Parameter,
             request.Content is null ? null : await request.Content.ReadAsStringAsync(cancellationToken),
-            request.Headers.ToDictionary(header => header.Key, header => header.Value.ToArray())));
+            request.Headers.ToDictionary(header => header.Key, header => header.Value.ToArray()));
 
-        return _responses.Count > 0 ? _responses.Dequeue()() : _fallback();
+        // Concurrency tests drive several requests through one handler instance.
+        lock (_gate)
+        {
+            _requests.Add(recorded);
+
+            if (Responder is not null)
+                return Responder(recorded);
+
+            return _responses.Count > 0 ? _responses.Dequeue()() : _fallback();
+        }
     }
 
     /// <summary>
@@ -107,8 +126,9 @@ internal sealed class ManualTimeProvider(DateTimeOffset utcNow) : TimeProvider
 }
 
 /// <summary>
-/// Token provider that hands out a fixed sequence of tokens: <see cref="Invalidate" /> moves to
-/// the next one, modelling a cache that re-mints on demand.
+/// Token provider that hands out a fixed sequence of tokens: invalidating the current one moves to
+/// the next, modelling a cache that re-mints on demand. Mirrors the real compare-and-invalidate
+/// semantics, so a call naming an already-replaced token is ignored.
 /// </summary>
 internal sealed class SequencedTokenProvider : IBexioTokenProvider
 {
@@ -116,7 +136,7 @@ internal sealed class SequencedTokenProvider : IBexioTokenProvider
     private string _current;
 
     /// <summary>
-    /// Number of times <see cref="Invalidate" /> was called.
+    /// Number of times a token was actually discarded.
     /// </summary>
     public int InvalidateCount { get; private set; }
 
@@ -131,11 +151,17 @@ internal sealed class SequencedTokenProvider : IBexioTokenProvider
     }
 
     /// <inheritdoc />
+    public bool CanRenew => true;
+
+    /// <inheritdoc />
     public Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default) => Task.FromResult(_current);
 
     /// <inheritdoc />
-    public void Invalidate()
+    public void Invalidate(string accessToken)
     {
+        if (!string.Equals(_current, accessToken, StringComparison.Ordinal))
+            return;
+
         InvalidateCount++;
 
         if (_pending.Count > 0)

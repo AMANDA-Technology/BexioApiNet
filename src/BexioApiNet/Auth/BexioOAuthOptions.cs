@@ -80,6 +80,16 @@ public sealed record BexioOAuthOptions
     public TimeSpan ClockSkew { get; init; } = BexioAuthDefaults.ClockSkew;
 
     /// <summary>
+    /// How long a token is cached when the token endpoint reports no <c>expires_in</c>. Defaults to
+    /// <see cref="BexioAuthDefaults.FallbackTokenLifetime" />.
+    /// </summary>
+    /// <remarks>
+    /// bexio documents no access token lifetime, so this is only a floor against the degenerate
+    /// case: without it a missing <c>expires_in</c> would mean a token request per API call.
+    /// </remarks>
+    public TimeSpan FallbackTokenLifetime { get; init; } = BexioAuthDefaults.FallbackTokenLifetime;
+
+    /// <summary>
     /// Absolute URI of the token endpoint, derived from <see cref="Authority" />.
     /// </summary>
     public Uri TokenEndpoint => BuildEndpoint(BexioAuthDefaults.TokenEndpointPath);

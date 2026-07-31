@@ -51,15 +51,21 @@ public sealed class StaticBexioTokenProvider : IBexioTokenProvider
     }
 
     /// <inheritdoc />
+    /// <remarks>
+    /// Always false: a rejected pre-issued token stays rejected, so
+    /// <see cref="BexioAuthDelegatingHandler" /> skips its retry for this provider.
+    /// </remarks>
+    public bool CanRenew => false;
+
+    /// <inheritdoc />
     public Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default)
         => Task.FromResult(_accessToken);
 
     /// <inheritdoc />
     /// <remarks>
-    /// No-op: there is nothing to renew. A rejected static token stays rejected, so
-    /// <see cref="BexioAuthDelegatingHandler" /> skips its retry for this provider.
+    /// No-op: there is no cache to clear and nothing to renew.
     /// </remarks>
-    public void Invalidate()
+    public void Invalidate(string accessToken)
     {
     }
 }

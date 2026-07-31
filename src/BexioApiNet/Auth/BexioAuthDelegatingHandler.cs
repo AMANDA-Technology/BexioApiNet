@@ -35,9 +35,9 @@ namespace BexioApiNet.Auth;
 /// be renewed without recreating the client.
 /// </summary>
 /// <remarks>
-/// A <c>401</c> is retried exactly once: the cached token is invalidated, a fresh one is fetched
-/// and the request is replayed. If the provider hands back the same token (a static Personal
-/// Access Token, for example) the retry is skipped, because it would fail identically.
+/// A <c>401</c> is retried exactly once: the rejected token is invalidated, a fresh one is fetched
+/// and the request is replayed. Providers that cannot renew — a static Personal Access Token, for
+/// example — skip the retry entirely, because it would fail identically.
 /// </remarks>
 public sealed class BexioAuthDelegatingHandler : DelegatingHandler
 {
@@ -70,8 +70,10 @@ public sealed class BexioAuthDelegatingHandler : DelegatingHandler
     /// <inheritdoc />
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
     {
-        // Buffer the body up-front so a retry can replay it — a streamed content can only be read once.
-        if (request.Content is not null)
+        // Buffer the body up-front so a retry can replay it — a streamed content can only be read
+        // once. Skipped when the provider cannot renew, since the copy would never be used; that
+        // spares a static-token consumer a second in-memory copy of every file upload.
+        if (_tokenProvider.CanRenew && request.Content is not null)
             await request.Content.LoadIntoBufferAsync(cancellationToken);
 
         var accessToken = await _tokenProvider.GetAccessTokenAsync(cancellationToken);
@@ -79,10 +81,12 @@ public sealed class BexioAuthDelegatingHandler : DelegatingHandler
 
         var response = await base.SendAsync(request, cancellationToken);
 
-        if (response.StatusCode != HttpStatusCode.Unauthorized)
+        if (response.StatusCode != HttpStatusCode.Unauthorized || !_tokenProvider.CanRenew)
             return response;
 
-        _tokenProvider.Invalidate();
+        // Naming the rejected token lets the provider ignore the call if someone else already
+        // renewed, so concurrent rejections collapse into one token request rather than one each.
+        _tokenProvider.Invalidate(accessToken);
         var renewedToken = await _tokenProvider.GetAccessTokenAsync(cancellationToken);
 
         if (string.Equals(renewedToken, accessToken, StringComparison.Ordinal))

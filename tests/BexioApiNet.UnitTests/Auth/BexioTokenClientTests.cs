@@ -309,6 +309,35 @@ public class BexioTokenClientTests
     }
 
     /// <summary>
+    /// <c>invalid_grant</c> is the one failure that means "the customer has to consent again"
+    /// rather than "retry later", so consumers get it without a string comparison.
+    /// </summary>
+    [Test]
+    public async Task RefreshTokenAsync_WhenGrantIsInvalid_FlagsItOnTheException()
+    {
+        var (client, _) = CreateClient(HttpStatusCode.BadRequest, """{"error":"invalid_grant"}""");
+
+        var exception = await Should.ThrowAsync<BexioAuthenticationException>(
+            () => client.RefreshTokenAsync("refresh-1", TestContext.CurrentContext.CancellationToken));
+
+        exception.IsInvalidGrant.ShouldBeTrue();
+    }
+
+    /// <summary>
+    /// Any other error is a candidate for a retry and must not be reported as a dead grant.
+    /// </summary>
+    [Test]
+    public async Task RefreshTokenAsync_WhenEndpointFailsTransiently_DoesNotFlagInvalidGrant()
+    {
+        var (client, _) = CreateClient(HttpStatusCode.ServiceUnavailable, """{"error":"temporarily_unavailable"}""");
+
+        var exception = await Should.ThrowAsync<BexioAuthenticationException>(
+            () => client.RefreshTokenAsync("refresh-1", TestContext.CurrentContext.CancellationToken));
+
+        exception.IsInvalidGrant.ShouldBeFalse();
+    }
+
+    /// <summary>
     /// The DI constructor takes a client per request from the factory, so a long-lived token client
     /// never pins a single handler.
     /// </summary>

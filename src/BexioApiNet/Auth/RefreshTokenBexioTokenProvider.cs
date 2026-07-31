@@ -53,7 +53,7 @@ public sealed class RefreshTokenBexioTokenProvider : CachingBexioTokenProvider
     /// <param name="timeProvider">Time source. Defaults to <see cref="TimeProvider.System" />.</param>
     public RefreshTokenBexioTokenProvider(IBexioTokenClient tokenClient, IBexioRefreshTokenStore refreshTokenStore,
         BexioOAuthOptions options, TimeProvider? timeProvider = null)
-        : base(GetClockSkew(options), timeProvider)
+        : base(options, timeProvider)
     {
         ArgumentNullException.ThrowIfNull(tokenClient);
         ArgumentNullException.ThrowIfNull(refreshTokenStore);
@@ -81,16 +81,5 @@ public sealed class RefreshTokenBexioTokenProvider : CachingBexioTokenProvider
             await _refreshTokenStore.StoreRefreshTokenAsync(response.RefreshToken, cancellationToken);
 
         return response;
-    }
-
-    /// <summary>
-    /// Reads the clock skew from the options, guarding against a null argument before the base
-    /// constructor runs.
-    /// </summary>
-    /// <param name="options">Client registration and endpoint settings.</param>
-    private static TimeSpan GetClockSkew(BexioOAuthOptions options)
-    {
-        ArgumentNullException.ThrowIfNull(options);
-        return options.ClockSkew;
     }
 }

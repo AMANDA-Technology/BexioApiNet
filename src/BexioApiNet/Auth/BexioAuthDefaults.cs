@@ -74,4 +74,11 @@ public static class BexioAuthDefaults
     /// actually expires. Covers clock drift between this host and the identity provider.
     /// </summary>
     public static readonly TimeSpan ClockSkew = TimeSpan.FromSeconds(60);
+
+    /// <summary>
+    /// Conservative lifetime assumed for a token whose response carries no <c>expires_in</c>. Short
+    /// enough that guessing wrong costs little — an early expiry surfaces as a <c>401</c> and is
+    /// renewed and replayed.
+    /// </summary>
+    public static readonly TimeSpan FallbackTokenLifetime = TimeSpan.FromMinutes(5);
 }

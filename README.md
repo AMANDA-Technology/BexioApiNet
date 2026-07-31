@@ -98,7 +98,7 @@ builder.Services.AddBexioServicesWithClientCredentials(
     });
 ```
 
-Token endpoint failures throw `BexioAuthenticationException` (carrying the OAuth `error` code) rather than returning an `ApiResult` — there is no API request to attach a result to.
+Token endpoint failures throw `BexioAuthenticationException` rather than returning an `ApiResult` — there is no API request to attach a result to. Check `IsInvalidGrant` to tell "the customer must consent again" apart from a transient failure worth retrying.
 
 `IBexioTokenClient.RevokeTokenAsync` revokes an access or refresh token for clean teardown when an integration is disconnected.
 

@@ -26,6 +26,8 @@ SOFTWARE.
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.AspNetCore;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Http;
+using Microsoft.Extensions.Options;
 
 namespace BexioApiNet.UnitTests.Auth;
 
@@ -179,6 +181,53 @@ public class BexioServiceCollectionAuthTests
             Assert.That(token, Is.EqualTo("access-1"));
             Assert.That(store.StoredRefreshToken, Is.EqualTo("refresh-2"));
         });
+    }
+
+    /// <summary>
+    /// The token request carries the client secret. Following a redirect would replay it to the
+    /// host named by the redirect, so the token client must refuse redirects just like the API
+    /// client does.
+    /// </summary>
+    [Test]
+    public void AddBexioTokenClient_DisablesAutoRedirect()
+    {
+        var services = new ServiceCollection();
+        services.AddBexioTokenClient(OAuthOptions);
+
+        using var provider = services.BuildServiceProvider(validateScopes: true);
+
+        var handler = provider
+            .GetRequiredService<IOptionsMonitor<HttpClientFactoryOptions>>()
+            .Get(BexioAuthDefaults.TokenHttpClientName)
+            .HttpMessageHandlerBuilderActions
+            .Aggregate(new TestHttpMessageHandlerBuilder(), (builder, configure) =>
+            {
+                configure(builder);
+                return builder;
+            })
+            .PrimaryHandler;
+
+        Assert.That(handler, Is.InstanceOf<HttpClientHandler>()
+            .And.Property(nameof(HttpClientHandler.AllowAutoRedirect)).False);
+    }
+
+    /// <summary>
+    /// Minimal <see cref="HttpMessageHandlerBuilder" /> used to run the registered handler
+    /// configuration and inspect the primary handler it produces.
+    /// </summary>
+    private sealed class TestHttpMessageHandlerBuilder : HttpMessageHandlerBuilder
+    {
+        /// <inheritdoc />
+        public override string? Name { get; set; }
+
+        /// <inheritdoc />
+        public override HttpMessageHandler PrimaryHandler { get; set; } = new HttpClientHandler();
+
+        /// <inheritdoc />
+        public override IList<DelegatingHandler> AdditionalHandlers { get; } = [];
+
+        /// <inheritdoc />
+        public override HttpMessageHandler Build() => PrimaryHandler;
     }
 
     /// <summary>

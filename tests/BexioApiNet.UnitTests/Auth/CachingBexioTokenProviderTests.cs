@@ -181,11 +181,97 @@ public class CachingBexioTokenProviderTests
         using var provider = new ClientCredentialsBexioTokenProvider(tokenClient, Options, new ManualTimeProvider(Start));
 
         await provider.GetAccessTokenAsync(TestContext.CurrentContext.CancellationToken);
-        provider.Invalidate();
+        provider.Invalidate("token-1");
         var second = await provider.GetAccessTokenAsync(TestContext.CurrentContext.CancellationToken);
 
         second.ShouldBe("token-2");
         await tokenClient.Received(2).ClientCredentialsAsync(Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// Invalidation names the token that was rejected, and is ignored when the cache has already
+    /// moved on. This is what stops a burst of concurrent <c>401</c>s — every one of them holding
+    /// the same stale token — from each discarding the token its predecessor just minted and
+    /// requesting one of its own.
+    /// </summary>
+    [Test]
+    public async Task Invalidate_WithAlreadyReplacedToken_KeepsCachedToken()
+    {
+        var tokenClient = Substitute.For<IBexioTokenClient>();
+        tokenClient.ClientCredentialsAsync(Arg.Any<CancellationToken>()).Returns(Token("token-1"), Token("token-2"));
+
+        using var provider = new ClientCredentialsBexioTokenProvider(tokenClient, Options, new ManualTimeProvider(Start));
+
+        await provider.GetAccessTokenAsync(TestContext.CurrentContext.CancellationToken);
+
+        // First rejection renews, the rest still name the stale token and must be no-ops.
+        provider.Invalidate("token-1");
+        await provider.GetAccessTokenAsync(TestContext.CurrentContext.CancellationToken);
+        provider.Invalidate("token-1");
+        provider.Invalidate("token-1");
+
+        var current = await provider.GetAccessTokenAsync(TestContext.CurrentContext.CancellationToken);
+
+        current.ShouldBe("token-2");
+        await tokenClient.Received(2).ClientCredentialsAsync(Arg.Any<CancellationToken>());
+    }
+
+    /// <summary>
+    /// A response without <c>expires_in</c> deserializes to a zero lifetime. Treating that as
+    /// "already expired" would make the cache permanently unusable and turn every API call into a
+    /// token request, so it falls back to the configured lifetime instead.
+    /// </summary>
+    [Test]
+    public async Task GetAccessTokenAsync_WhenResponseHasNoExpiry_UsesFallbackLifetime()
+    {
+        var tokenClient = Substitute.For<IBexioTokenClient>();
+        tokenClient.ClientCredentialsAsync(Arg.Any<CancellationToken>())
+            .Returns(Token("token-1", expiresIn: 0), Token("token-2"));
+
+        var time = new ManualTimeProvider(Start);
+        var options = Options with { FallbackTokenLifetime = TimeSpan.FromMinutes(5), ClockSkew = TimeSpan.FromSeconds(60) };
+        using var provider = new ClientCredentialsBexioTokenProvider(tokenClient, options, time);
+
+        await provider.GetAccessTokenAsync(TestContext.CurrentContext.CancellationToken);
+        time.Advance(TimeSpan.FromMinutes(3));
+        var cached = await provider.GetAccessTokenAsync(TestContext.CurrentContext.CancellationToken);
+
+        time.Advance(TimeSpan.FromMinutes(3));
+        var renewed = await provider.GetAccessTokenAsync(TestContext.CurrentContext.CancellationToken);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(cached, Is.EqualTo("token-1"), "the fallback lifetime must make the token cacheable");
+            Assert.That(renewed, Is.EqualTo("token-2"), "the fallback lifetime must still expire");
+        });
+    }
+
+    /// <summary>
+    /// A token whose lifetime is shorter than the clock skew would be stale the instant it was
+    /// issued. The skew is clamped so the token stays usable for part of its life instead.
+    /// </summary>
+    [Test]
+    public async Task GetAccessTokenAsync_WhenLifetimeIsShorterThanClockSkew_StillCachesTheToken()
+    {
+        var tokenClient = Substitute.For<IBexioTokenClient>();
+        tokenClient.ClientCredentialsAsync(Arg.Any<CancellationToken>())
+            .Returns(Token("token-1", expiresIn: 30), Token("token-2"));
+
+        var time = new ManualTimeProvider(Start);
+        using var provider = new ClientCredentialsBexioTokenProvider(tokenClient, Options, time);
+
+        await provider.GetAccessTokenAsync(TestContext.CurrentContext.CancellationToken);
+        time.Advance(TimeSpan.FromSeconds(10));
+        var cached = await provider.GetAccessTokenAsync(TestContext.CurrentContext.CancellationToken);
+
+        time.Advance(TimeSpan.FromSeconds(10));
+        var renewed = await provider.GetAccessTokenAsync(TestContext.CurrentContext.CancellationToken);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(cached, Is.EqualTo("token-1"), "half the 30s lifetime must remain usable");
+            Assert.That(renewed, Is.EqualTo("token-2"), "the clamped window must still close before the real expiry");
+        });
     }
 
     /// <summary>

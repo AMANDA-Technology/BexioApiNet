@@ -33,6 +33,16 @@ namespace BexioApiNet.Auth;
 public interface IBexioTokenProvider
 {
     /// <summary>
+    /// Whether this provider can produce a different token than the one it just handed out. False
+    /// for a pre-issued token, which no amount of retrying will change.
+    /// </summary>
+    /// <remarks>
+    /// <see cref="BexioAuthDelegatingHandler" /> uses this to skip both the <c>401</c> retry and
+    /// the request buffering that retry would need.
+    /// </remarks>
+    bool CanRenew { get; }
+
+    /// <summary>
     /// Gets a currently valid access token, renewing it if the cached one is expired or missing.
     /// </summary>
     /// <param name="cancellationToken">Cancellation token.</param>
@@ -41,9 +51,18 @@ public interface IBexioTokenProvider
     Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default);
 
     /// <summary>
-    /// Discards the cached token so the next <see cref="GetAccessTokenAsync" /> call obtains a
-    /// fresh one. Called when bexio rejects a request with <c>401</c>, which can happen before
-    /// the advertised expiry if the token was revoked.
+    /// Discards the cached token <b>only if it is still</b> <paramref name="accessToken" />, so the
+    /// next <see cref="GetAccessTokenAsync" /> call obtains a fresh one. Called when bexio rejects
+    /// a request with <c>401</c>, which can happen before the advertised expiry if the token was
+    /// revoked.
     /// </summary>
-    void Invalidate();
+    /// <remarks>
+    /// The comparison is what keeps concurrent rejections from stampeding the token endpoint: when
+    /// N in-flight requests all fail on the same stale token, the first invalidation renews and the
+    /// rest find a token that is no longer the one they complained about, so they leave it alone.
+    /// Unconditional invalidation would have each one discard the token its predecessor just
+    /// minted, turning N rejections into N token requests.
+    /// </remarks>
+    /// <param name="accessToken">The token that was rejected.</param>
+    void Invalidate(string accessToken);
 }

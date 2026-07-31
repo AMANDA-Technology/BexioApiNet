@@ -54,6 +54,16 @@ public sealed class BexioAuthenticationException : ApplicationException
     public HttpStatusCode? StatusCode { get; }
 
     /// <summary>
+    /// True when the identity provider answered <c>invalid_grant</c>.
+    /// </summary>
+    /// <remarks>
+    /// This is the one error that is not worth retrying: on the refresh flow it means the refresh
+    /// token is expired, revoked, or was already rotated away, and the customer has to grant
+    /// consent again. Every other error is a candidate for a retry or an alert.
+    /// </remarks>
+    public bool IsInvalidGrant => string.Equals(Error, "invalid_grant", StringComparison.Ordinal);
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="BexioAuthenticationException" /> class.
     /// </summary>
     /// <param name="message">Description of the failure.</param>

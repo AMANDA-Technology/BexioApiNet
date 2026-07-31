@@ -71,7 +71,7 @@ public class BexioAuthDelegatingHandlerTests
         using var client = CreateClient(tokenProvider, inner);
 
         await client.GetAsync(RequestUri, TestContext.CurrentContext.CancellationToken);
-        tokenProvider.Invalidate();
+        tokenProvider.Invalidate("token-1");
         await client.GetAsync(RequestUri, TestContext.CurrentContext.CancellationToken);
 
         Assert.Multiple(() =>
@@ -131,10 +131,11 @@ public class BexioAuthDelegatingHandlerTests
 
     /// <summary>
     /// A static Personal Access Token cannot be re-minted, so replaying the request with the very
-    /// same token would only produce a second <c>401</c>. The retry is skipped.
+    /// same token would only produce a second <c>401</c>. The retry — and the request buffering it
+    /// would have needed — is skipped.
     /// </summary>
     [Test]
-    public async Task SendAsync_WhenTokenIsUnchanged_DoesNotRetry()
+    public async Task SendAsync_WithNonRenewableProvider_DoesNotRetry()
     {
         var inner = new QueuedResponseHandler().Enqueue(HttpStatusCode.Unauthorized);
         using var client = CreateClient(new StaticBexioTokenProvider("token-1"), inner);

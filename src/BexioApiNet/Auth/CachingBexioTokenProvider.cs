@@ -42,6 +42,7 @@ public abstract class CachingBexioTokenProvider : IBexioTokenProvider, IDisposab
 
     private readonly TimeProvider _timeProvider;
     private readonly TimeSpan _clockSkew;
+    private readonly TimeSpan _fallbackTokenLifetime;
 
     /// <summary>
     /// The cached token, or null when none has been acquired or it was invalidated. Replaced as a
@@ -49,20 +50,26 @@ public abstract class CachingBexioTokenProvider : IBexioTokenProvider, IDisposab
     /// </summary>
     private CachedToken? _cached;
 
-    private bool _disposed;
+    private int _disposed;
 
     /// <summary>
     /// Initializes a new instance of the <see cref="CachingBexioTokenProvider" /> class.
     /// </summary>
-    /// <param name="clockSkew">Margin subtracted from the token expiry before it is considered stale.</param>
+    /// <param name="options">Client registration and endpoint settings, read for the caching margins.</param>
     /// <param name="timeProvider">Time source. Defaults to <see cref="TimeProvider.System" />.</param>
-    protected CachingBexioTokenProvider(TimeSpan clockSkew, TimeProvider? timeProvider = null)
+    protected CachingBexioTokenProvider(BexioOAuthOptions options, TimeProvider? timeProvider = null)
     {
-        ArgumentOutOfRangeException.ThrowIfLessThan(clockSkew, TimeSpan.Zero);
+        ArgumentNullException.ThrowIfNull(options);
+        ArgumentOutOfRangeException.ThrowIfLessThan(options.ClockSkew, TimeSpan.Zero);
+        ArgumentOutOfRangeException.ThrowIfLessThanOrEqual(options.FallbackTokenLifetime, TimeSpan.Zero);
 
-        _clockSkew = clockSkew;
+        _clockSkew = options.ClockSkew;
+        _fallbackTokenLifetime = options.FallbackTokenLifetime;
         _timeProvider = timeProvider ?? TimeProvider.System;
     }
+
+    /// <inheritdoc />
+    public bool CanRenew => true;
 
     /// <summary>
     /// Obtains a new token from the identity provider. Implementations must complete every side
@@ -76,7 +83,7 @@ public abstract class CachingBexioTokenProvider : IBexioTokenProvider, IDisposab
     /// <inheritdoc />
     public async Task<string> GetAccessTokenAsync(CancellationToken cancellationToken = default)
     {
-        ObjectDisposedException.ThrowIf(_disposed, this);
+        ObjectDisposedException.ThrowIf(Volatile.Read(ref _disposed) != 0, this);
 
         if (TryGetCachedToken(out var cached))
             return cached;
@@ -94,9 +101,7 @@ public abstract class CachingBexioTokenProvider : IBexioTokenProvider, IDisposab
             if (string.IsNullOrWhiteSpace(response.AccessToken))
                 throw new BexioAuthenticationException("The bexio token endpoint returned an empty access token.");
 
-            Volatile.Write(ref _cached, new CachedToken(
-                response.AccessToken,
-                _timeProvider.GetUtcNow().AddSeconds(response.ExpiresIn)));
+            Volatile.Write(ref _cached, new CachedToken(response.AccessToken, CalculateUsableUntil(response.ExpiresIn)));
 
             return response.AccessToken;
         }
@@ -107,13 +112,39 @@ public abstract class CachingBexioTokenProvider : IBexioTokenProvider, IDisposab
     }
 
     /// <inheritdoc />
-    public void Invalidate()
+    public void Invalidate(string accessToken)
     {
-        Volatile.Write(ref _cached, null);
+        var cached = Volatile.Read(ref _cached);
+
+        // Drop the cache only if it still holds the rejected token. Another caller may already have
+        // renewed it, and discarding that fresh token would send every concurrent 401 to the token
+        // endpoint for a token of its own.
+        if (cached is not null && string.Equals(cached.AccessToken, accessToken, StringComparison.Ordinal))
+            Interlocked.CompareExchange(ref _cached, null, cached);
     }
 
     /// <summary>
-    /// Reads the cached token when it is still valid for at least the configured clock skew.
+    /// Works out how long a freshly issued token may be served from the cache.
+    /// </summary>
+    /// <remarks>
+    /// Two degenerate cases would otherwise make the cache permanently unusable and turn every API
+    /// call into a token request: a response without <c>expires_in</c>, and a lifetime shorter than
+    /// the clock skew. The first falls back to a configured lifetime, the second halves the skew.
+    /// Both are safe to guess at because a token that dies early surfaces as a <c>401</c>, which
+    /// <see cref="BexioAuthDelegatingHandler" /> resolves by renewing and replaying.
+    /// </remarks>
+    /// <param name="expiresIn">Lifetime in seconds as reported by the token endpoint.</param>
+    /// <returns>The instant after which the cached token must not be served.</returns>
+    private DateTimeOffset CalculateUsableUntil(int expiresIn)
+    {
+        var lifetime = expiresIn > 0 ? TimeSpan.FromSeconds(expiresIn) : _fallbackTokenLifetime;
+        var skew = _clockSkew < lifetime ? _clockSkew : lifetime / 2;
+
+        return _timeProvider.GetUtcNow() + lifetime - skew;
+    }
+
+    /// <summary>
+    /// Reads the cached token while it is still inside its usable window.
     /// </summary>
     /// <param name="accessToken">The cached access token when the method returns true.</param>
     /// <returns>True when a usable token was cached.</returns>
@@ -121,7 +152,7 @@ public abstract class CachingBexioTokenProvider : IBexioTokenProvider, IDisposab
     {
         var cached = Volatile.Read(ref _cached);
 
-        if (cached is not null && _timeProvider.GetUtcNow() < cached.ExpiresAt - _clockSkew)
+        if (cached is not null && _timeProvider.GetUtcNow() < cached.UsableUntil)
         {
             accessToken = cached.AccessToken;
             return true;
@@ -136,10 +167,9 @@ public abstract class CachingBexioTokenProvider : IBexioTokenProvider, IDisposab
     /// </summary>
     public void Dispose()
     {
-        if (_disposed)
+        if (Interlocked.Exchange(ref _disposed, 1) != 0)
             return;
 
-        _disposed = true;
         Volatile.Write(ref _cached, null);
         _renewalGate.Dispose();
 
@@ -147,9 +177,9 @@ public abstract class CachingBexioTokenProvider : IBexioTokenProvider, IDisposab
     }
 
     /// <summary>
-    /// An access token together with the instant it stops being valid.
+    /// An access token together with the instant it stops being served from the cache.
     /// </summary>
     /// <param name="AccessToken">The access token.</param>
-    /// <param name="ExpiresAt">Absolute expiry, without the clock skew margin applied.</param>
-    private sealed record CachedToken(string AccessToken, DateTimeOffset ExpiresAt);
+    /// <param name="UsableUntil">Expiry with the clock skew margin already subtracted.</param>
+    private sealed record CachedToken(string AccessToken, DateTimeOffset UsableUntil);
 }
