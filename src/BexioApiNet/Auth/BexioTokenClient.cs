@@ -196,10 +196,8 @@ public sealed class BexioTokenClient : IBexioTokenClient
 
         try
         {
-            using var request = new HttpRequestMessage(HttpMethod.Post, endpoint)
-            {
-                Content = new FormUrlEncodedContent(parameters)
-            };
+            using var request = new HttpRequestMessage(HttpMethod.Post, endpoint);
+            request.Content = new FormUrlEncodedContent(parameters);
 
             if (useBasicAuthentication)
                 request.Headers.Authorization = CreateBasicAuthenticationHeader();

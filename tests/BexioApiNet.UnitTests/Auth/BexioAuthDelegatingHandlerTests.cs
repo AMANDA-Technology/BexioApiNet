@@ -163,10 +163,8 @@ public class BexioAuthDelegatingHandlerTests
             .Enqueue(HttpStatusCode.OK, "{}");
         using var client = CreateClient(new SequencedTokenProvider("token-1", "token-2"), inner);
 
-        using var request = new HttpRequestMessage(HttpMethod.Post, RequestUri)
-        {
-            Content = new StringContent(body, Encoding.UTF8, "application/json")
-        };
+        using var request = new HttpRequestMessage(HttpMethod.Post, RequestUri);
+        request.Content = new StringContent(body, Encoding.UTF8, "application/json");
         request.Headers.Add("X-Correlation-Id", "abc-123");
 
         await client.SendAsync(request, TestContext.CurrentContext.CancellationToken);

@@ -153,6 +153,7 @@ public class CachingBexioTokenProviderTests
 
         var callers = Enumerable
             .Range(0, callerCount)
+            // ReSharper disable once AccessToDisposedClosure
             .Select(_ => Task.Run(() => provider.GetAccessTokenAsync(TestContext.CurrentContext.CancellationToken)))
             .ToArray();
 

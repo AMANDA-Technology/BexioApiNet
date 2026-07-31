@@ -71,11 +71,12 @@ public class BexioServiceCollectionAuthTests
 
         using var provider = services.BuildServiceProvider(validateScopes: true);
         using var scope = provider.CreateScope();
+        var serviceProvider = scope.ServiceProvider;
 
         Assert.Multiple(() =>
         {
-            Assert.That(scope.ServiceProvider.GetRequiredService<IBexioApiClient>(), Is.Not.Null);
-            Assert.That(scope.ServiceProvider.GetRequiredService<IBexioConnectionHandler>(), Is.Not.Null);
+            Assert.That(serviceProvider.GetRequiredService<IBexioApiClient>(), Is.Not.Null);
+            Assert.That(serviceProvider.GetRequiredService<IBexioConnectionHandler>(), Is.Not.Null);
         });
     }
 
@@ -112,12 +113,14 @@ public class BexioServiceCollectionAuthTests
 
         using var provider = services.BuildServiceProvider(validateScopes: true);
         using var client = provider.GetRequiredService<IHttpClientFactory>().CreateClient(TypedClientName);
+        var headers = client.DefaultRequestHeaders;
+        var baseAddress = client.BaseAddress;
 
         Assert.Multiple(() =>
         {
-            Assert.That(client.DefaultRequestHeaders.Authorization, Is.Null);
-            Assert.That(client.BaseAddress, Is.EqualTo(new Uri(BaseUri)));
-            Assert.That(client.DefaultRequestHeaders.Accept.ToString(), Is.EqualTo(ApiAcceptHeaders.JsonFormatted));
+            Assert.That(headers.Authorization, Is.Null);
+            Assert.That(baseAddress, Is.EqualTo(new Uri(BaseUri)));
+            Assert.That(headers.Accept.ToString(), Is.EqualTo(ApiAcceptHeaders.JsonFormatted));
         });
     }
 
@@ -143,12 +146,13 @@ public class BexioServiceCollectionAuthTests
         services.AddBexioServicesWithClientCredentials(CreateConfiguration(), OAuthOptions);
 
         using var provider = services.BuildServiceProvider(validateScopes: true);
+        var tokenProvider = provider.GetRequiredService<IBexioTokenProvider>();
+        var tokenClient = provider.GetRequiredService<IBexioTokenClient>();
 
         Assert.Multiple(() =>
         {
-            Assert.That(provider.GetRequiredService<IBexioTokenProvider>(),
-                Is.InstanceOf<ClientCredentialsBexioTokenProvider>());
-            Assert.That(provider.GetRequiredService<IBexioTokenClient>(), Is.InstanceOf<BexioTokenClient>());
+            Assert.That(tokenProvider, Is.InstanceOf<ClientCredentialsBexioTokenProvider>());
+            Assert.That(tokenClient, Is.InstanceOf<BexioTokenClient>());
         });
     }
 
@@ -241,11 +245,13 @@ public class BexioServiceCollectionAuthTests
         services.AddBexioTokenClient(OAuthOptions);
 
         using var provider = services.BuildServiceProvider(validateScopes: true);
+        var tokenClient = provider.GetRequiredService<IBexioTokenClient>();
+        var tokenProvider = provider.GetService<IBexioTokenProvider>();
 
         Assert.Multiple(() =>
         {
-            Assert.That(provider.GetRequiredService<IBexioTokenClient>(), Is.InstanceOf<BexioTokenClient>());
-            Assert.That(provider.GetService<IBexioTokenProvider>(), Is.Null);
+            Assert.That(tokenClient, Is.InstanceOf<BexioTokenClient>());
+            Assert.That(tokenProvider, Is.Null);
         });
     }
 
