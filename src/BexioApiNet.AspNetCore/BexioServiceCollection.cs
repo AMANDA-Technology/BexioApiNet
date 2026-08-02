@@ -26,6 +26,7 @@ SOFTWARE.
 using System.Net.Http.Headers;
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Auth;
+using BexioApiNet.Configuration;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Interfaces.Connectors.Accounting;
 using BexioApiNet.Interfaces.Connectors.Banking;
@@ -138,6 +139,7 @@ public static class BexioServiceCollection
                 client.BaseAddress = new Uri(configuration.BaseUri);
                 client.DefaultRequestHeaders.Accept.Add(
                     new MediaTypeWithQualityHeaderValue(configuration.AcceptHeaderFormat));
+                client.ApplyDefaultRequestHeaders(configuration.DefaultRequestHeaders);
 
                 // No Authorization header here on purpose: it is set per request by the
                 // BexioAuthDelegatingHandler, so a renewed token takes effect without a new client.

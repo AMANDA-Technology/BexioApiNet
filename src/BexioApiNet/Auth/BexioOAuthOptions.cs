@@ -90,6 +90,21 @@ public sealed record BexioOAuthOptions
     public TimeSpan FallbackTokenLifetime { get; init; } = BexioAuthDefaults.FallbackTokenLifetime;
 
     /// <summary>
+    /// Static headers added to every request to the identity provider, on top of the headers the library sets
+    /// itself. Intended for caller identification and diagnostics — an outbound tag naming the calling
+    /// application, environment and build, for example. Defaults to <c>null</c>, which adds nothing.
+    /// </summary>
+    /// <remarks>
+    /// The token client is configured from these options rather than from
+    /// <see cref="Interfaces.IBexioConfiguration" />, so it needs its own property — the API client's
+    /// <c>IBexioConfiguration.DefaultRequestHeaders</c> cannot reach it. Applied once per
+    /// <see cref="HttpClient" />, so only static values belong here; reserved names (<c>Authorization</c>,
+    /// <c>Accept</c>, <c>Host</c>) and malformed entries are silently skipped — see
+    /// <see cref="Configuration.HttpClientExtension.ApplyDefaultRequestHeaders" /> for the full contract.
+    /// </remarks>
+    public IReadOnlyDictionary<string, string>? DefaultRequestHeaders { get; init; }
+
+    /// <summary>
     /// Absolute URI of the token endpoint, derived from <see cref="Authority" />.
     /// </summary>
     public Uri TokenEndpoint => BuildEndpoint(BexioAuthDefaults.TokenEndpointPath);

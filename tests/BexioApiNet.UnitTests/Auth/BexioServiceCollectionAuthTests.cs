@@ -25,6 +25,7 @@ SOFTWARE.
 
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.AspNetCore;
+using BexioApiNet.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Http;
 using Microsoft.Extensions.Options;
@@ -42,6 +43,9 @@ public class BexioServiceCollectionAuthTests
 {
     private const string BaseUri = "https://api.example.local/";
     private const string TypedClientName = nameof(IBexioConnectionHandler);
+    private const string CallerHeaderName = "X-Caller";
+    private const string CallerHeaderValue = "BexioApiNet.UnitTests/1.0";
+    private const string AcceptHeaderName = "Accept";
 
     private static readonly BexioOAuthOptions OAuthOptions = new()
     {
@@ -53,12 +57,32 @@ public class BexioServiceCollectionAuthTests
     /// <summary>
     /// Builds a configuration for the static token path.
     /// </summary>
-    private static BexioConfiguration CreateConfiguration(string jwtToken = "static-token") => new()
+    private static BexioConfiguration CreateConfiguration(string jwtToken = "static-token",
+        IReadOnlyDictionary<string, string>? defaultRequestHeaders = null) => new()
     {
         BaseUri = BaseUri,
         JwtToken = jwtToken,
-        AcceptHeaderFormat = ApiAcceptHeaders.JsonFormatted
+        AcceptHeaderFormat = ApiAcceptHeaders.JsonFormatted,
+        DefaultRequestHeaders = defaultRequestHeaders
     };
+
+    /// <summary>
+    /// Registers the static token path with the given default request headers and reports what the typed
+    /// client would put on the wire.
+    /// </summary>
+    /// <param name="defaultRequestHeaders">Caller-supplied default request headers.</param>
+    /// <returns>The typed client's default request headers, by name.</returns>
+    private static Dictionary<string, string[]> TypedClientHeaders(IReadOnlyDictionary<string, string>? defaultRequestHeaders)
+    {
+        var services = new ServiceCollection();
+        services.AddBexioServices(CreateConfiguration(defaultRequestHeaders: defaultRequestHeaders));
+
+        using var provider = services.BuildServiceProvider(validateScopes: true);
+        using var client = provider.GetRequiredService<IHttpClientFactory>().CreateClient(TypedClientName);
+
+        return client.DefaultRequestHeaders.ToDictionary(header => header.Key, header => header.Value.ToArray(),
+            StringComparer.OrdinalIgnoreCase);
+    }
 
     /// <summary>
     /// The original two-argument overload still registers a fully usable client.
@@ -253,6 +277,147 @@ public class BexioServiceCollectionAuthTests
             Assert.That(tokenClient, Is.InstanceOf<BexioTokenClient>());
             Assert.That(tokenProvider, Is.Null);
         });
+    }
+
+    /// <summary>
+    /// Caller-supplied default request headers reach the typed API client, on top of the headers the
+    /// library sets itself.
+    /// </summary>
+    [Test]
+    public void AddBexioServices_WithDefaultRequestHeaders_AppliesThemToTypedClient()
+    {
+        var headers = TypedClientHeaders(new Dictionary<string, string> { [CallerHeaderName] = CallerHeaderValue });
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(headers[CallerHeaderName], Is.EqualTo(new[] { CallerHeaderValue }));
+            Assert.That(headers[AcceptHeaderName], Is.EqualTo(new[] { ApiAcceptHeaders.JsonFormatted }));
+        });
+    }
+
+    /// <summary>
+    /// Not configuring the option, or configuring it empty, leaves the client exactly as the library
+    /// built it.
+    /// </summary>
+    [Test]
+    public void AddBexioServices_WithoutDefaultRequestHeaders_AddsNothing()
+    {
+        var withoutHeaders = TypedClientHeaders(null);
+        var withEmptyHeaders = TypedClientHeaders(new Dictionary<string, string>());
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(withoutHeaders.Keys, Is.EquivalentTo(new[] { AcceptHeaderName }));
+            Assert.That(withEmptyHeaders.Keys, Is.EquivalentTo(new[] { AcceptHeaderName }));
+        });
+    }
+
+    /// <summary>
+    /// A malformed entry is skipped rather than throwing or reaching the wire. A blank name or value has
+    /// nothing to send; a name outside the RFC 9110 token set is not a header name; and a value carrying
+    /// CR or LF is accepted by <c>TryAddWithoutValidation</c> but rejected by the connection writer at
+    /// send time — which would turn a diagnostic header into a failed API call.
+    /// </summary>
+    [TestCase(" ", CallerHeaderValue, TestName = "BlankName")]
+    [TestCase(CallerHeaderName, "  ", TestName = "BlankValue")]
+    [TestCase("X Caller", CallerHeaderValue, TestName = "InvalidNameToken")]
+    [TestCase("X-Caller:", CallerHeaderValue, TestName = "InvalidNameSeparator")]
+    [TestCase(CallerHeaderName, "value\r\nX-Injected: yes", TestName = "CarriageReturnLineFeedInValue")]
+    [TestCase(CallerHeaderName, "value\u007F", TestName = "ControlCharacterInValue")]
+    public void AddBexioServices_WithMalformedDefaultRequestHeader_SkipsIt(string name, string value)
+    {
+        var headers = TypedClientHeaders(new Dictionary<string, string> { [name] = value });
+
+        Assert.That(headers.Keys, Is.EquivalentTo(new[] { AcceptHeaderName }));
+    }
+
+    /// <summary>
+    /// The header collections append on a duplicate name instead of replacing, so an entry for a header
+    /// the library owns must be skipped — sending two <c>Accept</c> or <c>Authorization</c> values would
+    /// silently break the request rather than fail loudly.
+    /// </summary>
+    [Test]
+    public void AddBexioServices_WithReservedDefaultRequestHeader_SkipsItAndKeepsTheLibraryHeader()
+    {
+        var headers = TypedClientHeaders(new Dictionary<string, string>
+        {
+            ["authorization"] = "Bearer caller-supplied",
+            ["ACCEPT"] = "text/plain",
+            ["Host"] = "caller.example.local"
+        });
+
+        Assert.That(headers.Keys, Is.EquivalentTo(new[] { AcceptHeaderName }));
+        Assert.That(headers[AcceptHeaderName], Is.EqualTo(new[] { ApiAcceptHeaders.JsonFormatted }));
+    }
+
+    /// <summary>
+    /// Applying the same headers again replaces rather than appends. Asserted on a client of its own
+    /// because <c>IHttpClientFactory</c> hands out a fresh client per call, which would hide an append.
+    /// </summary>
+    [Test]
+    public void ApplyDefaultRequestHeaders_AppliedTwice_KeepsTheValueExactlyOnce()
+    {
+        var headers = new Dictionary<string, string> { [CallerHeaderName] = CallerHeaderValue };
+        using var client = new HttpClient();
+
+        var chained = client
+            .ApplyDefaultRequestHeaders(headers)
+            .ApplyDefaultRequestHeaders(headers);
+
+        Assert.Multiple(() =>
+        {
+            Assert.That(chained, Is.SameAs(client));
+            Assert.That(client.DefaultRequestHeaders.GetValues(CallerHeaderName), Is.EqualTo(new[] { CallerHeaderValue }));
+        });
+    }
+
+    /// <summary>
+    /// The token client is configured from <see cref="BexioOAuthOptions" />, not from the API
+    /// configuration, so it carries its own default request headers.
+    /// </summary>
+    [Test]
+    public void AddBexioTokenClient_WithDefaultRequestHeaders_AppliesThemToTokenClient()
+    {
+        var services = new ServiceCollection();
+        services.AddBexioTokenClient(OAuthOptions with
+        {
+            DefaultRequestHeaders = new Dictionary<string, string> { [CallerHeaderName] = CallerHeaderValue }
+        });
+
+        using var provider = services.BuildServiceProvider(validateScopes: true);
+        using var client = provider.GetRequiredService<IHttpClientFactory>().CreateClient(BexioAuthDefaults.TokenHttpClientName);
+
+        Assert.That(client.DefaultRequestHeaders.GetValues(CallerHeaderName), Is.EqualTo(new[] { CallerHeaderValue }));
+    }
+
+    /// <summary>
+    /// Adding the configure delegate for the default request headers must not cost the token client its
+    /// no-redirect rule, which keeps the client secret from being replayed to a redirect target.
+    /// </summary>
+    [Test]
+    public void AddBexioTokenClient_WithDefaultRequestHeaders_KeepsAutoRedirectDisabled()
+    {
+        var services = new ServiceCollection();
+        services.AddBexioTokenClient(OAuthOptions with
+        {
+            DefaultRequestHeaders = new Dictionary<string, string> { [CallerHeaderName] = CallerHeaderValue }
+        });
+
+        using var provider = services.BuildServiceProvider(validateScopes: true);
+
+        var handler = provider
+            .GetRequiredService<IOptionsMonitor<HttpClientFactoryOptions>>()
+            .Get(BexioAuthDefaults.TokenHttpClientName)
+            .HttpMessageHandlerBuilderActions
+            .Aggregate(new TestHttpMessageHandlerBuilder(), (builder, configure) =>
+            {
+                configure(builder);
+                return builder;
+            })
+            .PrimaryHandler;
+
+        Assert.That(handler, Is.InstanceOf<HttpClientHandler>()
+            .And.Property(nameof(HttpClientHandler.AllowAutoRedirect)).False);
     }
 
     /// <summary>

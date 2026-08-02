@@ -38,4 +38,7 @@ public sealed record BexioConfiguration : IBexioConfiguration
 
     /// <inheritdoc />
     public required string AcceptHeaderFormat { get; set; }
+
+    /// <inheritdoc />
+    public IReadOnlyDictionary<string, string>? DefaultRequestHeaders { get; set; }
 }

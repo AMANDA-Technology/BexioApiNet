@@ -39,6 +39,7 @@ The solution `BexioApiNet.sln` is organized into projects under `src/` and `test
 - **Dependency Injection**: The core `BexioApiClient` aggregates all connector services and is designed to be injected via `IBexioApiClient`.
 - **Query Parameters**: Optional query parameters are wrapped in domain-specific parameter objects extending `QueryParameter` (e.g., `QueryParameterManualEntry`).
 - **Typed HttpClient**: `BexioConnectionHandler` is registered as a typed client via `IHttpClientFactory` in `BexioServiceCollection.AddBexioServices` — no manual `HttpClient` instantiation in DI scenarios.
+- **Default request headers**: `IBexioConfiguration.DefaultRequestHeaders` (API client) and `BexioOAuthOptions.DefaultRequestHeaders` (token client) add static caller headers to every request, applied through `HttpClientExtension.ApplyDefaultRequestHeaders`. Optional, `null` by default, and never throwing: reserved names (`Authorization`, `Accept`, `Host`) and malformed entries are skipped.
 
 ## Important File Locations
 - **AI rules**: `ai_instructions.md`
