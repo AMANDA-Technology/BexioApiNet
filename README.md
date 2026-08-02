@@ -118,6 +118,25 @@ public class ContactsController(IBexioApiClient bexio) : ControllerBase
 }
 ```
 
+### Default request headers
+
+Static headers can be added to every request the library sends — a caller tag naming the calling application, environment and build, for example. Set them on the configuration for the API client and on the OAuth options for the identity provider; the token client is configured from the options, so it needs its own value:
+
+```csharp
+var callerHeaders = new Dictionary<string, string> { ["X-Caller"] = "MyApp/1.4.2 (prd)" };
+
+builder.Services.AddBexioServicesWithRefreshToken(
+    new BexioConfiguration
+    {
+        BaseUri = builder.Configuration["BexioApiNet:BaseUri"]!,
+        AcceptHeaderFormat = ApiAcceptHeaders.JsonFormatted,
+        DefaultRequestHeaders = callerHeaders
+    },
+    new BexioOAuthOptions { /* ... */ DefaultRequestHeaders = callerHeaders });
+```
+
+They are applied once per `HttpClient`, on top of the headers the library sets itself, so only static values belong here. `Authorization`, `Accept` and `Host` are reserved and silently skipped, as is any entry with a blank name or value, a name outside the RFC 9110 token set, or a value carrying a control character — the applier never throws. A consumer that supplies its own `HttpClient` can apply the same rules with `client.ApplyDefaultRequestHeaders(headers)`.
+
 ## Usage Examples
 
 ### List with auto-pagination

@@ -30,6 +30,7 @@ using System.Web;
 using BexioApiNet.Abstractions.Enums.Api;
 using BexioApiNet.Abstractions.Models.Api;
 using BexioApiNet.Auth;
+using BexioApiNet.Configuration;
 using BexioApiNet.Interfaces;
 using BexioApiNet.Models;
 
@@ -86,6 +87,7 @@ public sealed class BexioConnectionHandler : IBexioConnectionHandler
                 Accept = { new MediaTypeWithQualityHeaderValue(configuration.AcceptHeaderFormat) }
             }
         };
+        _client.ApplyDefaultRequestHeaders(configuration.DefaultRequestHeaders);
         _ownsHttpClient = true;
     }
 

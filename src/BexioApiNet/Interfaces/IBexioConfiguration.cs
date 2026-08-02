@@ -48,4 +48,19 @@ public interface IBexioConfiguration
     /// Requested format for the accept header for response. <see href="https://docs.bexio.com/#section/API-basics/HTTP-Headers">API-basics/HTTP-Headers</see>
     /// </summary>
     public string AcceptHeaderFormat { get; set; }
+
+    /// <summary>
+    /// Static headers added to every API request, on top of the headers the library sets itself. Intended for
+    /// caller identification and diagnostics — an outbound tag naming the calling application, environment and
+    /// build, for example. Defaults to <c>null</c>, which adds nothing.
+    /// </summary>
+    /// <remarks>
+    /// Applied once per <see cref="HttpClient" />, so only static values belong here. Reserved names
+    /// (<c>Authorization</c>, <c>Accept</c>, <c>Host</c>) and malformed entries are silently skipped — see
+    /// <see cref="Configuration.HttpClientExtension.ApplyDefaultRequestHeaders" /> for the full contract.
+    /// Declared as a default interface member so an existing implementation of this interface keeps compiling.
+    /// The OIDC token client is configured separately, through
+    /// <c>BexioOAuthOptions.DefaultRequestHeaders</c>.
+    /// </remarks>
+    public IReadOnlyDictionary<string, string>? DefaultRequestHeaders => null;
 }

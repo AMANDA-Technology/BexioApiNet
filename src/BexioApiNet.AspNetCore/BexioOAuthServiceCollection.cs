@@ -24,6 +24,7 @@ SOFTWARE.
 */
 
 using BexioApiNet.Auth;
+using BexioApiNet.Configuration;
 using BexioApiNet.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
@@ -94,7 +95,8 @@ public static class BexioOAuthServiceCollection
         // The token request carries the client secret, in the body or a Basic header. A 307/308
         // redirect would replay both to whatever host the redirect names, so follow the same
         // no-redirect rule the API client uses.
-        services.AddHttpClient(BexioAuthDefaults.TokenHttpClientName)
+        services.AddHttpClient(BexioAuthDefaults.TokenHttpClientName,
+                client => client.ApplyDefaultRequestHeaders(oauthOptions.DefaultRequestHeaders))
             .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler { AllowAutoRedirect = false });
 
         services.TryAddSingleton<IBexioTokenClient>(provider =>
